@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C52284E1-29E2-4676-8A88-CD7C8BA0CB4D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Zongsoft.Web</RootNamespace>
+    <AssemblyName>Zongsoft.Web</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <PublishUrl>http://localhost/Zongsoft.Web/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Debug\Zongsoft.Web.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\References\ASP.NET MVC 4\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Zongsoft.CoreLibrary">
+      <HintPath>..\..\Zongsoft.CoreLibrary\trunk\bin\Debug\Zongsoft.CoreLibrary.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\BindingUtility.cs" />
+    <Compile Include="Controls\ChartLine.cs" />
+    <Compile Include="Controls\ChartPoint.cs" />
+    <Compile Include="Controls\ChartSerie.cs" />
+    <Compile Include="Controls\ChartType.cs" />
+    <Compile Include="Controls\CheckBox.cs" />
+    <Compile Include="Controls\ComboBox.cs" />
+    <Compile Include="Controls\ComboBoxItem.cs" />
+    <Compile Include="Controls\ComboBoxItemCollection.cs" />
+    <Compile Include="Controls\ComboBoxRenderMode.cs" />
+    <Compile Include="Controls\CommandColumn.cs" />
+    <Compile Include="Controls\ControlExtension.cs" />
+    <Compile Include="Controls\DataBoundControlBuilder.cs" />
+    <Compile Include="Controls\DataBoundControl.cs" />
+    <Compile Include="Controls\Editor.cs" />
+    <Compile Include="Controls\EmptyTemplateScope.cs" />
+    <Compile Include="Controls\FileUpload.cs" />
+    <Compile Include="Controls\Grid.cs" />
+    <Compile Include="Controls\GridColumnBase.cs" />
+    <Compile Include="Controls\GridColumnCollection.cs" />
+    <Compile Include="Controls\GridColumn.cs" />
+    <Compile Include="Controls\Gallery.cs" />
+    <Compile Include="Controls\Hyperlink.cs" />
+    <Compile Include="Controls\ImageBox.cs" />
+    <Compile Include="Controls\InputBox.cs" />
+    <Compile Include="Controls\InputBoxType.cs" />
+    <Compile Include="Controls\Label.cs" />
+    <Compile Include="Controls\LabelRenderMode.cs" />
+    <Compile Include="Controls\Chart.cs" />
+    <Compile Include="Controls\ListView.cs" />
+    <Compile Include="Controls\ListViewItem.cs" />
+    <Compile Include="Controls\CompositeDataBoundControl.cs" />
+    <Compile Include="Controls\Literal.cs" />
+    <Compile Include="Controls\NumericBox.cs" />
+    <Compile Include="Controls\PagingBar.cs" />
+    <Compile Include="Controls\Picker.cs" />
+    <Compile Include="Controls\PickerColumn.cs" />
+    <Compile Include="Controls\PickerColumnCollection.cs" />
+    <Compile Include="Controls\ScrollbarMode.cs" />
+    <Compile Include="Controls\Slider.cs" />
+    <Compile Include="Controls\TabStrip.cs" />
+    <Compile Include="Controls\TabStripPanel.cs" />
+    <Compile Include="Controls\TabStripPanelCollection.cs" />
+    <Compile Include="Controls\TextBoxType.cs" />
+    <Compile Include="Controls\LayoutPanel.cs" />
+    <Compile Include="Controls\LayoutPanelCell.cs" />
+    <Compile Include="Controls\LayoutMode.cs" />
+    <Compile Include="Controls\SelectionMode.cs" />
+    <Compile Include="Controls\TextBox.cs" />
+    <Compile Include="Controls\TextBoxBase.cs" />
+    <Compile Include="Controls\ToolBar.cs" />
+    <Compile Include="Controls\ToolBarItem.cs" />
+    <Compile Include="Controls\ToolBarItemCollection.cs" />
+    <Compile Include="Controls\TreeView.cs" />
+    <Compile Include="Controls\TreeViewHelper.cs" />
+    <Compile Include="Controls\TreeViewNode.cs" />
+    <Compile Include="Controls\TreeViewNodeCollection.cs" />
+    <Compile Include="Controls\TreeViewNodeRenderEventArgs.cs" />
+    <Compile Include="Controls\Utility.cs" />
+    <Compile Include="Controls\Unit.cs" />
+    <Compile Include="Controls\UnitConverter.cs" />
+    <Compile Include="Controls\UnitType.cs" />
+    <Compile Include="Controls\HorizontalAlignment.cs" />
+    <Compile Include="Controls\Widget.cs" />
+    <Compile Include="Mvc\AuthorizationController.cs" />
+    <Compile Include="Mvc\DataController.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Themes\ComponentElement.cs" />
+    <Compile Include="Themes\ComponentElementCollection.cs" />
+    <Compile Include="Themes\DependencyElement.cs" />
+    <Compile Include="Themes\DependencyElementCollection.cs" />
+    <Compile Include="Themes\ElementBase.cs" />
+    <Compile Include="Themes\ElementCollectionBase.cs" />
+    <Compile Include="Themes\FileElement.cs" />
+    <Compile Include="Themes\FileElementCollection.cs" />
+    <Compile Include="Themes\IncludeElement.cs" />
+    <Compile Include="Themes\IncludeElementCollection.cs" />
+    <Compile Include="Themes\IncludeMode.cs" />
+    <Compile Include="Themes\Theme.cs" />
+    <Compile Include="Themes\ThemeException.cs" />
+    <Compile Include="Themes\ThemeResolver.cs" />
+    <Compile Include="Themes\ThemeUtility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Controls\Readme.txt" />
+    <Content Include="Themes\Theme.xml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
