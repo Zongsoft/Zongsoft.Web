@@ -62,13 +62,14 @@
     <Reference Include="System.Web.Abstractions" />
     <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\References\ASP.NET MVC 4\System.Web.Mvc.dll</HintPath>
+      <HintPath>..\References\ASP.NET MVC 4\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Xml" />
-    <Reference Include="Zongsoft.CoreLibrary">
-      <HintPath>..\..\Zongsoft.CoreLibrary\trunk\bin\Debug\Zongsoft.CoreLibrary.dll</HintPath>
+    <Reference Include="Zongsoft.CoreLibrary, Version=3.1.1310.37512, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Zongsoft.CoreLibrary\bin\Debug\Zongsoft.CoreLibrary.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -136,8 +137,6 @@
     <Compile Include="Controls\UnitType.cs" />
     <Compile Include="Controls\HorizontalAlignment.cs" />
     <Compile Include="Controls\Widget.cs" />
-    <Compile Include="Mvc\AuthorizationController.cs" />
-    <Compile Include="Mvc\DataController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Themes\ComponentElement.cs" />
     <Compile Include="Themes\ComponentElementCollection.cs" />
