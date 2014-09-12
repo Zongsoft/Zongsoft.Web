@@ -71,7 +71,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="Zongsoft.CoreLibrary, Version=3.1.1310.37512, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Zongsoft.CoreLibrary\bin\Debug\Zongsoft.CoreLibrary.dll</HintPath>
+      <HintPath>..\Zongsoft.CoreLibrary\bin\$(Configuration)\Zongsoft.CoreLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
