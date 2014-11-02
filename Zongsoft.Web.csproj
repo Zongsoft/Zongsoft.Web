@@ -185,7 +185,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Controls\Readme.txt" />
+    <Content Include="Controls\Readme.md" />
     <Content Include="Themes\Theme.xml">
       <SubType>Designer</SubType>
     </Content>
