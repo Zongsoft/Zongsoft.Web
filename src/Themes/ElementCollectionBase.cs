@@ -55,12 +55,17 @@ namespace Zongsoft.Web.Themes
 			return item.Name;
 		}
 
-		protected override void InsertItem(int index, T item)
+		protected override void InsertItems(int index, IEnumerable<T> items)
 		{
-			if(item != null)
-				item.Owner = _owner;
+			if(items != null)
+			{
+				foreach(var item in items)
+				{
+					item.Owner = _owner;
+				}
+			}
 
-			base.InsertItem(index, item);
+			base.InsertItems(index, items);
 		}
 
 		protected override void SetItem(int index, T item)

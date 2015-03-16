@@ -36,15 +36,18 @@ namespace Zongsoft.Web.Themes
 		{
 		}
 
-		protected override void InsertItem(int index, DependencyElement item)
+		protected override void InsertItems(int index, IEnumerable<DependencyElement> items)
 		{
-			if(item == null)
+			if(items == null)
 				return;
 
-			if(string.Equals(item.Name, this.Owner.Name, StringComparison.OrdinalIgnoreCase))
-				throw new InvalidOperationException();
+			foreach(var item in items)
+			{
+				if(string.Equals(item.Name, this.Owner.Name, StringComparison.OrdinalIgnoreCase))
+					throw new InvalidOperationException();
+			}
 
-			base.InsertItem(index, item);
+			base.InsertItems(index, items);
 		}
 	}
 }

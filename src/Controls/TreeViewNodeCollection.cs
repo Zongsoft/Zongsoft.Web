@@ -88,21 +88,24 @@ namespace Zongsoft.Web.Controls
 			base.SetItem(index, item);
 		}
 
-		protected override void InsertItem(int index, TreeViewNode item)
+		protected override void InsertItems(int index, IEnumerable<TreeViewNode> items)
 		{
-			if(item == null)
-				throw new ArgumentNullException("item");
+			if(items == null)
+				throw new ArgumentNullException("items");
 
-			if(item.Parent != null)
-				throw new ArgumentException();
+			foreach(var item in items)
+			{
+				if(item.Parent != null)
+					throw new ArgumentException();
 
-			item.Parent = _owner;
+				item.Parent = _owner;
+			}
 
 			//使用同步锁，以确保不与删除和清除方法冲突
 			lock(_syncRoot)
 			{
 				//调用基类同名方法
-				base.InsertItem(index, item);
+				base.InsertItems(index, items);
 			}
 		}
 
