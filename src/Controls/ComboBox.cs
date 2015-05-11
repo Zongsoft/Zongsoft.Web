@@ -311,7 +311,7 @@ namespace Zongsoft.Web.Controls
 
 			//生成自动提交的脚本事件代码
 			if(this.AutoSubmit)
-				writer.AddAttribute(HtmlTextWriterAttribute.Onchange, @"javaScript:var current = this.parentNode;while(current != null && current.tagName.toLowerCase() != 'form'){current = current.parentNode;}if(current != null && current.tagName.toLowerCase() == 'form')current.submit();");
+				writer.AddAttribute(HtmlTextWriterAttribute.Onchange, @"javascript:var current = this.parentNode;while(current != null && current.tagName.toLowerCase() != 'form'){current = current.parentNode;}if(current != null && current.tagName.toLowerCase() == 'form')current.submit();", false);
 
 			//生成控件标记(开始)
 			writer.RenderBeginTag(HtmlTextWriterTag.Select);
