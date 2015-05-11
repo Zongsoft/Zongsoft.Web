@@ -27,6 +27,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -36,7 +37,7 @@ namespace Zongsoft.Web.Themes
 	public class ThemeResolver
 	{
 		#region 静态变量
-		private static IDictionary<string, ThemeResolver> _resolvers;
+		private static ConcurrentDictionary<string, ThemeResolver> _resolvers;
 		#endregion
 
 		#region 成员字段
@@ -199,24 +200,15 @@ namespace Zongsoft.Web.Themes
 			if(string.IsNullOrWhiteSpace(path))
 				throw new ArgumentNullException("path");
 
+			path = path.Trim();
+
 			if(!Directory.Exists(path))
-				throw new DirectoryNotFoundException();
+				return null;
 
 			if(_resolvers == null)
-				System.Threading.Interlocked.CompareExchange(ref _resolvers, new Dictionary<string, ThemeResolver>(StringComparer.OrdinalIgnoreCase), null);
+				System.Threading.Interlocked.CompareExchange(ref _resolvers, new ConcurrentDictionary<string, ThemeResolver>(StringComparer.OrdinalIgnoreCase), null);
 
-			ThemeResolver resolver = null;
-
-			lock(_resolvers)
-			{
-				if(_resolvers.TryGetValue(path.Trim(), out resolver))
-					return resolver;
-
-				resolver = new ThemeResolver(path);
-				_resolvers.Add(path.Trim(), resolver);
-			}
-
-			return resolver;
+			return _resolvers.GetOrAdd(path.Trim(), key => new ThemeResolver(key));
 		}
 		#endregion
 	}

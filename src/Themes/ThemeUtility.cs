@@ -129,10 +129,10 @@ namespace Zongsoft.Web.Themes
 			}
 		}
 
-		public static void GenerateTheme(Page page)
+		public static bool GenerateTheme(Page page)
 		{
 			if(page == null || page.Request == null)
-				return;
+				return false;
 
 			string themeName = page.Request[ThemeName];
 
@@ -141,19 +141,23 @@ namespace Zongsoft.Web.Themes
 			else
 				themeName = themeName.Trim().Replace("/", "");
 
-			GenerateTheme(page, themeName);
+			return GenerateTheme(page, themeName);
 		}
 
-		public static void GenerateTheme(Page page, string themeName)
+		public static bool GenerateTheme(Page page, string themeName)
 		{
 			if(page == null || string.IsNullOrWhiteSpace(themeName))
-				return;
+				return false;
 
 			var resolver = Zongsoft.Web.Themes.ThemeResolver.GetResolver(page.MapPath("~/themes"));
+
+			if(resolver == null)
+				return false;
+
 			var theme = resolver.Resolve(themeName);
 
 			if(theme == null)
-				return;
+				return false;
 
 			try
 			{
@@ -163,6 +167,9 @@ namespace Zongsoft.Web.Themes
 				}
 
 				page.Response.SetCookie(new HttpCookie(ThemeName, themeName));
+
+				//返回成功
+				return true;
 			}
 			finally
 			{
