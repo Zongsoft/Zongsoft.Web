@@ -154,15 +154,21 @@ namespace Zongsoft.Web.Controls
 			if(value == null)
 				return string.Empty;
 
-			if(string.IsNullOrWhiteSpace(format))
+			if(value.GetType().IsEnum)
+				return Zongsoft.Common.EnumUtility.GetEnumEntry((Enum)value).ToString(format);
+
+			var valueType = value.GetType();
+
+			if(valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Nullable<>) && valueType.GetGenericArguments()[0].IsEnum)
 			{
-				if(value.GetType().IsEnum)
-					return Zongsoft.Common.EnumUtility.GetEnumEntry((Enum)value).Description;
-				else
-					return string.Format(provider, "{0}", value);
+				value = System.Convert.ChangeType(value, Nullable.GetUnderlyingType(valueType));
+				return Zongsoft.Common.EnumUtility.GetEnumEntry((Enum)value).ToString(format);
 			}
 
-			return string.Format(provider, "{0:" + format + "}", value);
+			if(string.IsNullOrWhiteSpace(format))
+				return string.Format(provider, "{0}", value);
+			else
+				return string.Format(provider, "{0:" + format + "}", value);
 		}
 		#endregion
 
