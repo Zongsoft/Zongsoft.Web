@@ -75,6 +75,20 @@ namespace Zongsoft.Web.Controls
 				this.SetAttributeValue(() => this.CssClass, value);
 			}
 		}
+
+		[Bindable(true)]
+		[DefaultValue(true)]
+		public override bool Visible
+		{
+			get
+			{
+				return this.GetAttributeValue<bool>("Visible", true);
+			}
+			set
+			{
+				this.SetAttributeValue(() => this.Visible, value);
+			}
+		}
 		#endregion
 
 		#region 保护属性
