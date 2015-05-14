@@ -154,16 +154,10 @@ namespace Zongsoft.Web.Controls
 			if(value == null)
 				return string.Empty;
 
-			if(value.GetType().IsEnum)
-				return Zongsoft.Common.EnumUtility.GetEnumEntry((Enum)value).ToString(format);
+			var enumType = Zongsoft.Common.EnumUtility.GetEnumType(value.GetType());
 
-			var valueType = value.GetType();
-
-			if(valueType.IsGenericType && valueType.GetGenericTypeDefinition() == typeof(Nullable<>) && valueType.GetGenericArguments()[0].IsEnum)
-			{
-				value = System.Convert.ChangeType(value, Nullable.GetUnderlyingType(valueType));
-				return Zongsoft.Common.EnumUtility.GetEnumEntry((Enum)value).ToString(format);
-			}
+			if(enumType != null)
+				return Zongsoft.Common.EnumUtility.Format(value, format);
 
 			if(string.IsNullOrWhiteSpace(format))
 				return string.Format(provider, "{0}", value);
