@@ -81,6 +81,9 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[MergableProperty(false)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		public ToolBarItemCollection Items
 		{
 			get
