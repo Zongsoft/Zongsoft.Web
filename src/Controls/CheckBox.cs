@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -38,7 +38,7 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public CheckBox()
 		{
-			this.Type = InputBoxType.CheckBox;
+			this.InputType = InputBoxType.CheckBox;
 		}
 		#endregion
 
@@ -60,7 +60,7 @@ namespace Zongsoft.Web.Controls
 
 		#region 重写属性
 		[DefaultValue(InputBoxType.CheckBox)]
-		public override InputBoxType Type
+		public override InputBoxType InputType
 		{
 			get
 			{
@@ -75,6 +75,16 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
+		public override void RenderControl(HtmlTextWriter writer)
+		{
+			if(string.IsNullOrWhiteSpace(this.CssClass))
+				this.CssClass = "field-checkbox";
+			else if(this.CssClass.StartsWith(":"))
+				this.CssClass = "field-checkbox " + this.CssClass.Trim(':');
+
+			base.RenderControl(writer);
+		}
+
 		protected override bool OnRenderAttribute(string name, object value, out string renderValue)
 		{
 			//如果选中属性为真则返回真表示生成该属性，否则返回假。

@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -101,13 +101,8 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
-		#region 保护方法
-		protected T GetAttributeValue<T>(string attributeName)
-		{
-			return this.GetAttributeValue<T>(attributeName, default(T));
-		}
-
-		protected T GetAttributeValue<T>(string attributeName, T defaultValue)
+		#region 公共方法
+		public T GetAttributeValue<T>(string attributeName, T defaultValue = default(T))
 		{
 			if(string.IsNullOrWhiteSpace(attributeName))
 				throw new ArgumentNullException("attributeName");
@@ -120,7 +115,27 @@ namespace Zongsoft.Web.Controls
 			return defaultValue;
 		}
 
-		protected void SetAttributeValue<T>(Expression<Func<T>> expression, T value)
+		public T GetAttributeValue<T>(Expression<Func<T>> expression, T defaultValue = default(T))
+		{
+			System.Linq.Expressions.MemberExpression exp = null;
+
+			switch(expression.Body.NodeType)
+			{
+				case ExpressionType.Convert:
+					exp = ((UnaryExpression)expression.Body).Operand as MemberExpression;
+					break;
+				case ExpressionType.MemberAccess:
+					exp = (System.Linq.Expressions.MemberExpression)expression.Body;
+					break;
+			}
+
+			if(exp == null)
+				throw new ArgumentException("expression");
+
+			return this.GetAttributeValue<T>(exp.Member.Name, defaultValue);
+		}
+
+		public void SetAttributeValue<T>(Expression<Func<T>> expression, T value)
 		{
 			System.Linq.Expressions.MemberExpression exp = null;
 
@@ -137,14 +152,12 @@ namespace Zongsoft.Web.Controls
 			if(exp == null)
 				return;
 
-			var attribute = exp.Member.GetCustomAttributes(typeof(System.ComponentModel.BindableAttribute), true)
-									.Cast<System.ComponentModel.BindableAttribute>()
-									.FirstOrDefault();
+			var attribute = (System.ComponentModel.BindableAttribute)Attribute.GetCustomAttribute(exp.Member, typeof(System.ComponentModel.BindableAttribute), true);
 
 			this.SetAttributeValue<T>(exp.Member.Name, value, (attribute == null ? false : attribute.Bindable));
 		}
 
-		protected void SetAttributeValue<T>(string attributeName, T value, bool bindable)
+		public void SetAttributeValue<T>(string attributeName, T value, bool bindable)
 		{
 			if(string.IsNullOrWhiteSpace(attributeName))
 				throw new ArgumentNullException("attributeName");

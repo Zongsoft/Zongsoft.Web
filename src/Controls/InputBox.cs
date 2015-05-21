@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -71,15 +71,15 @@ namespace Zongsoft.Web.Controls
 		}
 
 		[DefaultValue(InputBoxType.Text)]
-		public virtual InputBoxType Type
+		public virtual InputBoxType InputType
 		{
 			get
 			{
-				return this.GetAttributeValue<InputBoxType>("Type", InputBoxType.Text);
+				return this.GetAttributeValue<InputBoxType>("InputType", InputBoxType.Text);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Type, value);
+				this.SetAttributeValue(() => this.InputType, value);
 			}
 		}
 
@@ -115,11 +115,20 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		public override void RenderControl(HtmlTextWriter writer)
 		{
+			if(string.IsNullOrWhiteSpace(this.CssClass))
+				this.CssClass = "field-input";
+			else if(this.CssClass.StartsWith(":"))
+					this.CssClass = "field-input " + this.CssClass.Trim(':');
+
 			if(!string.IsNullOrWhiteSpace(this.Label))
 			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+
 				if(!string.IsNullOrWhiteSpace(this.ID))
 					writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
 
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field-label");
 				writer.RenderBeginTag(HtmlTextWriterTag.Label);
 				writer.WriteEncodedText(this.Label);
 				writer.RenderEndTag();
@@ -136,7 +145,7 @@ namespace Zongsoft.Web.Controls
 			if(!string.IsNullOrWhiteSpace(this.Name))
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Type, this.Type.ToString().ToLowerInvariant());
+			writer.AddAttribute(HtmlTextWriterAttribute.Type, this.InputType.ToString().ToLowerInvariant());
 
 			if(!this.Enabled)
 				writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "disabled");
@@ -146,6 +155,9 @@ namespace Zongsoft.Web.Controls
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Input);
 			writer.RenderEndTag();
+
+			if(!string.IsNullOrWhiteSpace(this.Label))
+				writer.RenderEndTag();
 		}
 		#endregion
 	}

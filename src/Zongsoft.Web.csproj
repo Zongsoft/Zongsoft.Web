@@ -82,6 +82,7 @@
     <Compile Include="Controls\ChartSerie.cs" />
     <Compile Include="Controls\ChartType.cs" />
     <Compile Include="Controls\CheckBox.cs" />
+    <Compile Include="Controls\CheckBoxGroup.cs" />
     <Compile Include="Controls\ComboBox.cs" />
     <Compile Include="Controls\ComboBoxItem.cs" />
     <Compile Include="Controls\ComboBoxItemCollection.cs" />
