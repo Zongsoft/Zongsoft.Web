@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -33,63 +33,39 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class FileUpload : DataBoundControl
+	public class FileUpload : InputBox
 	{
-		#region 公共属性
-		[Bindable(true)]
-		[DefaultValue(true)]
-		public bool Enabled
+		#region 构造函数
+		public FileUpload()
 		{
-			get
-			{
-				return this.GetAttributeValue<bool>("Enabled", true);
-			}
-			set
-			{
-				this.SetAttributeValue(() => this.Enabled, value);
-			}
+			this.InputType = InputBoxType.File;
 		}
+		#endregion
 
-		[Bindable(true)]
-		[DefaultValue("")]
-		public string Label
+		#region 重写属性
+		[DefaultValue(InputBoxType.File)]
+		public override InputBoxType InputType
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Label", string.Empty);
+				return base.InputType;
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Label, value);
-			}
-		}
+				if(value != InputBoxType.File)
+					throw new ArgumentOutOfRangeException();
 
-		[Bindable(true)]
-		[DefaultValue("")]
-		public string Value
-		{
-			get
-			{
-				return this.GetAttributeValue<string>("Value", string.Empty);
-			}
-			set
-			{
-				this.SetAttributeValue(() => this.Value, value);
+				base.InputType = value;
 			}
 		}
 		#endregion
 
 		#region 重写方法
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
-			if(string.IsNullOrWhiteSpace(this.ID))
-				throw new InvalidOperationException("The ID property is null or empty.");
+			this.RenderAttributes(writer);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-			writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
-			writer.AddAttribute(HtmlTextWriterAttribute.Type, "file");
 			writer.AddAttribute(HtmlTextWriterAttribute.Style, "display:none");
-			writer.AddAttribute(HtmlTextWriterAttribute.Value, this.Value);
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Input);
 			writer.RenderEndTag();
@@ -113,6 +89,9 @@ namespace Zongsoft.Web.Controls
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Input);
 			writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 	}

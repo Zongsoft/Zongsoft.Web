@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -73,11 +73,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Title", string.Empty);
+				return this.GetPropertyValue(() => this.Title);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Title, value);
+				this.SetPropertyValue(() => this.Title, value);
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			if(!string.IsNullOrWhiteSpace(this.ID))
 				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
@@ -126,6 +126,9 @@ namespace Zongsoft.Web.Controls
 			}
 
 			writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 

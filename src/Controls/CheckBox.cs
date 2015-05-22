@@ -45,15 +45,16 @@ namespace Zongsoft.Web.Controls
 		#region 公共属性
 		[Bindable(true)]
 		[DefaultValue(false)]
+		[PropertyMetadata(PropertyRender = "BooleanPropertyRender.True")]
 		public bool Checked
 		{
 			get
 			{
-				return this.GetAttributeValue<bool>("Checked");
+				return this.GetPropertyValue(() => this.Checked);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Checked, value);
+				this.SetPropertyValue(() => this.Checked, value);
 			}
 		}
 		#endregion
@@ -64,38 +65,38 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return InputBoxType.CheckBox;
+				return base.InputType;
 			}
 			set
 			{
 				if(value != InputBoxType.CheckBox)
 					throw new NotSupportedException();
+
+				base.InputType = value;
 			}
 		}
 		#endregion
 
 		#region 重写方法
-		public override void RenderControl(HtmlTextWriter writer)
-		{
-			if(string.IsNullOrWhiteSpace(this.CssClass))
-				this.CssClass = "field-checkbox";
-			else if(this.CssClass.StartsWith(":"))
-				this.CssClass = "field-checkbox " + this.CssClass.Trim(':');
+		//public override void RenderControl(HtmlTextWriter writer)
+		//{
+		//	if(string.IsNullOrWhiteSpace(this.CssClass))
+		//		this.CssClass = "field-checkbox";
+		//	else if(this.CssClass.StartsWith(":"))
+		//		this.CssClass = "field-checkbox " + this.CssClass.Trim(':');
 
-			base.RenderControl(writer);
-		}
+		//	base.RenderControl(writer);
+		//}
 
-		protected override bool OnRenderAttribute(string name, object value, out string renderValue)
-		{
-			//如果选中属性为真则返回真表示生成该属性，否则返回假。
-			if(string.Equals(name, "checked", StringComparison.OrdinalIgnoreCase))
-			{
-				renderValue = "checked";
-				return Convert.ToBoolean(value);
-			}
+		//protected override void RenderAttribute(HtmlTextWriter writer, PropertyMetadata property)
+		//{
+		//	//如果要生成的是Checked属性则判断其值是否为真(True)：如果是则不用生成属性(故而直接返回)，否则则调用基类同名方法执行默认的生成操作
+		//	if(string.Equals(property.Name, "Checked", StringComparison.OrdinalIgnoreCase) && (bool)property.Value == false)
+		//		return;
 
-			return base.OnRenderAttribute(name, value, out renderValue);
-		}
+		//	//调用基类同名方法
+		//	base.RenderAttribute(writer, property);
+		//}
 		#endregion
 	}
 }

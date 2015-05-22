@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -38,10 +38,10 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public PagingBar()
 		{
-			this.FirstPageTitle = "|<";
-			this.PreviousPageTitle = "<";
-			this.NextPageTitle = ">";
-			this.LastPageTitle = ">|";
+			this.FirstPageText = "|<";
+			this.PreviousPageText = "<";
+			this.NextPageText = ">";
+			this.LastPageText = ">|";
 		}
 		#endregion
 
@@ -52,11 +52,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<int>("PageCount", 0);
+				return this.GetPropertyValue(() => this.PageCount);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.PageCount, Math.Max(value, 0));
+				this.SetPropertyValue(() => this.PageCount, Math.Max(value, 0));
 			}
 		}
 
@@ -66,11 +66,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<int>("PageSize", 20);
+				return this.GetPropertyValue(() => this.PageSize);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.PageSize, Math.Max(value, 1));
+				this.SetPropertyValue(() => this.PageSize, Math.Max(value, 1));
 			}
 		}
 
@@ -80,11 +80,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<int>("PageIndex", 0);
+				return this.GetPropertyValue(() => this.PageIndex);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.PageIndex, Math.Max(value, 0));
+				this.SetPropertyValue(() => this.PageIndex, Math.Max(value, 0));
 			}
 		}
 
@@ -94,89 +94,90 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<int>("TotalCount", 0);
+				return this.GetPropertyValue(() => this.TotalCount);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.TotalCount, Math.Max(value, 0));
+				this.SetPropertyValue(() => this.TotalCount, Math.Max(value, 0));
 			}
 		}
 
 		[Bindable(true)]
+		[PropertyMetadata("href", PropertyRender = "UrlPropertyRender.Default")]
 		public string Url
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Url", string.Empty);
+				return this.GetPropertyValue(() => this.Url);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Url, value);
+				this.SetPropertyValue(() => this.Url, value);
 			}
 		}
 
 		[Bindable(true)]
-		public string FirstPageTitle
+		public string FirstPageText
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("FirstPageTitle", string.Empty);
+				return this.GetPropertyValue(() => this.FirstPageText);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.FirstPageTitle, value);
+				this.SetPropertyValue(() => this.FirstPageText, value);
 			}
 		}
 
 		[Bindable(true)]
-		public string PreviousPageTitle
+		public string PreviousPageText
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("PreviousPageTitle", string.Empty);
+				return this.GetPropertyValue(() => this.PreviousPageText);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.PreviousPageTitle, value);
+				this.SetPropertyValue(() => this.PreviousPageText, value);
 			}
 		}
 
 		[Bindable(true)]
-		public string NextPageTitle
+		public string NextPageText
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("NextPageTitle", string.Empty);
+				return this.GetPropertyValue(() => this.NextPageText);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.NextPageTitle, value);
+				this.SetPropertyValue(() => this.NextPageText, value);
 			}
 		}
 
 		[Bindable(true)]
-		public string LastPageTitle
+		public string LastPageText
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("LastPageTitle", string.Empty);
+				return this.GetPropertyValue(() => this.LastPageText);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.LastPageTitle, value);
+				this.SetPropertyValue(() => this.LastPageText, value);
 			}
 		}
 
 		[Bindable(true)]
-		public string MorePageTitle
+		public string MorePageText
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("MorePageTitle", string.Empty);
+				return this.GetPropertyValue(() => this.MorePageText);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.MorePageTitle, value);
+				this.SetPropertyValue(() => this.MorePageText, value);
 			}
 		}
 
@@ -184,40 +185,30 @@ namespace Zongsoft.Web.Controls
 		/// 获取或设置
 		/// </summary>
 		[Bindable(true)]
-		[DefaultValue("")]
+		[DefaultValue("{0}/{1}")]
 		public string PageNumberFormat
 		{
 			get
 			{
-				var result = this.GetAttributeValue<string>("PageNumberFormat", string.Empty);
-
-				if(string.IsNullOrWhiteSpace(result))
-					return "{0}/{1}";
-
-				return result;
+				return this.GetPropertyValue(() => this.PageNumberFormat);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.PageNumberFormat, value);
+				this.SetPropertyValue(() => this.PageNumberFormat, value);
 			}
 		}
 
 		[Bindable(true)]
-		[DefaultValue("")]
+		[DefaultValue("{0}")]
 		public string TotalCountFormat
 		{
 			get
 			{
-				var result = this.GetAttributeValue<string>("TotalCountFormat", string.Empty);
-
-				if(string.IsNullOrWhiteSpace(result))
-					return "{0}";
-
-				return result;
+				return this.GetPropertyValue(() => this.TotalCountFormat);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.TotalCountFormat, value);
+				this.SetPropertyValue(() => this.TotalCountFormat, value);
 			}
 		}
 
@@ -227,11 +218,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<bool>("TotalCountVisible", false);
+				return this.GetPropertyValue(() => this.TotalCountVisible);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.TotalCountVisible, value);
+				this.SetPropertyValue(() => this.TotalCountVisible, value);
 			}
 		}
 
@@ -241,11 +232,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<bool>("RedirectPageVisible", false);
+				return this.GetPropertyValue(() => this.RedirectPageVisible);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.RedirectPageVisible, value);
+				this.SetPropertyValue(() => this.RedirectPageVisible, value);
 			}
 		}
 		#endregion
@@ -267,7 +258,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成控件
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			var range = Zongsoft.Common.PagingEvaluator.Instance.Evaluate(this.PageIndex, this.PageCount, this.PageSize);
 
@@ -303,20 +294,20 @@ namespace Zongsoft.Web.Controls
 			//生成“第一页”的导航元素
 			writer.AddAttribute(HtmlTextWriterAttribute.Href, this.GetUrl(1));
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
-			writer.WriteEncodedText(this.FirstPageTitle);
+			writer.WriteEncodedText(this.FirstPageText);
 			writer.RenderEndTag();
 
 			//生成“上一页”的导航元素
 			writer.AddAttribute(HtmlTextWriterAttribute.Href, (this.PageIndex > 1 ? this.GetUrl(this.PageIndex - 1) : Utility.EmptyLink));
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
-			writer.WriteEncodedText(this.PreviousPageTitle);
+			writer.WriteEncodedText(this.PreviousPageText);
 			writer.RenderEndTag();
 
-			if(range.StartIndex > 1 && !string.IsNullOrWhiteSpace(this.MorePageTitle))
+			if(range.StartIndex > 1 && !string.IsNullOrWhiteSpace(this.MorePageText))
 			{
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "more");
 				writer.RenderBeginTag(HtmlTextWriterTag.Span);
-				writer.Write(this.MorePageTitle);
+				writer.Write(this.MorePageText);
 				writer.RenderEndTag();
 			}
 
@@ -339,24 +330,24 @@ namespace Zongsoft.Web.Controls
 				}
 			}
 
-			if(range.FinishIndex < this.PageCount && !string.IsNullOrWhiteSpace(this.MorePageTitle))
+			if(range.FinishIndex < this.PageCount && !string.IsNullOrWhiteSpace(this.MorePageText))
 			{
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "more");
 				writer.RenderBeginTag(HtmlTextWriterTag.Span);
-				writer.Write(this.MorePageTitle);
+				writer.Write(this.MorePageText);
 				writer.RenderEndTag();
 			}
 
 			//生成“下一页”的导航元素
 			writer.AddAttribute(HtmlTextWriterAttribute.Href, (this.PageIndex < this.PageCount ? this.GetUrl(this.PageIndex + 1) : Utility.EmptyLink));
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
-			writer.WriteEncodedText(this.NextPageTitle);
+			writer.WriteEncodedText(this.NextPageText);
 			writer.RenderEndTag();
 
 			//生成“最后页”的导航元素
 			writer.AddAttribute(HtmlTextWriterAttribute.Href, this.GetUrl(this.PageCount));
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
-			writer.WriteEncodedText(this.LastPageTitle);
+			writer.WriteEncodedText(this.LastPageText);
 			writer.RenderEndTag();
 
 			if(this.RedirectPageVisible)
@@ -375,6 +366,9 @@ namespace Zongsoft.Web.Controls
 
 			//生成分页器的容器标记(结束)
 			writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 	}

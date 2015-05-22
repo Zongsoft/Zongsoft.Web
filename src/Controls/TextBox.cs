@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -28,36 +28,62 @@ using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Text;
+using System.Web;
+using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class TextBox : TextBoxBase
+	public class TextBox : InputBox
 	{
 		#region 构造函数
-		public TextBox()
+		protected TextBox()
 		{
+			this.InputType = InputBoxType.Text;
 		}
 		#endregion
 
 		#region 公共属性
-		[DefaultValue(TextBoxType.Text)]
-		public TextBoxType TextBoxType
+		[Bindable(true)]
+		[DefaultValue(false)]
+		[PropertyMetadata(PropertyRender = "BooleanPropertyRender.True")]
+		public bool ReadOnly
 		{
 			get
 			{
-				TextBoxType result;
-
-				if(Enum.TryParse<TextBoxType>(this.CssClass, true, out result))
-					return result;
-				else
-					return TextBoxType.Text;
+				return this.GetPropertyValue(() => this.ReadOnly);
 			}
 			set
 			{
-				if(value == TextBoxType.Date || value == TextBoxType.DateTime || value == TextBoxType.Time)
-					this.ReadOnly = true;
+				this.SetPropertyValue(() => this.ReadOnly, value);
+			}
+		}
 
-				this.CssClass = value.ToString();
+		[Bindable(true)]
+		[DefaultValue(-1)]
+		public int MaxLength
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.MaxLength);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.MaxLength, value);
+			}
+		}
+
+		public string Text
+		{
+			get
+			{
+				return base.Value;
+			}
+			set
+			{
+				base.Value = value;
+
+				//必须手动更新对应的真实属性元数据的原始文本值
+				this.GetProperty("Value").ValueString = value;
 			}
 		}
 		#endregion
@@ -68,12 +94,24 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return InputBoxType.Text;
+				return base.InputType;
 			}
 			set
 			{
-				if(value != InputBoxType.Text)
-					throw new NotSupportedException();
+				if(value != InputBoxType.Text && value != InputBoxType.Password)
+				{
+					var field = typeof(InputBoxType).GetField(value.ToString());
+
+					if(field != null)
+					{
+						var attribute = Attribute.GetCustomAttribute(field, typeof(CategoryAttribute));
+
+						if(attribute == null || ((CategoryAttribute)attribute).Category != "Text")
+							throw new ArgumentOutOfRangeException();
+					}
+				}
+
+				base.InputType = value;
 			}
 		}
 		#endregion

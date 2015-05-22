@@ -42,12 +42,8 @@ namespace Zongsoft.Web.Controls
 	[ControlBuilder(typeof(DataBoundControlBuilder))]
 	public class DataBoundControl : Control, IAttributeAccessor
 	{
-		#region 私有变量
-		private NameValueCollection _bindingAttributes;
-		#endregion
-
 		#region 成员变量
-		private IDictionary<string, object> _attributes;
+		private readonly IDictionary<string, PropertyMetadata> _properties;
 		#endregion
 
 		#region 构造函数
@@ -56,66 +52,72 @@ namespace Zongsoft.Web.Controls
 			//重置客户端Id的生成方式为静态
 			this.ClientIDMode = System.Web.UI.ClientIDMode.Static;
 
-			_attributes = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-			_bindingAttributes = new NameValueCollection(StringComparer.OrdinalIgnoreCase);
+			//初始化属性集合
+			_properties = new Dictionary<string, PropertyMetadata>(StringComparer.OrdinalIgnoreCase);
 		}
 		#endregion
 
 		#region 公共属性
-		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata("class")]
 		public string CssClass
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("CssClass", string.Empty);
+				return this.GetPropertyValue(() => this.CssClass);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.CssClass, value);
-			}
-		}
+				if(value != null && value.Length > 0)
+				{
+					value = value.Trim();
 
-		[Bindable(true)]
-		[DefaultValue(true)]
-		public override bool Visible
-		{
-			get
-			{
-				return this.GetAttributeValue<bool>("Visible", true);
-			}
-			set
-			{
-				this.SetAttributeValue(() => this.Visible, value);
+					if(value.StartsWith(":"))
+						value = (this.CssClass + " " + value.Trim(':')).Trim();
+				}
+
+				this.SetPropertyValue(() => this.CssClass, value);
 			}
 		}
 		#endregion
 
 		#region 保护属性
-		protected IDictionary<string, object> Attributes
+		protected IDictionary<string, PropertyMetadata> Properties
 		{
 			get
 			{
-				return _attributes;
+				return _properties;
 			}
 		}
 		#endregion
 
 		#region 公共方法
-		public T GetAttributeValue<T>(string attributeName, T defaultValue = default(T))
+		protected PropertyMetadata GetProperty(string name)
 		{
-			if(string.IsNullOrWhiteSpace(attributeName))
-				throw new ArgumentNullException("attributeName");
+			if(string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException("name");
 
-			attributeName = attributeName.Trim();
+			PropertyMetadata property;
 
-			if(_attributes != null && _attributes.ContainsKey(attributeName))
-				return (T)_attributes[attributeName];
+			if(_properties.TryGetValue(name, out property))
+				return property;
 
-			return defaultValue;
+			return null;
 		}
 
-		public T GetAttributeValue<T>(Expression<Func<T>> expression, T defaultValue = default(T))
+		public T GetPropertyValue<T>(string name)
+		{
+			var property = this.GetProperty(name);
+
+			if(property != null)
+				return (T)property.Value;
+
+			property = this.CreatePropertyMetadata(name, null, true);
+			_properties.Add(name.Trim(), property);
+			return (T)property.DefaultValue;
+		}
+
+		public T GetPropertyValue<T>(Expression<Func<T>> expression)
 		{
 			System.Linq.Expressions.MemberExpression exp = null;
 
@@ -132,10 +134,26 @@ namespace Zongsoft.Web.Controls
 			if(exp == null)
 				throw new ArgumentException("expression");
 
-			return this.GetAttributeValue<T>(exp.Member.Name, defaultValue);
+			return this.GetPropertyValue<T>(exp.Member.Name);
 		}
 
-		public void SetAttributeValue<T>(Expression<Func<T>> expression, T value)
+		public void SetPropertyValue<T>(string name, T value)
+		{
+			if(string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException("name");
+
+			PropertyMetadata property;
+
+			if(_properties.TryGetValue(name, out property))
+			{
+				property.Value = value;
+				return;
+			}
+
+			_properties.Add(name.Trim(), this.CreatePropertyMetadata(name, value, true));
+		}
+
+		public void SetPropertyValue<T>(Expression<Func<T>> expression, T value)
 		{
 			System.Linq.Expressions.MemberExpression exp = null;
 
@@ -150,117 +168,45 @@ namespace Zongsoft.Web.Controls
 			}
 
 			if(exp == null)
-				return;
+				throw new ArgumentException("expression");
 
-			var attribute = (System.ComponentModel.BindableAttribute)Attribute.GetCustomAttribute(exp.Member, typeof(System.ComponentModel.BindableAttribute), true);
-
-			this.SetAttributeValue<T>(exp.Member.Name, value, (attribute == null ? false : attribute.Bindable));
-		}
-
-		public void SetAttributeValue<T>(string attributeName, T value, bool bindable)
-		{
-			if(string.IsNullOrWhiteSpace(attributeName))
-				throw new ArgumentNullException("attributeName");
-
-			attributeName = attributeName.Trim();
-
-			//如果当前控件所在的页面为空，则表明页面还处在刚解析完成阶段。
-			//因此控件的属性值有待于初始化过程中再进行绑定表达式计算，需要将当前属性值保存到_bindingAttributes集中。
-			if(this.Page == null)
-			{
-				if(bindable && (typeof(T) == typeof(string) || (value != null && value.GetType() == typeof(string))))
-					_bindingAttributes[attributeName] = (string)(object)value;
-				else
-					_attributes[attributeName] = value;
-			}
-			else
-			{
-				if(bindable && typeof(T) == typeof(string))
-				{
-					_attributes[attributeName] = BindingUtility.FormatBindingValue((string)(object)value, this.GetBindingSource());
-				}
-				else
-				{
-					_attributes[attributeName] = value;
-				}
-			}
+			this.SetPropertyValue<T>(exp.Member.Name, value);
 		}
 		#endregion
 
 		#region 虚拟方法
-		protected virtual void RenderAttributes(HtmlTextWriter writer, params string[] excludedAttributes)
+		protected virtual void RenderAttributes(HtmlTextWriter writer)
 		{
-			string attributeName;
+			if(!string.IsNullOrWhiteSpace(this.ID))
+				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
 
-			if(_attributes == null || _attributes.Count < 1)
+			foreach(var property in _properties.Values)
+			{
+				if(property.Renderable)
+					this.RenderAttribute(writer, property);
+			}
+		}
+
+		protected virtual void RenderAttribute(HtmlTextWriter writer, PropertyMetadata property)
+		{
+			var propertyRender = property.PropertyRender;
+
+			//如果指定了属性生成器，则调用属性生成器来生成结果
+			if(propertyRender != null && propertyRender.RenderProperty(writer, property))
 				return;
 
-			foreach(KeyValuePair<string, object> attribute in _attributes)
-			{
-				if(attribute.Value != null)
-				{
-					if(string.Equals(attribute.Key, "DataSource", StringComparison.OrdinalIgnoreCase) ||
-					   string.Equals(attribute.Key, "BindingSource", StringComparison.OrdinalIgnoreCase))
-						continue;
-
-					if(excludedAttributes != null && excludedAttributes.Contains(attribute.Key, StringComparer.OrdinalIgnoreCase))
-						continue;
-
-					if(string.Equals(attribute.Key, "CssClass", StringComparison.OrdinalIgnoreCase))
-						attributeName = "class";
-					else
-						attributeName = attribute.Key.ToLowerInvariant();
-
-					string attributeValue;
-					if(this.OnRenderAttribute(attributeName, attribute.Value, out attributeValue))
-						writer.AddAttribute(attributeName, attributeValue ?? string.Empty);
-				}
-			}
-		}
-
-		protected virtual bool OnRenderAttribute(string name, object value, out string renderValue)
-		{
-			if(value == null)
-				renderValue = string.Empty;
-			else
-			{
-				if(string.Equals(name, "value", StringComparison.OrdinalIgnoreCase))
-					renderValue = value.ToString();
-				else
-					renderValue = value.ToString().ToLowerInvariant();
-			}
-
-			return true;
-		}
-
-		protected virtual string FormatAttributeValue(string name, object value, string format)
-		{
-			return BindingUtility.FormatValue(value, format, null);
+			if(!string.IsNullOrEmpty(property.AttributeValue))
+				writer.AddAttribute(property.AttributeName, property.AttributeValue);
 		}
 		#endregion
 
 		#region 重写方法
 		protected override void OnInit(EventArgs e)
 		{
-			if(_bindingAttributes != null && _bindingAttributes.Count > 0)
-			{
-				foreach(string key in _bindingAttributes)
-				{
-					var property = TypeDescriptor.GetProperties(this).Find(key, true);
+			PropertyMetadata visible;
 
-					if(property == null)
-					{
-						_attributes[key] = BindingUtility.FormatBindingValue(_bindingAttributes[key], this.GetBindingSource(), (value, format) => this.FormatAttributeValue(key, value, format));
-					}
-					else
-					{
-						if(property.PropertyType == typeof(string))
-							_attributes[key] = BindingUtility.FormatBindingValue(_bindingAttributes[key], this.GetBindingSource(), (value, format) => this.FormatAttributeValue(key, value, format));
-						else
-							_attributes[key] = BindingUtility.GetBindingValue(_bindingAttributes[key], this.GetBindingSource(), property.PropertyType);
-					}
-				}
-			}
+			if(_properties.TryGetValue("Visible", out visible))
+				this.Visible = (bool)BindingUtility.GetBindingValue(visible.ValueString, this.GetBindingSource(), typeof(bool));
 
 			//调用基类同名方法
 			base.OnInit(e);
@@ -270,15 +216,21 @@ namespace Zongsoft.Web.Controls
 		#region 显式实现
 		string IAttributeAccessor.GetAttribute(string key)
 		{
-			return _bindingAttributes[key.Trim('$')];
+			return _properties[key.Trim('$')].ValueString;
 		}
 
 		void IAttributeAccessor.SetAttribute(string key, string value)
 		{
-			if(string.Equals(key, "$ID", StringComparison.OrdinalIgnoreCase))
+			key = key.Trim('$');
+
+			//注意：以下对 ID 的特殊处理是为了解决 Mono in Linux 中的系统错误
+			if(string.Equals(key, "ID", StringComparison.OrdinalIgnoreCase))
+			{
 				this.ID = value;
-			else
-				_bindingAttributes[key.Trim('$')] = value;
+				return;
+			}
+
+			_properties[key] = this.CreatePropertyMetadata(key, value);
 		}
 		#endregion
 
@@ -295,17 +247,72 @@ namespace Zongsoft.Web.Controls
 			return this.Page;
 		}
 
-		private object GetPropertyDefaultValue(PropertyDescriptor property)
+		private PropertyMetadata CreatePropertyMetadata(string propertyName, string valueString)
 		{
+			if(string.IsNullOrWhiteSpace(propertyName))
+				throw new ArgumentNullException("propertyName");
+
+			PropertyMetadata propertyMetadata = null;
+			var property = this.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+
 			if(property == null)
-				throw new ArgumentNullException("property");
+				propertyMetadata = new PropertyMetadata(this, propertyName, valueString);
+			else
+			{
+				propertyMetadata = this.CreatePropertyMetadata(property, null);
+				propertyMetadata.ValueString = valueString;
+			}
 
-			DefaultValueAttribute attribute = (DefaultValueAttribute)property.Attributes[typeof(DefaultValueAttribute)];
+			return propertyMetadata;
+		}
 
+		private PropertyMetadata CreatePropertyMetadata(string propertyName, object value, bool throwsNotExists)
+		{
+			if(string.IsNullOrWhiteSpace(propertyName))
+				throw new ArgumentNullException("propertyName");
+
+			var property = this.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+
+			if(property == null)
+			{
+				if(throwsNotExists)
+					throw new InvalidOperationException(string.Format("Not found the '{0}' property of '{1}' control.", propertyName, this.GetType().FullName));
+				else
+					return null;
+			}
+
+			return this.CreatePropertyMetadata(property, value);
+		}
+
+		private PropertyMetadata CreatePropertyMetadata(PropertyInfo propertyInfo, object value)
+		{
+			if(propertyInfo == null)
+				throw new ArgumentNullException("propertyInfo");
+
+			var propertyMetadata = new PropertyMetadata(this, propertyInfo.Name, propertyInfo.PropertyType, value);
+
+			var attribute = Attribute.GetCustomAttribute(propertyInfo, typeof(DefaultValueAttribute), true);
 			if(attribute != null)
-				return attribute.Value;
+				propertyMetadata.DefaultValue = ((DefaultValueAttribute)attribute).Value;
 
-			return Zongsoft.Common.Convert.GetDefaultValue(property.PropertyType);
+			attribute = Attribute.GetCustomAttribute(propertyInfo, typeof(BindableAttribute), true);
+			if(attribute != null)
+				propertyMetadata.Bindable = ((BindableAttribute)attribute).Bindable;
+
+			attribute = Attribute.GetCustomAttribute(propertyInfo, typeof(PropertyMetadataAttribute), true);
+			if(attribute != null)
+			{
+				var attributeName = ((PropertyMetadataAttribute)attribute).AttributeName;
+
+				if(!string.IsNullOrWhiteSpace(attributeName))
+					propertyMetadata.AttributeName = attributeName;
+
+				propertyMetadata.Renderable = ((PropertyMetadataAttribute)attribute).Renderable;
+				propertyMetadata.Bindable = ((PropertyMetadataAttribute)attribute).Bindable;
+				propertyMetadata.PropertyRender = ((PropertyMetadataAttribute)attribute).GetPropertyRender();
+			}
+
+			return propertyMetadata;
 		}
 		#endregion
 	}

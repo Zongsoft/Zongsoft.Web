@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -26,11 +26,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
@@ -39,15 +34,16 @@ namespace Zongsoft.Web.Controls
 		#region 公共属性
 		[Bindable(true)]
 		[DefaultValue(null)]
+		[PropertyMetadata(false)]
 		public object DataSource
 		{
 			get
 			{
-				return this.GetAttributeValue<object>("DataSource", null);
+				return this.GetPropertyValue(() => this.DataSource);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.DataSource, value);
+				this.SetPropertyValue(() => this.DataSource, value);
 			}
 		}
 		#endregion

@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -38,45 +38,71 @@ namespace Zongsoft.Web.Controls
 		#region 公共属性
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata("href", PropertyRender = "UrlPropertyRender.Default")]
 		public string Url
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Url", string.Empty);
+				return this.GetPropertyValue(() => this.Url);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Url, value);
+				this.SetPropertyValue(() => this.Url, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue("")]
+		public string Title
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.Title);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.Title, value);
+			}
+		}
+
+		[Bindable(true)]
+		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string Text
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Text", string.Empty);
+				return this.GetPropertyValue(() => this.Text);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Text, value);
+				this.SetPropertyValue(() => this.Text, value);
 			}
 		}
 		#endregion
 
 		#region 生成控件
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
-			//生成其他Attributes，并忽略URL属性
-			this.RenderAttributes(writer, "Url");
-			//生成特定的URL属性
-			writer.AddAttribute(HtmlTextWriterAttribute.Href, this.ResolveUrl(this.Url));
+			//生成所有属性
+			this.RenderAttributes(writer);
 
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
 			writer.WriteEncodedText(this.Text);
 			writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
+
+		//protected override void RenderAttribute(HtmlTextWriter writer, PropertyMetadata property)
+		//{
+		//	if(string.Equals(property.Name, "url", StringComparison.OrdinalIgnoreCase))
+		//		property.AttributeValue = this.ResolveUrl(property.AttributeValue);
+
+		//	//调用基类同名方法
+		//	base.RenderAttribute(writer, property);
+		//}
 		#endregion
 	}
 }

@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -70,70 +70,75 @@ namespace Zongsoft.Web.Controls
 
 		[Bindable(true)]
 		[DefaultValue(false)]
+		[PropertyMetadata(false)]
 		public bool AutoSubmit
 		{
 			get
 			{
-				return this.GetAttributeValue("AutoSubmit", false);
+				return this.GetPropertyValue(() => this.AutoSubmit);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.AutoSubmit, value);
+				this.SetPropertyValue(() => this.AutoSubmit, value);
 			}
 		}
 
 		[DefaultValue(ComboBoxRenderMode.Classic)]
+		[PropertyMetadata(false)]
 		public ComboBoxRenderMode RenderMode
 		{
 			get
 			{
-				return this.GetAttributeValue<ComboBoxRenderMode>("RenderMode", ComboBoxRenderMode.Classic);
+				return this.GetPropertyValue(() => this.RenderMode);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.RenderMode, value);
+				this.SetPropertyValue(() => this.RenderMode, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string Label
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Label", string.Empty);
+				return this.GetPropertyValue(() => this.Label);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Label, value);
+				this.SetPropertyValue(() => this.Label, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue(-1)]
+		[PropertyMetadata(false)]
 		public int SelectedIndex
 		{
 			get
 			{
-				return this.GetAttributeValue<int>("SelectedIndex", -1);
+				return this.GetPropertyValue(() => this.SelectedIndex);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.SelectedIndex, Math.Max(value, -1));
+				this.SetPropertyValue(() => this.SelectedIndex, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string SelectedValue
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("SelectedValue", string.Empty);
+				return this.GetPropertyValue(() => this.SelectedValue);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.SelectedValue, value);
+				this.SetPropertyValue(() => this.SelectedValue, value);
 			}
 		}
 
@@ -147,7 +152,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成控件
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			switch(this.RenderMode)
 			{
@@ -158,6 +163,9 @@ namespace Zongsoft.Web.Controls
 					this.RenderCustom(writer);
 					break;
 			}
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 

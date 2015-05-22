@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -55,17 +55,18 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<ChartType>("Type", ChartType.Pie);
+				return this.GetPropertyValue(() => this.Type);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Type, value);
+				this.SetPropertyValue(() => this.Type, value);
 			}
 		}
 
 		[NotifyParentProperty(true)]
 		[PersistenceMode(PersistenceMode.InnerProperty)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		[PropertyMetadata(false)]
 		public ChartBinding Binding
 		{
 			get
@@ -77,6 +78,7 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[PropertyMetadata(false)]
 		public ChartPointCollection Points
 		{
 			get
@@ -88,6 +90,7 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[PropertyMetadata(false)]
 		public ChartSerieCollection Series
 		{
 			get
@@ -99,6 +102,7 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[PropertyMetadata(false)]
 		public ChartLineCollection Lines
 		{
 			get
@@ -116,11 +120,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Title", string.Empty);
+				return this.GetPropertyValue(() => this.Title);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Title, value);
+				this.SetPropertyValue(() => this.Title, value);
 			}
 		}
 
@@ -128,11 +132,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<Unit>("Width", Unit.Empty);
+				return this.GetPropertyValue(() => this.Width);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Width, value);
+				this.SetPropertyValue(() => this.Width, value);
 			}
 		}
 
@@ -140,17 +144,17 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<Unit>("Height", Unit.Empty);
+				return this.GetPropertyValue(() => this.Height);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Height, value);
+				this.SetPropertyValue(() => this.Height, value);
 			}
 		}
 		#endregion
 
 		#region 生成控件
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			if(string.IsNullOrWhiteSpace(this.ID))
 				throw new InvalidOperationException("The ID property is null or empty.");
@@ -215,6 +219,9 @@ namespace Zongsoft.Web.Controls
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
 			writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 

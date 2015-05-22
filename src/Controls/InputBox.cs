@@ -36,6 +36,13 @@ namespace Zongsoft.Web.Controls
 {
 	public class InputBox : DataBoundControl
 	{
+		#region 构造函数
+		public InputBox()
+		{
+			this.InputType = InputBoxType.Text;
+		}
+		#endregion
+
 		#region 公共属性
 		[Bindable(true)]
 		[DefaultValue("")]
@@ -43,57 +50,89 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				var name = this.GetAttributeValue<string>("Name", string.Empty);
-
-				if(string.IsNullOrWhiteSpace(name))
-					return this.ID ?? string.Empty;
-
-				return name;
+				return this.GetPropertyValue(() => this.Name);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Name, value);
+				this.SetPropertyValue(() => this.Name, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue(true)]
+		[PropertyMetadata("disabled", PropertyRender = "BooleanPropertyRender.False")]
 		public bool Enabled
 		{
 			get
 			{
-				return this.GetAttributeValue<bool>("Enabled", true);
+				return this.GetPropertyValue(() => this.Enabled);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Enabled, value);
+				this.SetPropertyValue(() => this.Enabled, value);
 			}
 		}
 
 		[DefaultValue(InputBoxType.Text)]
+		[PropertyMetadata("type")]
 		public virtual InputBoxType InputType
 		{
 			get
 			{
-				return this.GetAttributeValue<InputBoxType>("InputType", InputBoxType.Text);
+				return this.GetPropertyValue(() => this.InputType);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.InputType, value);
+				this.SetPropertyValue(() => this.InputType, value);
+
+				switch(value)
+				{
+					case InputBoxType.Button:
+						this.CssClass = "ui-button";
+						break;
+					case InputBoxType.Reset:
+						this.CssClass = "ui-button reset";
+						break;
+					case InputBoxType.Submit:
+						this.CssClass = "ui-button submit";
+						break;
+					case InputBoxType.File:
+						this.CssClass = "ui-file";
+						break;
+					case InputBoxType.Image:
+						this.CssClass = "ui-image";
+						break;
+					case InputBoxType.CheckBox:
+						this.CssClass = "ui-checkbox";
+						break;
+					case InputBoxType.Radio:
+						this.CssClass = "ui-radio";
+						break;
+					case InputBoxType.Text:
+						this.CssClass = "ui-input";
+						break;
+					case InputBoxType.Password:
+						this.CssClass = "ui-input password";
+						break;
+					default:
+						this.CssClass = "ui-input " + value.ToString().ToLowerInvariant();
+						break;
+				}
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string Label
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Label", string.Empty);
+				return this.GetPropertyValue(() => this.Label);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Label, value);
+				this.SetPropertyValue(() => this.Label, value);
 			}
 		}
 
@@ -103,23 +142,18 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Value", string.Empty);
+				return this.GetPropertyValue(() => this.Value);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Value, value);
+				this.SetPropertyValue(() => this.Value, value);
 			}
 		}
 		#endregion
 
 		#region 重写方法
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
-			if(string.IsNullOrWhiteSpace(this.CssClass))
-				this.CssClass = "field-input";
-			else if(this.CssClass.StartsWith(":"))
-					this.CssClass = "field-input " + this.CssClass.Trim(':');
-
 			if(!string.IsNullOrWhiteSpace(this.Label))
 			{
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
@@ -128,36 +162,26 @@ namespace Zongsoft.Web.Controls
 				if(!string.IsNullOrWhiteSpace(this.ID))
 					writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
 
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field-label");
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "ui-label");
 				writer.RenderBeginTag(HtmlTextWriterTag.Label);
 				writer.WriteEncodedText(this.Label);
 				writer.RenderEndTag();
 			}
 
-			if(!string.IsNullOrWhiteSpace(this.ID))
-			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-
-				if(string.IsNullOrWhiteSpace(this.Name))
-					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
-			}
-
-			if(!string.IsNullOrWhiteSpace(this.Name))
-				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
-
-			writer.AddAttribute(HtmlTextWriterAttribute.Type, this.InputType.ToString().ToLowerInvariant());
-
-			if(!this.Enabled)
-				writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "disabled");
+			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
+				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
 
 			//生成其他属性
-			this.RenderAttributes(writer, new string[] { "Name", "Enabled", "Label", "Type" });
+			this.RenderAttributes(writer);
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Input);
 			writer.RenderEndTag();
 
 			if(!string.IsNullOrWhiteSpace(this.Label))
 				writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 	}

@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -124,11 +124,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue("LoadingPath", string.Empty);
+				return this.GetPropertyValue(() => this.LoadingPath);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.LoadingPath, value);
+				this.SetPropertyValue(() => this.LoadingPath, value);
 			}
 		}
 
@@ -138,11 +138,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<ScrollbarMode>("ScrollbarMode", Web.Controls.ScrollbarMode.None);
+				return this.GetPropertyValue(() => this.ScrollbarMode);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.ScrollbarMode, value);
+				this.SetPropertyValue(() => this.ScrollbarMode, value);
 			}
 		}
 
@@ -152,11 +152,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<SelectionMode>("SelectionMode", SelectionMode.None);
+				return this.GetPropertyValue(() => this.SelectionMode);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.SelectionMode, value);
+				this.SetPropertyValue(() => this.SelectionMode, value);
 			}
 		}
 
@@ -166,11 +166,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue("SelectedPath", string.Empty);
+				return this.GetPropertyValue(() => this.SelectedPath);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.SelectedPath, value);
+				this.SetPropertyValue(() => this.SelectedPath, value);
 			}
 		}
 
@@ -180,11 +180,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue("Height", Unit.Empty);
+				return this.GetPropertyValue(() => this.Height);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Height, value);
+				this.SetPropertyValue(() => this.Height, value);
 			}
 		}
 
@@ -194,21 +194,18 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue("Width", Unit.Empty);
+				return this.GetPropertyValue(() => this.Width);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Width, value);
+				this.SetPropertyValue(() => this.Width, value);
 			}
 		}
 		#endregion
 
 		#region 重写方法
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
-			if(!this.Visible)
-				return;
-
 			//生成数据源对应的子树
 			this.GenerateNodes();
 
@@ -252,6 +249,9 @@ namespace Zongsoft.Web.Controls
 
 				writer.RenderEndTag();
 			}
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 

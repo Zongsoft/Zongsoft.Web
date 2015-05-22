@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -52,48 +52,51 @@ namespace Zongsoft.Web.Controls
 	{
 		#region 公共属性
 		[DefaultValue(LayoutMode.Flow)]
+		[PropertyMetadata(false)]
 		public LayoutMode LayoutMode
 		{
 			get
 			{
-				return this.GetAttributeValue<LayoutMode>("LayoutMode", Web.Controls.LayoutMode.Flow);
+				return this.GetPropertyValue(() => this.LayoutMode);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.LayoutMode, value);
+				this.SetPropertyValue(() => this.LayoutMode, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue(2)]
+		[PropertyMetadata(false)]
 		public int LayoutColumns
 		{
 			get
 			{
-				return this.GetAttributeValue<int>("LayoutColumns", 2);
+				return this.GetPropertyValue(() => this.LayoutColumns);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.LayoutColumns, Math.Max(value, 1));
+				this.SetPropertyValue(() => this.LayoutColumns, Math.Max(value, 1));
 			}
 		}
 
 		[DefaultValue(true)]
+		[PropertyMetadata(false)]
 		public bool MergeLastCells
 		{
 			get
 			{
-				return this.GetAttributeValue<bool>("MergeLastCells", true);
+				return this.GetPropertyValue(() => this.MergeLastCells);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.MergeLastCells, value);
+				this.SetPropertyValue(() => this.MergeLastCells, value);
 			}
 		}
 		#endregion
 
 		#region 重写方法
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			IList<Control> controls = this.GetControls();
 
@@ -109,17 +112,17 @@ namespace Zongsoft.Web.Controls
 					this.RenderTableLayout(writer, controls);
 					break;
 			}
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 
 		#region 私有方法
 		private void RenderFlowLayout(HtmlTextWriter writer, IList<Control> controls)
 		{
-			if(!string.IsNullOrWhiteSpace(this.ID))
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-
 			//生成其他自定义属性
-			this.RenderAttributes(writer, "layoutMode", "layoutColumns", "mergeLastCells");
+			this.RenderAttributes(writer);
 
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layoutPanel layout-flow");
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
@@ -146,11 +149,8 @@ namespace Zongsoft.Web.Controls
 
 		private void RenderTableLayout(HtmlTextWriter writer, IList<Control> controls)
 		{
-			if(!string.IsNullOrWhiteSpace(this.ID))
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-
 			//生成其他自定义属性
-			this.RenderAttributes(writer, "layoutMode", "layoutColumns", "mergeLastCells");
+			this.RenderAttributes(writer);
 
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layoutPanel layout-table");
 			writer.RenderBeginTag(HtmlTextWriterTag.Table);

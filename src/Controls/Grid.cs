@@ -53,29 +53,31 @@ namespace Zongsoft.Web.Controls
 		#region 公共属性
 		[Bindable(true)]
 		[DefaultValue(SelectionMode.None)]
+		[PropertyMetadata("data-selectionMode")]
 		public SelectionMode SelectionMode
 		{
 			get
 			{
-				return this.GetAttributeValue<SelectionMode>("SelectionMode", SelectionMode.None);
+				return this.GetPropertyValue(() => this.SelectionMode);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.SelectionMode, value);
+				this.SetPropertyValue(() => this.SelectionMode, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue("select")]
+		[PropertyMetadata("data-selectionName")]
 		public string SelectionName
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("SelectionName", "select");
+				return this.GetPropertyValue(() => this.SelectionName);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.SelectionName, value);
+				this.SetPropertyValue(() => this.SelectionName, value);
 			}
 		}
 
@@ -94,11 +96,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("DataKeys", string.Empty);
+				return this.GetPropertyValue(() => this.DataKeys);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.DataKeys, value);
+				this.SetPropertyValue(() => this.DataKeys, value);
 			}
 		}
 
@@ -106,11 +108,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<Unit>("Width", Unit.Empty);
+				return this.GetPropertyValue(() => this.Width);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Width, value);
+				this.SetPropertyValue(() => this.Width, value);
 			}
 		}
 
@@ -118,17 +120,17 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<Unit>("Height", Unit.Empty);
+				return this.GetPropertyValue(() => this.Height);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Height, value);
+				this.SetPropertyValue(() => this.Height, value);
 			}
 		}
 		#endregion
 
 		#region 生成控件
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			if(!string.IsNullOrWhiteSpace(this.ID))
 				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID + "-wrapper");
@@ -149,7 +151,7 @@ namespace Zongsoft.Web.Controls
 				writer.AddAttribute(HtmlTextWriterAttribute.Height, this.Height.ToString());
 
 			//生成其他属性
-			this.RenderAttributes(writer, new string[] { "SelectionMode" });
+			this.RenderAttributes(writer);
 
 			//生成表格标记(开始)
 			writer.RenderBeginTag(HtmlTextWriterTag.Table);
@@ -235,6 +237,9 @@ namespace Zongsoft.Web.Controls
 			writer.RenderEndTag();
 			//生成表格包装结束标记</div>
 			writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 

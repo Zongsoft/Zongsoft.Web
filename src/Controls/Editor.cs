@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -33,134 +33,46 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class Editor : DataBoundControl
+	public class Editor : TextBox
 	{
 		#region 构造函数
 		public Editor()
 		{
-			this.CssClass = "editor";
-		}
-		#endregion
-
-		#region 公共属性
-		[Bindable(true)]
-		[DefaultValue("")]
-		public string Name
-		{
-			get
-			{
-				return this.GetAttributeValue<string>("Name", this.ID);
-			}
-			set
-			{
-				this.SetAttributeValue(() => this.Name, value);
-			}
-		}
-
-		[Bindable(true)]
-		[DefaultValue(true)]
-		public bool Enabled
-		{
-			get
-			{
-				return this.GetAttributeValue<bool>("Enabled", true);
-			}
-			set
-			{
-				this.SetAttributeValue(() => this.Enabled, value);
-			}
-		}
-
-		[Bindable(true)]
-		[DefaultValue("")]
-		public string Label
-		{
-			get
-			{
-				return this.GetAttributeValue<string>("Label", string.Empty);
-			}
-			set
-			{
-				this.SetAttributeValue(() => this.Label, value);
-			}
-		}
-
-		[Bindable(true)]
-		[DefaultValue(false)]
-		public bool ReadOnly
-		{
-			get
-			{
-				return this.GetAttributeValue<bool>("ReadOnly", false);
-			}
-			set
-			{
-				this.SetAttributeValue(() => this.ReadOnly, value);
-			}
-		}
-
-		[Bindable(true)]
-		[DefaultValue(-1)]
-		public int MaxLength
-		{
-			get
-			{
-				return this.GetAttributeValue<int>("MaxLength", -1);
-			}
-			set
-			{
-				this.SetAttributeValue(() => this.MaxLength, value);
-			}
-		}
-
-		[Bindable(true)]
-		[DefaultValue("")]
-		public string Text
-		{
-			get
-			{
-				return this.GetAttributeValue<string>("Text", string.Empty);
-			}
-			set
-			{
-				this.SetAttributeValue(() => this.Text, value);
-			}
+			this.CssClass = ":editor";
 		}
 		#endregion
 
 		#region 生成控件
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			if(!string.IsNullOrWhiteSpace(this.Label))
 			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+
 				if(!string.IsNullOrWhiteSpace(this.ID))
 					writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
 
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field-label");
 				writer.RenderBeginTag(HtmlTextWriterTag.Label);
 				writer.WriteEncodedText(this.Label);
 				writer.RenderEndTag();
 			}
 
-			if(!string.IsNullOrWhiteSpace(this.ID))
-			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-
-				if(string.IsNullOrWhiteSpace(this.Name))
-					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
-			}
-
-			if(!string.IsNullOrWhiteSpace(this.Name))
-				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
-
-			if(!this.Enabled)
-				writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "disabled");
+			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
+				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
 
 			//生成其他属性
-			this.RenderAttributes(writer, new string[] { "Name", "Enabled", "Label", "Text" });
+			this.RenderAttributes(writer);
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Textarea);
-			writer.WriteEncodedText(this.Text);
 			writer.RenderEndTag();
+
+			if(!string.IsNullOrWhiteSpace(this.Label))
+				writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 	}

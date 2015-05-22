@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -48,41 +48,44 @@ namespace Zongsoft.Web.Controls
 
 		#region 公共属性
 		[DefaultValue(false)]
+		[PropertyMetadata(false)]
 		public bool IsOrdered
 		{
 			get
 			{
-				return this.GetAttributeValue<bool>("IsOrdered", false);
+				return this.GetPropertyValue(() => this.IsOrdered);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.IsOrdered, value);
+				this.SetPropertyValue(() => this.IsOrdered, value);
 			}
 		}
 
 		[DefaultValue(EmptyTemplateScope.Item)]
+		[PropertyMetadata(false)]
 		public EmptyTemplateScope EmptyTemplateScope
 		{
 			get
 			{
-				return this.GetAttributeValue<EmptyTemplateScope>("EmptyTemplateScope", Web.Controls.EmptyTemplateScope.Item);
+				return this.GetPropertyValue(() => this.EmptyTemplateScope);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.EmptyTemplateScope, value);
+				this.SetPropertyValue(() => this.EmptyTemplateScope, value);
 			}
 		}
 
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string ItemTemplateText
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("ItemTemplateText", string.Empty);
+				return this.GetPropertyValue(() => this.ItemTemplateText);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.ItemTemplateText, value);
+				this.SetPropertyValue(() => this.ItemTemplateText, value);
 			}
 		}
 
@@ -148,7 +151,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			if(this.DataSource == null && this.EmptyTemplateScope == EmptyTemplateScope.Control)
 			{
@@ -197,6 +200,9 @@ namespace Zongsoft.Web.Controls
 
 			//生成所有子控件
 			this.RenderChildren(writer);
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 

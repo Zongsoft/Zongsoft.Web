@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -31,12 +31,12 @@ using System.Text;
 
 namespace Zongsoft.Web.Controls
 {
-	public class NumericBox : TextBoxBase
+	public class NumericBox : TextBox
 	{
 		#region 构造函数
 		public NumericBox()
 		{
-			this.CssClass = "numeric";
+			this.InputType = InputBoxType.Number;
 		}
 		#endregion
 
@@ -49,11 +49,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<byte>("Scale", 0);
+				return this.GetPropertyValue(() => this.Scale);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Scale, value);
+				this.SetPropertyValue(() => this.Scale, value);
 			}
 		}
 
@@ -65,24 +65,24 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<byte>("Precision", 0);
+				return this.GetPropertyValue(() => this.Precision);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Precision, value);
+				this.SetPropertyValue(() => this.Precision, value);
 			}
 		}
 
 		[DefaultValue(1)]
-		public double Increment
+		public double Interval
 		{
 			get
 			{
-				return this.GetAttributeValue<double>("Increment", 1);
+				return this.GetPropertyValue(() => this.Interval);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Increment, value);
+				this.SetPropertyValue(() => this.Interval, value);
 			}
 		}
 
@@ -91,11 +91,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<double>("Maximum", 0);
+				return this.GetPropertyValue(() => this.Maximum);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Maximum, value);
+				this.SetPropertyValue(() => this.Maximum, value);
 			}
 		}
 
@@ -104,11 +104,29 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<double>("Minimum", 0);
+				return this.GetPropertyValue(() => this.Minimum);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Minimum, value);
+				this.SetPropertyValue(() => this.Minimum, value);
+			}
+		}
+		#endregion
+
+		#region 重写属性
+		[DefaultValue(InputBoxType.Text)]
+		public override InputBoxType InputType
+		{
+			get
+			{
+				return base.InputType;
+			}
+			set
+			{
+				if(value != InputBoxType.Number)
+					throw new ArgumentOutOfRangeException();
+
+				base.InputType = value;
 			}
 		}
 		#endregion

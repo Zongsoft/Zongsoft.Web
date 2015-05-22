@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -35,17 +35,24 @@ namespace Zongsoft.Web.Controls
 {
 	public class Label : DataBoundControl
 	{
+		#region 构造函数
+		public Label()
+		{
+			this.CssClass = "ui-label";
+		}
+		#endregion
+
 		#region 公共属性
 		[DefaultValue("")]
 		public string AssociatedControlId
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("AssociatedControlId", string.Empty);
+				return this.GetPropertyValue(() => this.AssociatedControlId);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.AssociatedControlId, value);
+				this.SetPropertyValue(() => this.AssociatedControlId, value);
 			}
 		}
 
@@ -55,30 +62,31 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Text", string.Empty);
+				return this.GetPropertyValue(() => this.Text);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Text, value);
+				this.SetPropertyValue(() => this.Text, value);
 			}
 		}
 
 		[DefaultValue(LabelRenderMode.Label)]
+		[PropertyMetadata(false)]
 		public LabelRenderMode RenderMode
 		{
 			get
 			{
-				return this.GetAttributeValue<LabelRenderMode>("RenderMode", LabelRenderMode.Label);
+				return this.GetPropertyValue(() => this.RenderMode);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.RenderMode, value);
+				this.SetPropertyValue(() => this.RenderMode, value);
 			}
 		}
 		#endregion
 
 		#region 生成控件
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			HtmlTextWriterTag? tag = null;
 
@@ -98,12 +106,18 @@ namespace Zongsoft.Web.Controls
 			}
 
 			if(tag.HasValue)
+			{
+				this.RenderAttributes(writer);
 				writer.RenderBeginTag(tag.Value);
+			}
 
 			writer.WriteEncodedText(this.Text);
 
 			if(tag.HasValue)
 				writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 	}

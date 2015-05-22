@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -25,17 +25,13 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Web;
+using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public enum TextBoxType
+	public interface IPropertyRender
 	{
-		Text,
-		Date,
-		Time,
-		DateTime,
+		bool RenderProperty(HtmlTextWriter writer, PropertyMetadata property);
 	}
 }

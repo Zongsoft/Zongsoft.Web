@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -40,61 +40,68 @@ namespace Zongsoft.Web.Controls
 	{
 		#region 公共属性
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string TagName
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("TagName", string.Empty);
+				return this.GetPropertyValue(() => this.TagName);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.TagName, value);
+				this.SetPropertyValue(() => this.TagName, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string Text
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Text", string.Empty);
+				return this.GetPropertyValue(() => this.Text);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Text, value);
+				this.SetPropertyValue(() => this.Text, value);
 			}
 		}
 
 		[DefaultValue(true)]
+		[PropertyMetadata(false)]
 		public bool TextEncoded
 		{
 			get
 			{
-				return this.GetAttributeValue<bool>("TextEncoded", true);
+				return this.GetPropertyValue(() => this.TextEncoded);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.TextEncoded, value);
+				this.SetPropertyValue(() => this.TextEncoded, value);
 			}
 		}
 		#endregion
 
 		#region 生成控件
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			if(!string.IsNullOrWhiteSpace(this.TagName))
 			{
-				this.RenderAttributes(writer, new string[] { "Tag", "Text", "TextEncoded" });
+				this.RenderAttributes(writer);
 				writer.RenderBeginTag(this.TagName.Trim().ToLowerInvariant());
 			}
-
-			this.EnsureChildControls();
 
 			if(this.TextEncoded)
 				writer.WriteEncodedText(this.Text);
 			else
 				writer.Write(this.Text);
+
+			//确认生成了所有的子控件
+			this.EnsureChildControls();
+
+			//绘制所有子控件
+			this.RenderChildren(writer);
 
 			if(!string.IsNullOrWhiteSpace(this.TagName))
 				writer.RenderEndTag();

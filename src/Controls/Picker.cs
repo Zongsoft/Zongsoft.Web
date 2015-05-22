@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -76,25 +76,26 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Name", string.Empty);
+				return this.GetPropertyValue(() => this.Name);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Name, value);
+				this.SetPropertyValue(() => this.Name, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue(true)]
+		[PropertyMetadata("disabled", PropertyRender = "BooleanPropertyRender.False")]
 		public bool Enabled
 		{
 			get
 			{
-				return this.GetAttributeValue<bool>("Enabled", true);
+				return this.GetPropertyValue(() => this.Enabled);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Enabled, value);
+				this.SetPropertyValue(() => this.Enabled, value);
 			}
 		}
 
@@ -104,11 +105,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Title", string.Empty);
+				return this.GetPropertyValue(() => this.Title);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Title, value);
+				this.SetPropertyValue(() => this.Title, value);
 			}
 		}
 
@@ -118,11 +119,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Label", string.Empty);
+				return this.GetPropertyValue(() => this.Label);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Label, value);
+				this.SetPropertyValue(() => this.Label, value);
 			}
 		}
 
@@ -130,11 +131,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("DataKeys", string.Empty);
+				return this.GetPropertyValue(() => this.DataKeys);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.DataKeys, value);
+				this.SetPropertyValue(() => this.DataKeys, value);
 			}
 		}
 
@@ -144,11 +145,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("SelectedValue", string.Empty);
+				return this.GetPropertyValue(() => this.SelectedValue);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.SelectedValue, value);
+				this.SetPropertyValue(() => this.SelectedValue, value);
 			}
 		}
 
@@ -158,11 +159,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<SelectionMode>("SelectionMode", SelectionMode.Single);
+				return this.GetPropertyValue(() => this.SelectionMode);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.SelectionMode, value);
+				this.SetPropertyValue(() => this.SelectionMode, value);
 			}
 		}
 
@@ -172,11 +173,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Text", string.Empty);
+				return this.GetPropertyValue(() => this.Text);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Text, value);
+				this.SetPropertyValue(() => this.Text, value);
 			}
 		}
 
@@ -185,25 +186,26 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("FormatString", string.Empty);
+				return this.GetPropertyValue(() => this.FormatString);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.FormatString, value);
+				this.SetPropertyValue(() => this.FormatString, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata("href", PropertyRender = "UrlPropertyRender.Default")]
 		public string Url
 		{
 			get
 			{
-				return this.GetAttributeValue<string>("Url", string.Empty);
+				return this.GetPropertyValue(() => this.Url);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Url, value);
+				this.SetPropertyValue(() => this.Url, value);
 			}
 		}
 
@@ -211,11 +213,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<Unit>("Width", Unit.Empty);
+				return this.GetPropertyValue(() => this.Width);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Width, value);
+				this.SetPropertyValue(() => this.Width, value);
 			}
 		}
 
@@ -223,11 +225,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetAttributeValue<Unit>("Height", Unit.Empty);
+				return this.GetPropertyValue(() => this.Height);
 			}
 			set
 			{
-				this.SetAttributeValue(() => this.Height, value);
+				this.SetPropertyValue(() => this.Height, value);
 			}
 		}
 
@@ -244,7 +246,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成控件
-		public override void RenderControl(HtmlTextWriter writer)
+		protected override void Render(HtmlTextWriter writer)
 		{
 			if(string.IsNullOrWhiteSpace(this.ID))
 				throw new InvalidOperationException("The ID property is null or empty.");
@@ -327,6 +329,9 @@ namespace Zongsoft.Web.Controls
 
 			//生成视图部分的DIV结束元素
 			writer.RenderEndTag();
+
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 	}

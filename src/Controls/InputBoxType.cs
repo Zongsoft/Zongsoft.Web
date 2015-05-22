@@ -25,22 +25,53 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
 
 namespace Zongsoft.Web.Controls
 {
 	public enum InputBoxType
 	{
+		[Category("Text")]
 		Text,
+		[Category("Text")]
+		Password,
+
+		[Category("Button")]
 		Button,
+		[Category("Button")]
+		Reset,
+		[Category("Button")]
+		Submit,
+
+		[Category("Button")]
 		CheckBox,
+		[Category("Button")]
+		Radio,
+
 		Hidden,
 		Image,
-		Password,
-		Radio,
-		Reset,
-		Submit,
+		File,
+
+		/// <summary>扩展：数字输入框</summary>
+		[Category("Text")]
+		Number,
+		/// <summary>扩展：日期输入框</summary>
+		[Category("Text")]
+		Date,
+		/// <summary>扩展：时间输入框</summary>
+		[Category("Text")]
+		Time,
+		/// <summary>扩展：日期和时间输入框</summary>
+		[Category("Text")]
+		DateTime,
+		/// <summary>扩展：网址输入框</summary>
+		[Category("Text")]
+		Url,
+		/// <summary>扩展：电子邮箱地址输入框</summary>
+		[Category("Text")]
+		Email,
+		/// <summary>扩展：搜索框</summary>
+		[Category("Text")]
+		Search,
 	}
 }
