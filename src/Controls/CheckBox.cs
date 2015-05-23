@@ -76,27 +76,5 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 		#endregion
-
-		#region 重写方法
-		//public override void RenderControl(HtmlTextWriter writer)
-		//{
-		//	if(string.IsNullOrWhiteSpace(this.CssClass))
-		//		this.CssClass = "field-checkbox";
-		//	else if(this.CssClass.StartsWith(":"))
-		//		this.CssClass = "field-checkbox " + this.CssClass.Trim(':');
-
-		//	base.RenderControl(writer);
-		//}
-
-		//protected override void RenderAttribute(HtmlTextWriter writer, PropertyMetadata property)
-		//{
-		//	//如果要生成的是Checked属性则判断其值是否为真(True)：如果是则不用生成属性(故而直接返回)，否则则调用基类同名方法执行默认的生成操作
-		//	if(string.Equals(property.Name, "Checked", StringComparison.OrdinalIgnoreCase) && (bool)property.Value == false)
-		//		return;
-
-		//	//调用基类同名方法
-		//	base.RenderAttribute(writer, property);
-		//}
-		#endregion
 	}
 }

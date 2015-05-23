@@ -6,7 +6,11 @@
 
 ## 控件设计
 
-所有控件均从 `DataBoundControl` 类继承。控件的属性可以通过 `PropertyMetadataAttribute` 标记类来指定相应的生成规则，该类的定义如下：
+所有控件均从 `DataBoundControl` 类继承，该基类指定 `DataBoundControlBuilder` 来解析页面中的控件元素。
+
+### 控件属性
+
+控件的属性可以通过 `PropertyMetadataAttribute` 标记类来指定相应的生成规则，该类的定义如下：
 
 ``` C#
 [AttributeUsage(AttributeTargets.Property)]
@@ -27,7 +31,12 @@ public class PropertyMetadataAttribute : Attribute
 ```
 
 控件属性均使用从 `DataBoundControl` 基类中的 `GetPropertyValue(...)` 方法获取属性值和 `SetPropertyValue(...)` 方法来设置属性值。
-如果控件属性未声明 `PropertyMetadataAttribute`，则表示生成同名的 HTML 特性(attribute)，如果控件属性未声明 `DefaultValueAttribute` 并且该控件的使用者也未显式对该属性进行设置的话，则不会为其生成对应的 HTML 特性(attribute)。
+
+如果控件属性未声明 `PropertyMetadataAttribute`，则表示生成同名的 `HTML特性(attribute)`，也可以通过指定 `PropertyMetadataAttribute.AttributeName` 属性来显式设定要生成的 `HTML特性(attribute)` 的名称；可通过 `PropertyMetadataAttribute.Renderable` 属性来指示是否需要生成对应的 `HTML特性(attribute)`。
+
+控件属性通过 `BindableAttribute.Bindable` 或者 `PropertyMetadataAttribute.Bindable` 来表示是否支持绑定表达式。
+
+关于控件属性的一般编写方法，请参考 InputBox 控件的代码，大致如下：
 
 ``` C#
 public class InputBox : DataBoundControl
@@ -138,4 +147,17 @@ public class InputBox : DataBoundControl
 		}
 	}
 }
+```
+
+
+### 样式类名
+
+通常每个控件会有自己的默认样式类名(即HTML元素的CSS样式名)，但是可以显式设置控件的 `CSSClass` 属性来覆盖或追加(以冒号打头)样式类名，用法大致如下：
+
+``` HTML
+<!-- 覆盖默认的控件属性的样式类名 -->
+<zs:InputBox InputType="Password" CssClass="MyCssClass" runat="server" />
+
+<!-- 在默认的控件属性的样式类名后追加指定的样式类名 -->
+<zs:InputBox InputType="Password" CssClass=":MyFirstCssClass MySecondCssClass" runat="server" />
 ```

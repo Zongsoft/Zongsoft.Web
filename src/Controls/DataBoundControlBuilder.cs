@@ -63,10 +63,20 @@ namespace Zongsoft.Web.Controls
 
 				if(property != null && property.IsDefined(typeof(BindableAttribute), true))
 				{
-					var bindableAttribute = Attribute.GetCustomAttribute(property, typeof(BindableAttribute), true);
+					var attribute = Attribute.GetCustomAttribute(property, typeof(PropertyMetadataAttribute), true);
 
-					if(bindableAttribute != null && ((BindableAttribute)bindableAttribute).Bindable)
-						attributeName = "$" + attributeName;
+					if(attribute != null)
+					{
+						if(((PropertyMetadataAttribute)attribute).Bindable)
+							attributeName = "$" + attributeName;
+					}
+					else
+					{
+						attribute = Attribute.GetCustomAttribute(property, typeof(BindableAttribute), true);
+
+						if(attribute != null && ((BindableAttribute)attribute).Bindable)
+							attributeName = "$" + attributeName;
+					}
 				}
 
 				attributes[attributeName] = entry.Value;

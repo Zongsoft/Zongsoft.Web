@@ -36,7 +36,7 @@ namespace Zongsoft.Web.Controls
 	public class TextBox : InputBox
 	{
 		#region 构造函数
-		protected TextBox()
+		public TextBox()
 		{
 			this.InputType = InputBoxType.Text;
 		}

@@ -73,7 +73,7 @@ namespace Zongsoft.Web.Controls
 					value = value.Trim();
 
 					if(value.StartsWith(":"))
-						value = (this.CssClass + " " + value.Trim(':')).Trim();
+						value = (this.CssClass + " " + value.Trim(':', ' ', '\t')).Trim();
 				}
 
 				this.SetPropertyValue(() => this.CssClass, value);
@@ -174,8 +174,29 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
-		#region 虚拟方法
-		protected virtual void RenderAttributes(HtmlTextWriter writer)
+		#region 生成方法
+		protected override void Render(HtmlTextWriter writer)
+		{
+			this.RenderBeginTag(writer);
+			this.RenderContent(writer);
+			this.RenderEndTag(writer);
+		}
+
+		protected virtual void RenderBeginTag(HtmlTextWriter writer)
+		{
+			this.AddAttributes(writer);
+		}
+
+		protected virtual void RenderEndTag(HtmlTextWriter writer)
+		{
+		}
+
+		protected virtual void RenderContent(HtmlTextWriter writer)
+		{
+			this.RenderChildren(writer);
+		}
+
+		protected virtual void AddAttributes(HtmlTextWriter writer)
 		{
 			if(!string.IsNullOrWhiteSpace(this.ID))
 				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
@@ -183,11 +204,11 @@ namespace Zongsoft.Web.Controls
 			foreach(var property in _properties.Values)
 			{
 				if(property.Renderable)
-					this.RenderAttribute(writer, property);
+					this.AddAttribute(writer, property);
 			}
 		}
 
-		protected virtual void RenderAttribute(HtmlTextWriter writer, PropertyMetadata property)
+		protected virtual void AddAttribute(HtmlTextWriter writer, PropertyMetadata property)
 		{
 			var propertyRender = property.PropertyRender;
 
@@ -200,13 +221,16 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
-		#region 重写方法
+		#region 初始方法
 		protected override void OnInit(EventArgs e)
 		{
 			PropertyMetadata visible;
 
 			if(_properties.TryGetValue("Visible", out visible))
+			{
 				this.Visible = (bool)BindingUtility.GetBindingValue(visible.ValueString, this.GetBindingSource(), typeof(bool));
+				_properties.Remove("Visible");
+			}
 
 			//调用基类同名方法
 			base.OnInit(e);
@@ -234,19 +258,14 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
-		#region 私有方法
-		private object GetBindingSource()
+		#region 保护方法
+		protected object GetBindingSource()
 		{
-			if(this.DataItemContainer != null)
-				return this.DataItemContainer;
-
-			//注意：以下判断是专为MVC中的局部视图(即用户控件)发现的问题而特别处理。
-			if(this.TemplateControl is System.Web.Mvc.ViewUserControl)
-				return this.TemplateControl;
-
-			return this.Page;
+			return BindingUtility.GetBindingSource(this);
 		}
+		#endregion
 
+		#region 私有方法
 		private PropertyMetadata CreatePropertyMetadata(string propertyName, string valueString)
 		{
 			if(string.IsNullOrWhiteSpace(propertyName))

@@ -122,7 +122,7 @@ namespace Zongsoft.Web.Controls
 		private void RenderFlowLayout(HtmlTextWriter writer, IList<Control> controls)
 		{
 			//生成其他自定义属性
-			this.RenderAttributes(writer);
+			this.AddAttributes(writer);
 
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layoutPanel layout-flow");
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
@@ -150,7 +150,7 @@ namespace Zongsoft.Web.Controls
 		private void RenderTableLayout(HtmlTextWriter writer, IList<Control> controls)
 		{
 			//生成其他自定义属性
-			this.RenderAttributes(writer);
+			this.AddAttributes(writer);
 
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layoutPanel layout-table");
 			writer.RenderBeginTag(HtmlTextWriterTag.Table);

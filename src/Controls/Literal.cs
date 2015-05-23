@@ -84,27 +84,36 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成控件
-		protected override void Render(HtmlTextWriter writer)
+		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
 			if(!string.IsNullOrWhiteSpace(this.TagName))
 			{
-				this.RenderAttributes(writer);
+				//添加所有特性到当前标签的特性集
+				this.AddAttributes(writer);
+
+				//生成当前标签元素
 				writer.RenderBeginTag(this.TagName.Trim().ToLowerInvariant());
 			}
+		}
 
-			if(this.TextEncoded)
-				writer.WriteEncodedText(this.Text);
-			else
-				writer.Write(this.Text);
-
-			//确认生成了所有的子控件
-			this.EnsureChildControls();
-
-			//绘制所有子控件
-			this.RenderChildren(writer);
-
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
 			if(!string.IsNullOrWhiteSpace(this.TagName))
 				writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
+			if(!string.IsNullOrWhiteSpace(this.Text))
+			{
+				if(this.TextEncoded)
+					writer.WriteEncodedText(this.Text);
+				else
+					writer.Write(this.Text);
+			}
+
+			//生成所有子控件
+			this.RenderChildren(writer);
 		}
 		#endregion
 	}

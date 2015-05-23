@@ -38,41 +38,8 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public Editor()
 		{
+			this.TagName = "textarea";
 			this.CssClass = ":editor";
-		}
-		#endregion
-
-		#region 生成控件
-		protected override void Render(HtmlTextWriter writer)
-		{
-			if(!string.IsNullOrWhiteSpace(this.Label))
-			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
-				writer.RenderBeginTag(HtmlTextWriterTag.Div);
-
-				if(!string.IsNullOrWhiteSpace(this.ID))
-					writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
-
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field-label");
-				writer.RenderBeginTag(HtmlTextWriterTag.Label);
-				writer.WriteEncodedText(this.Label);
-				writer.RenderEndTag();
-			}
-
-			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
-				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
-
-			//生成其他属性
-			this.RenderAttributes(writer);
-
-			writer.RenderBeginTag(HtmlTextWriterTag.Textarea);
-			writer.RenderEndTag();
-
-			if(!string.IsNullOrWhiteSpace(this.Label))
-				writer.RenderEndTag();
-
-			//调用基类同名方法
-			base.Render(writer);
 		}
 		#endregion
 	}

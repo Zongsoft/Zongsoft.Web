@@ -151,7 +151,7 @@ namespace Zongsoft.Web.Controls
 				writer.AddAttribute(HtmlTextWriterAttribute.Height, this.Height.ToString());
 
 			//生成其他属性
-			this.RenderAttributes(writer);
+			this.AddAttributes(writer);
 
 			//生成表格标记(开始)
 			writer.RenderBeginTag(HtmlTextWriterTag.Table);

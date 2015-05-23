@@ -85,7 +85,7 @@ namespace Zongsoft.Web.Controls
 		protected override void Render(HtmlTextWriter writer)
 		{
 			//生成所有属性
-			this.RenderAttributes(writer);
+			this.AddAttributes(writer);
 
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
 			writer.WriteEncodedText(this.Text);

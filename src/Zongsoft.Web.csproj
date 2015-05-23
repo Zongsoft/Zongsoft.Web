@@ -88,7 +88,6 @@
     <Compile Include="Controls\ComboBoxItemCollection.cs" />
     <Compile Include="Controls\ComboBoxRenderMode.cs" />
     <Compile Include="Controls\CommandColumn.cs" />
-    <Compile Include="Controls\ControlExtension.cs" />
     <Compile Include="Controls\DataBoundControlBuilder.cs" />
     <Compile Include="Controls\DataBoundControl.cs" />
     <Compile Include="Controls\Editor.cs" />
@@ -193,7 +192,11 @@
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Link>README.md</Link>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

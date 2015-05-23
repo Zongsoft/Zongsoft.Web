@@ -34,12 +34,12 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class InputBox : DataBoundControl
+	public class InputBox : Literal
 	{
 		#region 构造函数
 		public InputBox()
 		{
-			this.InputType = InputBoxType.Text;
+			this.TagName = "input";
 		}
 		#endregion
 
@@ -171,17 +171,11 @@ namespace Zongsoft.Web.Controls
 			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
 
-			//生成其他属性
-			this.RenderAttributes(writer);
-
-			writer.RenderBeginTag(HtmlTextWriterTag.Input);
-			writer.RenderEndTag();
+			//调用基类同名方法
+			base.Render(writer);
 
 			if(!string.IsNullOrWhiteSpace(this.Label))
 				writer.RenderEndTag();
-
-			//调用基类同名方法
-			base.Render(writer);
 		}
 		#endregion
 	}

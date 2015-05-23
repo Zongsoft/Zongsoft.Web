@@ -63,7 +63,7 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void Render(HtmlTextWriter writer)
 		{
-			this.RenderAttributes(writer);
+			this.AddAttributes(writer);
 
 			writer.AddAttribute(HtmlTextWriterAttribute.Style, "display:none");
 

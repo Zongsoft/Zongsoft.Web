@@ -127,7 +127,7 @@ namespace Zongsoft.Web.Controls
 			{
 				if(_flags[EVALUATE_VALUE])
 				{
-					_value = BindingUtility.GetBindingValue(_valueString, this.GetBindingSource(), this.PropertyType);
+					_value = BindingUtility.GetBindingValue(_valueString, BindingUtility.GetBindingSource(_control), this.PropertyType);
 					_flags[EVALUATE_VALUE] = false;
 				}
 
@@ -186,7 +186,7 @@ namespace Zongsoft.Web.Controls
 			{
 				if(_flags[EVALUATE_ATTRIBUTEVALUE])
 				{
-					_attributeValue = BindingUtility.FormatBindingValue(_valueString, this.GetBindingSource(), (v, format) => BindingUtility.FormatValue(v, format, null));
+					_attributeValue = BindingUtility.FormatBindingValue(_valueString, BindingUtility.GetBindingSource(_control), (v, format) => BindingUtility.FormatValue(v, format, null));
 					_flags[EVALUATE_ATTRIBUTEVALUE] = false;
 				}
 
@@ -241,20 +241,6 @@ namespace Zongsoft.Web.Controls
 }}";
 
 			return string.Format(FORMAT, this.Name, this.PropertyType, this.Value, this.ValueString, this.AttributeName, this.AttributeValue, this.Bindable, this.Renderable, this.PropertyRender);
-		}
-		#endregion
-
-		#region 私有方法
-		private object GetBindingSource()
-		{
-			if(_control.DataItemContainer != null)
-				return _control.DataItemContainer;
-
-			//注意：以下判断是专为MVC中的局部视图(即用户控件)发现的问题而特别处理。
-			if(_control.TemplateControl is System.Web.Mvc.ViewUserControl)
-				return _control.TemplateControl;
-
-			return _control.Page;
 		}
 		#endregion
 	}

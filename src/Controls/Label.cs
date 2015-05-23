@@ -107,7 +107,7 @@ namespace Zongsoft.Web.Controls
 
 			if(tag.HasValue)
 			{
-				this.RenderAttributes(writer);
+				this.AddAttributes(writer);
 				writer.RenderBeginTag(tag.Value);
 			}
 

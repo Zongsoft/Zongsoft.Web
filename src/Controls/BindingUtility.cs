@@ -149,6 +149,21 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 内部方法
+		internal static object GetBindingSource(System.Web.UI.Control control)
+		{
+			if(control == null)
+				return null;
+
+			if(control.DataItemContainer != null)
+				return control.DataItemContainer;
+
+			//注意：以下判断是专为MVC中的局部视图(即用户控件)发现的问题而特别处理。
+			if(control.TemplateControl is System.Web.Mvc.ViewUserControl)
+				return control.TemplateControl;
+
+			return control.Page;
+		}
+
 		internal static string FormatValue(object value, string format, IFormatProvider provider)
 		{
 			if(value == null)
