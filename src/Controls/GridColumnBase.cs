@@ -219,7 +219,10 @@ namespace Zongsoft.Web.Controls
 
 				writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
 				writer.AddAttribute(HtmlTextWriterAttribute.Value, BindingUtility.FormatBindingValue(this.Value, dataItem, true));
-				writer.AddAttribute(HtmlTextWriterAttribute.Title, BindingUtility.FormatBindingValue(this.ToolTip, dataItem, true));
+
+				if(!string.IsNullOrWhiteSpace(this.ToolTip))
+					writer.AddAttribute(HtmlTextWriterAttribute.Title, BindingUtility.FormatBindingValue(this.ToolTip, dataItem, true));
+
 				writer.RenderBeginTag(HtmlTextWriterTag.Input);
 				writer.RenderEndTag();
 			}

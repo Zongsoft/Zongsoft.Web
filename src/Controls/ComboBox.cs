@@ -49,11 +49,31 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public ComboBox()
 		{
+			this.CssClass = "select";
 			_items = new ComboBoxItemCollection();
 		}
 		#endregion
 
 		#region 公共属性
+		[Bindable(true)]
+		public string Name
+		{
+			get
+			{
+				var result = this.GetPropertyValue(() => this.Name);
+
+				if(string.IsNullOrWhiteSpace(result))
+					return this.ID;
+
+				return result;
+			}
+			set
+			{
+				if(!string.IsNullOrWhiteSpace(value))
+					this.SetPropertyValue(() => this.Name, value);
+			}
+		}
+
 		[NotifyParentProperty(true)]
 		[PersistenceMode(PersistenceMode.InnerProperty)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
@@ -142,6 +162,9 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[MergableProperty(false)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		public ComboBoxItemCollection Items
 		{
 			get
@@ -152,24 +175,184 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成控件
-		protected override void Render(HtmlTextWriter writer)
-		{
-			switch(this.RenderMode)
-			{
-				case ComboBoxRenderMode.Classic:
-					this.RenderClassic(writer);
-					break;
-				case ComboBoxRenderMode.Custom:
-					this.RenderCustom(writer);
-					break;
-			}
+		//protected override void Render(HtmlTextWriter writer)
+		//{
+		//	switch(this.RenderMode)
+		//	{
+		//		case ComboBoxRenderMode.Classic:
+		//			this.RenderClassic(writer);
+		//			break;
+		//		case ComboBoxRenderMode.Custom:
+		//			this.RenderCustom(writer);
+		//			break;
+		//	}
 
-			//调用基类同名方法
-			base.Render(writer);
+		//	//调用基类同名方法
+		//	base.Render(writer);
+		//}
+
+		protected override void RenderBeginTag(HtmlTextWriter writer)
+		{
+			if(this.RenderMode == ComboBoxRenderMode.Classic)
+			{
+				this.AddAttributes(writer);
+
+				//生成自动提交的脚本事件代码
+				if(this.AutoSubmit)
+					writer.AddAttribute(HtmlTextWriterAttribute.Onchange, @"javascript:var current = this.parentNode;while(current != null && current.tagName.toLowerCase() != 'form'){current = current.parentNode;}if(current != null && current.tagName.toLowerCase() == 'form')current.submit();", false);
+
+				//生成控件标记(开始)
+				writer.RenderBeginTag(HtmlTextWriterTag.Select);
+			}
+			else
+			{
+				this.AddAttributes(writer, "ID", "Name");
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+
+				this.AddAttributes(writer, "CssClass");
+
+				if(this.AutoSubmit)
+					writer.AddAttribute(HtmlTextWriterAttribute.Onchange, @"javascript:var current = this.parentNode;while(current != null && current.tagName.toLowerCase() != 'form'){current = current.parentNode;}if(current != null && current.tagName.toLowerCase() == 'form')current.submit();", false);
+
+				writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
+				writer.RenderBeginTag(HtmlTextWriterTag.Input);
+				writer.RenderEndTag();
+
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "select select-text");
+				writer.RenderBeginTag(HtmlTextWriterTag.Span);
+				writer.RenderEndTag();
+
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "select select-icon icon icon-dropdown");
+				writer.RenderBeginTag(HtmlTextWriterTag.I);
+				writer.RenderEndTag();
+
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "select select-list");
+				writer.RenderBeginTag(HtmlTextWriterTag.Dl);
+			}
+		}
+
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
+
+			if(this.RenderMode == ComboBoxRenderMode.Custom)
+				writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
+			int index = 0;
+
+			index = this.RenderItems(writer, index);
+			this.RenderDataItems(writer, index);
 		}
 		#endregion
 
 		#region 私有方法
+		private int RenderItems(HtmlTextWriter writer, int index)
+		{
+			foreach(var item in _items)
+			{
+				if(this.RenderMode == ComboBoxRenderMode.Classic)
+					writer.AddAttribute(HtmlTextWriterAttribute.Value, item.Value);
+				else
+					writer.AddAttribute("data-value", item.Value);
+
+				if(item.Disabled)
+					writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "disabled");
+
+				if(this.SelectedIndex < 0)
+				{
+					if(string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase))
+					{
+						if(this.RenderMode == ComboBoxRenderMode.Classic)
+							writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
+						else
+							writer.AddAttribute("data-selected", "selected");
+					}
+				}
+				else
+				{
+					if(this.SelectedIndex == index)
+					{
+						if(this.RenderMode == ComboBoxRenderMode.Classic)
+							writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
+						else
+							writer.AddAttribute("data-selected", "selected");
+					}
+				}
+
+				if(this.RenderMode == ComboBoxRenderMode.Classic)
+					writer.RenderBeginTag(HtmlTextWriterTag.Option);
+				else
+					writer.RenderBeginTag(HtmlTextWriterTag.Dt);
+
+				writer.WriteEncodedText(item.Text);
+				writer.RenderEndTag();
+
+				index++;
+			}
+
+			return index;
+		}
+
+		private int RenderDataItems(HtmlTextWriter writer, int index)
+		{
+			if(this.DataSource != null)
+			{
+				IEnumerable dataSource = this.DataSource as IEnumerable;
+
+				if(dataSource != null)
+				{
+					foreach(object dataItem in dataSource)
+					{
+						string value = BindingUtility.FormatBindingValue(_binding != null ? _binding.ValueMember : string.Empty, dataItem, true);
+
+						if(string.IsNullOrEmpty(value))
+							continue;
+
+						if(this.RenderMode == ComboBoxRenderMode.Classic)
+							writer.AddAttribute(HtmlTextWriterAttribute.Value, value);
+						else
+							writer.AddAttribute("data-value", value);
+
+						if(this.SelectedIndex < 0)
+						{
+							if(string.Equals(this.SelectedValue, value, StringComparison.OrdinalIgnoreCase))
+							{
+								if(this.RenderMode == ComboBoxRenderMode.Classic)
+									writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
+								else
+									writer.AddAttribute("data-selected", "selected");
+							}
+						}
+						else
+						{
+							if(this.SelectedIndex == index)
+							{
+								if(this.RenderMode == ComboBoxRenderMode.Classic)
+									writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
+								else
+									writer.AddAttribute("data-selected", "selected");
+							}
+						}
+
+						if(this.RenderMode == ComboBoxRenderMode.Classic)
+							writer.RenderBeginTag(HtmlTextWriterTag.Option);
+						else
+							writer.RenderBeginTag(HtmlTextWriterTag.Dt);
+
+						writer.WriteEncodedText(BindingUtility.FormatBindingValue(_binding != null ? _binding.TextMember : string.Empty, dataItem, true));
+						writer.RenderEndTag();
+
+						index++;
+					}
+				}
+			}
+
+			return index;
+		}
+
 		private void RenderCustom(HtmlTextWriter writer)
 		{
 			if(string.IsNullOrWhiteSpace(this.ID))

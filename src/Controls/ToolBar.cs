@@ -62,6 +62,7 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public ToolBar()
 		{
+			this.CssClass = "toolbar";
 			_items = new ToolBarItemCollection(this);
 		}
 		#endregion
@@ -94,17 +95,19 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
-		protected override void Render(HtmlTextWriter writer)
+		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
-			if(!string.IsNullOrWhiteSpace(this.ID))
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-
-			if(!string.IsNullOrWhiteSpace(this.Title))
-				writer.AddAttribute(HtmlTextWriterAttribute.Title, this.Title);
-
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, string.IsNullOrWhiteSpace(this.CssClass) ? "toolbar" : this.CssClass);
+			this.AddAttributes(writer);
 			writer.RenderBeginTag(HtmlTextWriterTag.Dl);
+		}
 
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
 			foreach(ToolBarItem item in _items)
 			{
 				if(!item.Visible)
@@ -124,11 +127,6 @@ namespace Zongsoft.Web.Controls
 					writer.RenderEndTag();
 				}
 			}
-
-			writer.RenderEndTag();
-
-			//调用基类同名方法
-			base.Render(writer);
 		}
 		#endregion
 
@@ -153,11 +151,12 @@ namespace Zongsoft.Web.Controls
 
 			if(!string.IsNullOrWhiteSpace(item.Icon))
 			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, item.Icon.Trim() + " icon");
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "icon icon-" + item.Icon.Trim());
 				writer.RenderBeginTag(HtmlTextWriterTag.I);
 				writer.RenderEndTag();
 			}
 
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "toolbar-button");
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
 
 			if(!string.IsNullOrEmpty(item.Text))

@@ -38,7 +38,7 @@ namespace Zongsoft.Web.Controls
 		#region 公共属性
 		[Bindable(true)]
 		[DefaultValue("")]
-		[PropertyMetadata(PropertyRender = "UrlPropertyRender.Default")]
+		[PropertyMetadata("src", PropertyRender = "UrlPropertyRender.Default", Renderable = false)]
 		public string ImageUrl
 		{
 			get
@@ -68,6 +68,7 @@ namespace Zongsoft.Web.Controls
 
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata("alt")]
 		public string Title
 		{
 			get
@@ -106,16 +107,9 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成控件
-		protected override void Render(HtmlTextWriter writer)
+		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
-			if(!string.IsNullOrWhiteSpace(this.NavigateUrl))
-			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Href, this.NavigateUrl);
-				writer.RenderBeginTag(HtmlTextWriterTag.A);
-			}
-
-			writer.AddAttribute(HtmlTextWriterAttribute.Src, this.ImageUrl);
-			writer.AddAttribute(HtmlTextWriterAttribute.Alt, this.Title);
+			this.AddAttributes(writer);
 
 			if(!Unit.IsEmpty(this.Width))
 				writer.AddAttribute(HtmlTextWriterAttribute.Width, this.Width.ToString());
@@ -124,13 +118,31 @@ namespace Zongsoft.Web.Controls
 				writer.AddAttribute(HtmlTextWriterAttribute.Height, this.Height.ToString());
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Img);
-			writer.RenderEndTag();
+		}
 
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
+			base.RenderContent(writer);
+		}
+
+		protected override void Render(HtmlTextWriter writer)
+		{
 			if(!string.IsNullOrWhiteSpace(this.NavigateUrl))
-				writer.RenderEndTag();
+			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Href, this.NavigateUrl);
+				writer.RenderBeginTag(HtmlTextWriterTag.A);
+			}
 
 			//调用基类同名方法
 			base.Render(writer);
+
+			if(!string.IsNullOrWhiteSpace(this.NavigateUrl))
+				writer.RenderEndTag();
 		}
 		#endregion
 	}

@@ -195,14 +195,14 @@ namespace Zongsoft.Web.Controls
 			this.RenderChildren(writer);
 		}
 
-		protected virtual void AddAttributes(HtmlTextWriter writer)
+		protected virtual void AddAttributes(HtmlTextWriter writer, params string[] ignoreProperties)
 		{
-			if(!string.IsNullOrWhiteSpace(this.ID))
+			if(!string.IsNullOrWhiteSpace(this.ID) && !Zongsoft.Common.StringExtension.In(this.ID, ignoreProperties, StringComparison.OrdinalIgnoreCase))
 				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
 
 			foreach(var property in _properties.Values)
 			{
-				if(property.Renderable)
+				if(property.Renderable && !Zongsoft.Common.StringExtension.In(property.Name, ignoreProperties, StringComparison.OrdinalIgnoreCase))
 					this.AddAttribute(writer, property);
 			}
 		}

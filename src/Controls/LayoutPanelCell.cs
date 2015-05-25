@@ -41,6 +41,14 @@ namespace Zongsoft.Web.Controls
 		private int _rowSpan;
 		#endregion
 
+		#region 构造函数
+		LayoutPanelCell()
+		{
+			_colSpan = 1;
+			_rowSpan = 1;
+		}
+		#endregion
+
 		#region 公共属性
 		public int ColSpan
 		{
