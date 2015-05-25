@@ -184,7 +184,6 @@ namespace Zongsoft.Web.Controls
 
 		protected virtual void RenderBeginTag(HtmlTextWriter writer)
 		{
-			this.AddAttributes(writer);
 		}
 
 		protected virtual void RenderEndTag(HtmlTextWriter writer)

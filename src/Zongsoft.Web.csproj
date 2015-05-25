@@ -104,7 +104,6 @@
     <Compile Include="Controls\InputBoxType.cs" />
     <Compile Include="Controls\IPropertyRender.cs" />
     <Compile Include="Controls\Label.cs" />
-    <Compile Include="Controls\LabelRenderMode.cs" />
     <Compile Include="Controls\Chart.cs" />
     <Compile Include="Controls\ListView.cs" />
     <Compile Include="Controls\ListViewItem.cs" />
@@ -128,6 +127,7 @@
     <Compile Include="Controls\LayoutMode.cs" />
     <Compile Include="Controls\SelectionMode.cs" />
     <Compile Include="Controls\TextBox.cs" />
+    <Compile Include="Controls\TextBoxBase.cs" />
     <Compile Include="Controls\ToolBar.cs" />
     <Compile Include="Controls\ToolBarItem.cs" />
     <Compile Include="Controls\ToolBarItemCollection.cs" />

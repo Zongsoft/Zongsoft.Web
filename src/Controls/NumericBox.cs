@@ -31,7 +31,7 @@ using System.Text;
 
 namespace Zongsoft.Web.Controls
 {
-	public class NumericBox : TextBox
+	public class NumericBox : TextBoxBase
 	{
 		#region 构造函数
 		public NumericBox()

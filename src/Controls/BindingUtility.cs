@@ -73,20 +73,23 @@ namespace Zongsoft.Web.Controls
 
 			BindingDescription[] bindings = GetBindings(bindingText);
 
+			if(bindings.Length == 0)
+				return Zongsoft.Common.Convert.ConvertValue(bindingText, valueType);
+
 			if(bindings.Length > 1)
 				throw new ArgumentException();
 
 			object memberValue = null;
 
-			if(bindings.Length == 0)
-			{
-				memberValue = GetMemberValue(bindingSource, bindingText, false);
+			//if(bindings.Length == 0)
+			//{
+			//	memberValue = GetMemberValue(bindingSource, bindingText, false);
 
-				if(memberValue == null)
-					memberValue = bindingText;
+			//	if(memberValue == null)
+			//		memberValue = bindingText;
 
-				return Zongsoft.Common.Convert.ConvertValue(memberValue, valueType);
-			}
+			//	return Zongsoft.Common.Convert.ConvertValue(memberValue, valueType);
+			//}
 
 			memberValue = GetMemberValue(bindingSource, bindings[0].BindingPath, true);
 
@@ -135,15 +138,20 @@ namespace Zongsoft.Web.Controls
 			}
 			else
 			{
-				object value = GetMemberValue(bindingSource, bindingText, false);
-
-				if(value == null)
-					return bindingText;
-
 				if(format == null)
-					return value.ToString();
+					return bindingText;
 				else
-					return format(value, string.Empty);
+					return format(bindingText, string.Empty);
+
+				//object value = GetMemberValue(bindingSource, bindingText, false);
+
+				//if(value == null)
+				//	return bindingText;
+
+				//if(format == null)
+				//	return value.ToString();
+				//else
+				//	return format(value, string.Empty);
 			}
 		}
 		#endregion

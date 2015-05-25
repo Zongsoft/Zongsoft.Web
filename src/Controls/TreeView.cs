@@ -206,6 +206,9 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void Render(HtmlTextWriter writer)
 		{
+			if(_nodes.Count < 1)
+				return;
+
 			//生成数据源对应的子树
 			this.GenerateNodes();
 

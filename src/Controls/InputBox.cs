@@ -88,34 +88,34 @@ namespace Zongsoft.Web.Controls
 				switch(value)
 				{
 					case InputBoxType.Button:
-						this.CssClass = "ui-button";
+						this.CssClass = "btn";
 						break;
 					case InputBoxType.Reset:
-						this.CssClass = "ui-button reset";
+						this.CssClass = "btn btn-reset";
 						break;
 					case InputBoxType.Submit:
-						this.CssClass = "ui-button submit";
+						this.CssClass = "btn btn-primary";
 						break;
 					case InputBoxType.File:
-						this.CssClass = "ui-file";
+						this.CssClass = "file";
 						break;
 					case InputBoxType.Image:
-						this.CssClass = "ui-image";
+						this.CssClass = "image";
 						break;
 					case InputBoxType.CheckBox:
-						this.CssClass = "ui-checkbox";
+						this.CssClass = "checkbox";
 						break;
 					case InputBoxType.Radio:
-						this.CssClass = "ui-radio";
+						this.CssClass = "radio";
 						break;
 					case InputBoxType.Text:
-						this.CssClass = "ui-input";
+						this.CssClass = "input";
 						break;
 					case InputBoxType.Password:
-						this.CssClass = "ui-input password";
+						this.CssClass = "input input-password";
 						break;
 					default:
-						this.CssClass = "ui-input " + value.ToString().ToLowerInvariant();
+						this.CssClass = "input " + value.ToString().ToLowerInvariant();
 						break;
 				}
 			}
@@ -154,18 +154,19 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void Render(HtmlTextWriter writer)
 		{
+			//生成最外层的Div布局元素，即<div class="field">
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
+			writer.RenderBeginTag(HtmlTextWriterTag.Div);
+
+			//生成Label标签
 			if(!string.IsNullOrWhiteSpace(this.Label))
 			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
-				writer.RenderBeginTag(HtmlTextWriterTag.Div);
-
 				if(!string.IsNullOrWhiteSpace(this.ID))
 					writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
 
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "ui-label");
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "label");
 				writer.RenderBeginTag(HtmlTextWriterTag.Label);
 				writer.WriteEncodedText(this.Label);
-				writer.RenderEndTag();
 			}
 
 			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
@@ -174,8 +175,12 @@ namespace Zongsoft.Web.Controls
 			//调用基类同名方法
 			base.Render(writer);
 
+			//关闭Label标签
 			if(!string.IsNullOrWhiteSpace(this.Label))
 				writer.RenderEndTag();
+
+			//关闭最外层的Div布局元素，即生成</div>
+			writer.RenderEndTag();
 		}
 		#endregion
 	}

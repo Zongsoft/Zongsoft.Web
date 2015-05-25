@@ -33,13 +33,58 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class Editor : TextBoxBase
+	public class TextBoxBase : InputBox
 	{
 		#region 构造函数
-		public Editor()
+		public TextBoxBase()
 		{
-			this.TagName = "textarea";
-			this.CssClass = ":editor";
+			this.InputType = InputBoxType.Text;
+		}
+		#endregion
+
+		#region 公共属性
+		[Bindable(true)]
+		[DefaultValue(false)]
+		[PropertyMetadata(PropertyRender = "BooleanPropertyRender.True")]
+		public bool ReadOnly
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.ReadOnly);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.ReadOnly, value);
+			}
+		}
+
+		[Bindable(true)]
+		[DefaultValue(-1)]
+		public int MaxLength
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.MaxLength);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.MaxLength, value);
+			}
+		}
+
+		public string Text
+		{
+			get
+			{
+				return base.Value;
+			}
+			set
+			{
+				base.Value = value;
+
+				//必须手动更新对应的真实属性元数据的原始文本值
+				this.GetProperty("Value").ValueString = value;
+			}
 		}
 		#endregion
 
@@ -53,8 +98,18 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				if(value != InputBoxType.Text)
-					throw new ArgumentOutOfRangeException();
+				if(value != InputBoxType.Text && value != InputBoxType.Password)
+				{
+					var field = typeof(InputBoxType).GetField(value.ToString());
+
+					if(field != null)
+					{
+						var attribute = Attribute.GetCustomAttribute(field, typeof(CategoryAttribute));
+
+						if(attribute == null || ((CategoryAttribute)attribute).Category != "Text")
+							throw new ArgumentOutOfRangeException();
+					}
+				}
 
 				base.InputType = value;
 			}

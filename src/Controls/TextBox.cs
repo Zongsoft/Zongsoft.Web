@@ -33,85 +33,35 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class TextBox : InputBox
+	public class TextBox : TextBoxBase
 	{
-		#region 构造函数
-		public TextBox()
-		{
-			this.InputType = InputBoxType.Text;
-		}
-		#endregion
-
 		#region 公共属性
 		[Bindable(true)]
-		[DefaultValue(false)]
-		[PropertyMetadata(PropertyRender = "BooleanPropertyRender.True")]
-		public bool ReadOnly
+		[PropertyMetadata("data-icon")]
+		public string Icon
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.ReadOnly);
+				return this.GetPropertyValue(() => this.Icon);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.ReadOnly, value);
-			}
-		}
-
-		[Bindable(true)]
-		[DefaultValue(-1)]
-		public int MaxLength
-		{
-			get
-			{
-				return this.GetPropertyValue(() => this.MaxLength);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.MaxLength, value);
-			}
-		}
-
-		public string Text
-		{
-			get
-			{
-				return base.Value;
-			}
-			set
-			{
-				base.Value = value;
-
-				//必须手动更新对应的真实属性元数据的原始文本值
-				this.GetProperty("Value").ValueString = value;
+				this.SetPropertyValue(() => this.Icon, value);
 			}
 		}
 		#endregion
 
-		#region 重写属性
-		[DefaultValue(InputBoxType.Text)]
-		public override InputBoxType InputType
+		#region 重写方法
+		protected override void RenderEndTag(HtmlTextWriter writer)
 		{
-			get
+			//调用基类同名方法
+			base.RenderEndTag(writer);
+
+			if(!string.IsNullOrWhiteSpace(this.Icon))
 			{
-				return base.InputType;
-			}
-			set
-			{
-				if(value != InputBoxType.Text && value != InputBoxType.Password)
-				{
-					var field = typeof(InputBoxType).GetField(value.ToString());
-
-					if(field != null)
-					{
-						var attribute = Attribute.GetCustomAttribute(field, typeof(CategoryAttribute));
-
-						if(attribute == null || ((CategoryAttribute)attribute).Category != "Text")
-							throw new ArgumentOutOfRangeException();
-					}
-				}
-
-				base.InputType = value;
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "icon icon-" + this.Icon.Trim().ToLowerInvariant());
+				writer.RenderBeginTag(HtmlTextWriterTag.I);
+				writer.RenderEndTag();
 			}
 		}
 		#endregion

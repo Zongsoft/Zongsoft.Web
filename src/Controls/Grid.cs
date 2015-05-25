@@ -40,12 +40,14 @@ namespace Zongsoft.Web.Controls
 	public class Grid : CompositeDataBoundControl
 	{
 		#region 成员变量
+		private ITemplate _emptyTemplate;
 		private GridColumnCollection _columns;
 		#endregion
 
 		#region 构造函数
 		public Grid()
 		{
+			this.CssClass = "table table-striped";
 			_columns = new GridColumnCollection();
 		}
 		#endregion
@@ -92,6 +94,21 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(ListView))]
+		public ITemplate EmptyTemplate
+		{
+			get
+			{
+				return _emptyTemplate;
+			}
+			set
+			{
+				_emptyTemplate = value;
+			}
+		}
+
 		public string DataKeys
 		{
 			get
@@ -130,32 +147,26 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成控件
-		protected override void Render(HtmlTextWriter writer)
+		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
-			if(!string.IsNullOrWhiteSpace(this.ID))
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID + "-wrapper");
+			//生成标准的属性集
+			this.AddAttributes(writer);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "grid");
-			writer.RenderBeginTag(HtmlTextWriterTag.Div);
-
-			if(!string.IsNullOrWhiteSpace(this.ID))
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-
+			//生成内置的表格特性
 			writer.AddAttribute(HtmlTextWriterAttribute.Border, "0");
 			writer.AddAttribute(HtmlTextWriterAttribute.Cellpadding, "0");
 			writer.AddAttribute(HtmlTextWriterAttribute.Cellspacing, "0");
 
-			if(this.Width.Value != 0)
-				writer.AddAttribute(HtmlTextWriterAttribute.Width, this.Width.ToString());
-			if(this.Height.Value != 0)
-				writer.AddAttribute(HtmlTextWriterAttribute.Height, this.Height.ToString());
-
-			//生成其他属性
-			this.AddAttributes(writer);
-
-			//生成表格标记(开始)
 			writer.RenderBeginTag(HtmlTextWriterTag.Table);
+		}
 
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
 			#region 表头部分
 			writer.RenderBeginTag(HtmlTextWriterTag.Thead);
 
@@ -211,7 +222,12 @@ namespace Zongsoft.Web.Controls
 			//生成表体标记(开始)
 			writer.RenderBeginTag(HtmlTextWriterTag.Tbody);
 
-			if(this.DataSource != null)
+			if(this.DataSource == null)
+			{
+				if(_emptyTemplate != null)
+					_emptyTemplate.InstantiateIn(this);
+			}
+			else
 			{
 				IEnumerable dataSource = this.DataSource as IEnumerable;
 
@@ -232,14 +248,6 @@ namespace Zongsoft.Web.Controls
 			//生成表体标记(结束)
 			writer.RenderEndTag();
 			#endregion
-
-			//生成表格标记(结束)
-			writer.RenderEndTag();
-			//生成表格包装结束标记</div>
-			writer.RenderEndTag();
-
-			//调用基类同名方法
-			base.Render(writer);
 		}
 		#endregion
 

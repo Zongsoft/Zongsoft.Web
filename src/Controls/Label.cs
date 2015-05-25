@@ -33,17 +33,19 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class Label : DataBoundControl
+	public class Label : Literal
 	{
 		#region 构造函数
 		public Label()
 		{
-			this.CssClass = "ui-label";
+			this.CssClass = "label";
+			this.TagName = "label";
 		}
 		#endregion
 
 		#region 公共属性
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string AssociatedControlId
 		{
 			get
@@ -55,69 +57,15 @@ namespace Zongsoft.Web.Controls
 				this.SetPropertyValue(() => this.AssociatedControlId, value);
 			}
 		}
-
-		[Bindable(true)]
-		[DefaultValue("")]
-		public string Text
-		{
-			get
-			{
-				return this.GetPropertyValue(() => this.Text);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.Text, value);
-			}
-		}
-
-		[DefaultValue(LabelRenderMode.Label)]
-		[PropertyMetadata(false)]
-		public LabelRenderMode RenderMode
-		{
-			get
-			{
-				return this.GetPropertyValue(() => this.RenderMode);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.RenderMode, value);
-			}
-		}
 		#endregion
 
 		#region 生成控件
-		protected override void Render(HtmlTextWriter writer)
+		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
-			HtmlTextWriterTag? tag = null;
+			if(!string.IsNullOrWhiteSpace(this.AssociatedControlId))
+				writer.AddAttribute(HtmlTextWriterAttribute.For, this.AssociatedControlId);
 
-			switch(this.RenderMode)
-			{
-				case LabelRenderMode.Label:
-					if(!string.IsNullOrWhiteSpace(this.AssociatedControlId))
-						writer.AddAttribute(HtmlTextWriterAttribute.For, this.AssociatedControlId);
-					tag = HtmlTextWriterTag.Label;
-					break;
-				case LabelRenderMode.Span:
-					tag = HtmlTextWriterTag.Span;
-					break;
-				case LabelRenderMode.Div:
-					tag = HtmlTextWriterTag.Div;
-					break;
-			}
-
-			if(tag.HasValue)
-			{
-				this.AddAttributes(writer);
-				writer.RenderBeginTag(tag.Value);
-			}
-
-			writer.WriteEncodedText(this.Text);
-
-			if(tag.HasValue)
-				writer.RenderEndTag();
-
-			//调用基类同名方法
-			base.Render(writer);
+			base.RenderBeginTag(writer);
 		}
 		#endregion
 	}
