@@ -33,27 +33,27 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public enum CommandType
+	public enum GridCommandType
 	{
 		Delete,
 		Edit,
 		Details
 	}
 
-	public class CommandColumn : GridColumnBase
+	public class GridCommandColumn : GridColumnBase
 	{
 		#region 成员变量
 		private bool _enabled;
 		private string _text;
 		private string _arguments;
-		private CommandType _commandType;
+		private GridCommandType _commandType;
 		#endregion
 
 		#region 构造函数
-		public CommandColumn()
+		public GridCommandColumn()
 		{
 			_enabled = true;
-			_commandType = Controls.CommandType.Details;
+			_commandType = Controls.GridCommandType.Details;
 
 			this.Attributes.Add("class", "grid-command");
 		}
@@ -98,7 +98,7 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
-		public CommandType CommandType
+		public GridCommandType CommandType
 		{
 			get
 			{
@@ -115,9 +115,9 @@ namespace Zongsoft.Web.Controls
 		protected override void OnRender(HtmlTextWriter writer, object dataItem)
 		{
 			writer.AddAttribute(HtmlTextWriterAttribute.Name, _commandType.ToString());
-			writer.AddAttribute(HtmlTextWriterAttribute.Href, BindingUtility.FormatBindingValue(_arguments, dataItem));
+			writer.AddAttribute(HtmlTextWriterAttribute.Href, BindingUtility.FormatBindingValue(_arguments, dataItem, true));
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
-			writer.WriteEncodedText(BindingUtility.FormatBindingValue(_text, dataItem));
+			writer.WriteEncodedText(BindingUtility.FormatBindingValue(_text, dataItem, true));
 			writer.RenderEndTag();
 
 			//调用基类同名方法

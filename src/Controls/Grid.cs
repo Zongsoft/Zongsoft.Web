@@ -37,7 +37,7 @@ using System.Web.UI;
 namespace Zongsoft.Web.Controls
 {
 	[ParseChildren(true, "Columns")]
-	public class Grid : CompositeDataBoundControl
+	public class Grid : CompositeDataBoundControl, INamingContainer
 	{
 		#region 成员变量
 		private ITemplate _emptyTemplate;
@@ -48,7 +48,7 @@ namespace Zongsoft.Web.Controls
 		public Grid()
 		{
 			this.CssClass = "table table-striped";
-			_columns = new GridColumnCollection();
+			_columns = new GridColumnCollection(this);
 		}
 		#endregion
 

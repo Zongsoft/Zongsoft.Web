@@ -110,7 +110,7 @@ namespace Zongsoft.Web.Controls
 			var property = this.GetProperty(name);
 
 			if(property != null)
-				return (T)property.Value;
+				return Zongsoft.Common.Convert.ConvertValue<T>(property.Value, (T)property.DefaultValue);
 
 			property = this.CreatePropertyMetadata(name, null, true);
 			_properties.Add(name.Trim(), property);

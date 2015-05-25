@@ -40,6 +40,11 @@ namespace Zongsoft.Web.Controls
 		{
 			this.InputType = InputBoxType.Text;
 		}
+
+		protected TextBoxBase(InputBoxType inputType)
+		{
+			this.InputType = inputType;
+		}
 		#endregion
 
 		#region 公共属性
@@ -106,7 +111,7 @@ namespace Zongsoft.Web.Controls
 					{
 						var attribute = Attribute.GetCustomAttribute(field, typeof(CategoryAttribute));
 
-						if(attribute == null || ((CategoryAttribute)attribute).Category != "Text")
+						if(attribute == null || ((CategoryAttribute)attribute).Category != "TextBox")
 							throw new ArgumentOutOfRangeException();
 					}
 				}

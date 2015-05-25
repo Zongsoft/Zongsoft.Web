@@ -41,6 +41,10 @@ namespace Zongsoft.Web.Controls
 		{
 			this.TagName = "input";
 		}
+
+		public InputBox(InputBoxType inputType)
+		{
+		}
 		#endregion
 
 		#region 公共属性

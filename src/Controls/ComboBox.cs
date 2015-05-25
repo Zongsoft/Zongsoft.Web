@@ -227,7 +227,7 @@ namespace Zongsoft.Web.Controls
 				{
 					foreach(object dataItem in dataSource)
 					{
-						string value = BindingUtility.FormatBindingValue(_binding.ValueMember, dataItem);
+						string value = BindingUtility.FormatBindingValue(_binding.ValueMember, dataItem, true);
 
 						if(string.IsNullOrEmpty(value))
 							continue;
@@ -236,7 +236,7 @@ namespace Zongsoft.Web.Controls
 						{
 							if(string.Equals(this.SelectedValue, value, StringComparison.OrdinalIgnoreCase))
 							{
-								selectedText = BindingUtility.FormatBindingValue(_binding.TextMember, dataItem);
+								selectedText = BindingUtility.FormatBindingValue(_binding.TextMember, dataItem, true);
 								selectedValue = value;
 							}
 						}
@@ -244,7 +244,7 @@ namespace Zongsoft.Web.Controls
 						{
 							if(this.SelectedIndex == index)
 							{
-								selectedText = BindingUtility.FormatBindingValue(_binding.TextMember, dataItem);
+								selectedText = BindingUtility.FormatBindingValue(_binding.TextMember, dataItem, true);
 								selectedValue = value;
 							}
 						}
@@ -252,7 +252,7 @@ namespace Zongsoft.Web.Controls
 						writer.AddAttribute("zs:value", value);
 
 						writer.RenderBeginTag(HtmlTextWriterTag.Li);
-						writer.WriteEncodedText(BindingUtility.FormatBindingValue(_binding.TextMember, dataItem));
+						writer.WriteEncodedText(BindingUtility.FormatBindingValue(_binding.TextMember, dataItem, true));
 						writer.RenderEndTag();
 
 						index++;
@@ -357,7 +357,7 @@ namespace Zongsoft.Web.Controls
 				{
 					foreach(object dataItem in dataSource)
 					{
-						string value = BindingUtility.FormatBindingValue(_binding != null ? _binding.ValueMember : string.Empty, dataItem);
+						string value = BindingUtility.FormatBindingValue(_binding != null ? _binding.ValueMember : string.Empty, dataItem, true);
 
 						if(string.IsNullOrEmpty(value))
 							continue;
@@ -376,7 +376,7 @@ namespace Zongsoft.Web.Controls
 						}
 
 						writer.RenderBeginTag(HtmlTextWriterTag.Option);
-						writer.WriteEncodedText(BindingUtility.FormatBindingValue(_binding != null ? _binding.TextMember : string.Empty, dataItem));
+						writer.WriteEncodedText(BindingUtility.FormatBindingValue(_binding != null ? _binding.TextMember : string.Empty, dataItem, true));
 						writer.RenderEndTag();
 
 						index++;

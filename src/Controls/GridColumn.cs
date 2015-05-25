@@ -123,9 +123,9 @@ namespace Zongsoft.Web.Controls
 		{
 			if(!string.IsNullOrWhiteSpace(_navigateUrl))
 			{
-				string navigateUrl = BindingUtility.FormatBindingValue(_navigateUrl, dataItem);
-				string navigateTitle = BindingUtility.FormatBindingValue(_navigateTitle, dataItem);
-				string navigateCssClass = BindingUtility.FormatBindingValue(_navigateCssClass, dataItem);
+				string navigateUrl = BindingUtility.FormatBindingValue(_navigateUrl, dataItem, true);
+				string navigateTitle = BindingUtility.FormatBindingValue(_navigateTitle, dataItem, true);
+				string navigateCssClass = BindingUtility.FormatBindingValue(_navigateCssClass, dataItem, true);
 
 				if(navigateUrl == null)
 					writer.AddAttribute(HtmlTextWriterAttribute.Href, Utility.EmptyLink);
@@ -143,12 +143,12 @@ namespace Zongsoft.Web.Controls
 
 			if(!string.IsNullOrWhiteSpace(_imageUrl))
 			{
-				string imageUrl = BindingUtility.FormatBindingValue(_imageUrl, dataItem);
+				string imageUrl = BindingUtility.FormatBindingValue(_imageUrl, dataItem, true);
 				if(!string.IsNullOrWhiteSpace(imageUrl))
 				{
 					writer.AddAttribute(HtmlTextWriterAttribute.Src, imageUrl);
 
-					string imageTitle = BindingUtility.FormatBindingValue(_imageTitle, dataItem);
+					string imageTitle = BindingUtility.FormatBindingValue(_imageTitle, dataItem, true);
 					if(!string.IsNullOrWhiteSpace(imageTitle))
 						writer.AddAttribute(HtmlTextWriterAttribute.Alt, imageTitle);
 
@@ -157,7 +157,7 @@ namespace Zongsoft.Web.Controls
 				}
 			}
 
-			string text = BindingUtility.FormatBindingValue(_text, dataItem);
+			string text = BindingUtility.FormatBindingValue(_text ?? this.Name, dataItem, true);
 			if(string.IsNullOrEmpty(text))
 				text = this.NullText;
 

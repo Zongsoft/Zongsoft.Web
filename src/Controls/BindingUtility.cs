@@ -61,35 +61,35 @@ namespace Zongsoft.Web.Controls
 			return bindings.ToArray();
 		}
 
-		public static object GetBindingValue(string bindingText, object bindingSource)
+		public static object GetBindingValue(string bindingText, object bindingSource, bool isResolvedText = false)
 		{
-			return GetBindingValue(bindingText, bindingSource, (Type)null);
+			return GetBindingValue(bindingText, bindingSource, (Type)null, isResolvedText);
 		}
 
-		public static object GetBindingValue(string bindingText, object bindingSource, Type valueType)
+		public static object GetBindingValue(string bindingText, object bindingSource, Type valueType, bool isResolvedText = false)
 		{
 			if(string.IsNullOrEmpty(bindingText))
 				return Zongsoft.Common.Convert.ConvertValue(bindingText, valueType);
 
 			BindingDescription[] bindings = GetBindings(bindingText);
 
-			if(bindings.Length == 0)
-				return Zongsoft.Common.Convert.ConvertValue(bindingText, valueType);
-
 			if(bindings.Length > 1)
 				throw new ArgumentException();
 
 			object memberValue = null;
 
-			//if(bindings.Length == 0)
-			//{
-			//	memberValue = GetMemberValue(bindingSource, bindingText, false);
+			if(bindings.Length == 0)
+			{
+				if(!isResolvedText)
+					return Zongsoft.Common.Convert.ConvertValue(bindingText, valueType);
 
-			//	if(memberValue == null)
-			//		memberValue = bindingText;
+				memberValue = GetMemberValue(bindingSource, bindingText, false);
 
-			//	return Zongsoft.Common.Convert.ConvertValue(memberValue, valueType);
-			//}
+				if(memberValue == null)
+					memberValue = bindingText;
+
+				return Zongsoft.Common.Convert.ConvertValue(memberValue, valueType);
+			}
 
 			memberValue = GetMemberValue(bindingSource, bindings[0].BindingPath, true);
 
@@ -102,17 +102,17 @@ namespace Zongsoft.Web.Controls
 			return memberValue;
 		}
 
-		public static string FormatBindingValue(string bindingText, object bindingSource)
+		public static string FormatBindingValue(string bindingText, object bindingSource, bool isResolvedText = false)
 		{
-			return FormatBindingValue(bindingText, bindingSource, (IFormatProvider)null);
+			return FormatBindingValue(bindingText, bindingSource, (IFormatProvider)null, isResolvedText);
 		}
 
-		public static string FormatBindingValue(string bindingText, object bindingSource, IFormatProvider provider)
+		public static string FormatBindingValue(string bindingText, object bindingSource, IFormatProvider provider, bool isResolvedText = false)
 		{
-			return FormatBindingValue(bindingText, bindingSource, (value, format) => FormatValue(value, format, provider));
+			return FormatBindingValue(bindingText, bindingSource, (value, format) => FormatValue(value, format, provider), isResolvedText);
 		}
 
-		public static string FormatBindingValue(string bindingText, object bindingSource, BindingFormatter format)
+		public static string FormatBindingValue(string bindingText, object bindingSource, BindingFormatter format, bool isResolvedText = false)
 		{
 			if(string.IsNullOrWhiteSpace(bindingText))
 				return bindingSource != null ? bindingSource.ToString() : string.Empty;
@@ -138,20 +138,23 @@ namespace Zongsoft.Web.Controls
 			}
 			else
 			{
+				if(isResolvedText)
+				{
+					object value = GetMemberValue(bindingSource, bindingText, false);
+
+					if(value == null)
+						return bindingText;
+
+					if(format == null)
+						return value.ToString();
+					else
+						return format(value, string.Empty);
+				}
+
 				if(format == null)
 					return bindingText;
 				else
 					return format(bindingText, string.Empty);
-
-				//object value = GetMemberValue(bindingSource, bindingText, false);
-
-				//if(value == null)
-				//	return bindingText;
-
-				//if(format == null)
-				//	return value.ToString();
-				//else
-				//	return format(value, string.Empty);
 			}
 		}
 		#endregion

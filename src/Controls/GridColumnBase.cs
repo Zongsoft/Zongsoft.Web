@@ -71,6 +71,10 @@ namespace Zongsoft.Web.Controls
 			{
 				return _grid;
 			}
+			internal set
+			{
+				_grid = value;
+			}
 		}
 
 		public NameValueCollection Attributes
@@ -214,8 +218,8 @@ namespace Zongsoft.Web.Controls
 					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
 
 				writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
-				writer.AddAttribute(HtmlTextWriterAttribute.Value, BindingUtility.FormatBindingValue(this.Value, dataItem));
-				writer.AddAttribute(HtmlTextWriterAttribute.Title, BindingUtility.FormatBindingValue(this.ToolTip, dataItem));
+				writer.AddAttribute(HtmlTextWriterAttribute.Value, BindingUtility.FormatBindingValue(this.Value, dataItem, true));
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, BindingUtility.FormatBindingValue(this.ToolTip, dataItem, true));
 				writer.RenderBeginTag(HtmlTextWriterTag.Input);
 				writer.RenderEndTag();
 			}

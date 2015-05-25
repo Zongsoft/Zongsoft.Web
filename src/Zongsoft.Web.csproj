@@ -87,7 +87,7 @@
     <Compile Include="Controls\ComboBoxItem.cs" />
     <Compile Include="Controls\ComboBoxItemCollection.cs" />
     <Compile Include="Controls\ComboBoxRenderMode.cs" />
-    <Compile Include="Controls\CommandColumn.cs" />
+    <Compile Include="Controls\GridCommandColumn.cs" />
     <Compile Include="Controls\DataBoundControlBuilder.cs" />
     <Compile Include="Controls\DataBoundControl.cs" />
     <Compile Include="Controls\Editor.cs" />
@@ -98,6 +98,7 @@
     <Compile Include="Controls\GridColumnCollection.cs" />
     <Compile Include="Controls\GridColumn.cs" />
     <Compile Include="Controls\Gallery.cs" />
+    <Compile Include="Controls\GridTemplateColumn.cs" />
     <Compile Include="Controls\Hyperlink.cs" />
     <Compile Include="Controls\ImageBox.cs" />
     <Compile Include="Controls\InputBox.cs" />

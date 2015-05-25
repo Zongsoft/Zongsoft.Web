@@ -34,14 +34,45 @@ namespace Zongsoft.Web.Controls
 {
 	public class GridColumnCollection : Zongsoft.Collections.NamedCollectionBase<GridColumnBase>
 	{
-		public GridColumnCollection() : base(StringComparer.OrdinalIgnoreCase)
-		{
-		}
+		#region 成员字段
+		private Grid _grid;
+		#endregion
 
+		#region 构造函数
+		public GridColumnCollection(Grid grid) : base(StringComparer.OrdinalIgnoreCase)
+		{
+			if(grid == null)
+				throw new ArgumentNullException("grid");
+
+			_grid = grid;
+		}
+		#endregion
+
+		#region 重写方法
 		protected override string GetKeyForItem(GridColumnBase item)
 		{
 			return item.Name;
 		}
+
+		protected override void InsertItems(int index, IEnumerable<GridColumnBase> items)
+		{
+			if(items != null)
+			{
+				foreach(var item in items)
+					item.Grid = _grid;
+			}
+
+			base.InsertItems(index, items);
+		}
+
+		protected override void SetItem(int index, GridColumnBase item)
+		{
+			if(item != null)
+				item.Grid = _grid;
+
+			base.SetItem(index, item);
+		}
+		#endregion
 
 		public double GetTotalWeight()
 		{

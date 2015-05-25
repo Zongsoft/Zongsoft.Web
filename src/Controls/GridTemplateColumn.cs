@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -26,52 +26,45 @@
 
 using System;
 using System.ComponentModel;
+using System.Collections.Generic;
+using System.Text;
+using System.Web;
+using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public enum InputBoxType
+	public class GridTemplateColumn : GridColumnBase
 	{
-		[Category("TextBox")]
-		Text,
-		[Category("TextBox")]
-		Password,
+		#region 成员字段
+		private ITemplate _content;
+		#endregion
 
-		[Category("Button")]
-		Button,
-		[Category("Button")]
-		Reset,
-		[Category("Button")]
-		Submit,
+		#region 公共属性
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(ListView))]
+		public ITemplate Content
+		{
+			get
+			{
+				return _content;
+			}
+			set
+			{
+				_content = value;
+			}
+		}
+		#endregion
 
-		[Category("Button")]
-		CheckBox,
-		[Category("Button")]
-		Radio,
+		#region 重写方法
+		protected override void OnRender(HtmlTextWriter writer, object dataItem)
+		{
+			if(_content != null)
+				_content.InstantiateIn(this.Grid);
 
-		Hidden,
-		Image,
-		File,
-
-		/// <summary>扩展：数字输入框</summary>
-		[Category("TextBox")]
-		Number,
-		/// <summary>扩展：日期输入框</summary>
-		[Category("TextBox")]
-		Date,
-		/// <summary>扩展：时间输入框</summary>
-		[Category("TextBox")]
-		Time,
-		/// <summary>扩展：日期和时间输入框</summary>
-		[Category("TextBox")]
-		DateTime,
-		/// <summary>扩展：网址输入框</summary>
-		[Category("TextBox")]
-		Url,
-		/// <summary>扩展：电子邮箱地址输入框</summary>
-		[Category("TextBox")]
-		Email,
-		/// <summary>扩展：搜索框</summary>
-		[Category("TextBox")]
-		Search,
+			//调用基类同名方法
+			base.OnRender(writer, dataItem);
+		}
+		#endregion
 	}
 }

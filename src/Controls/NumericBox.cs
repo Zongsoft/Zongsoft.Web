@@ -34,9 +34,8 @@ namespace Zongsoft.Web.Controls
 	public class NumericBox : TextBoxBase
 	{
 		#region 构造函数
-		public NumericBox()
+		public NumericBox() : base(InputBoxType.Number)
 		{
-			this.InputType = InputBoxType.Number;
 		}
 		#endregion
 
@@ -114,7 +113,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写属性
-		[DefaultValue(InputBoxType.Text)]
+		[DefaultValue(InputBoxType.Number)]
 		public override InputBoxType InputType
 		{
 			get
