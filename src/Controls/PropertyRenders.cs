@@ -85,7 +85,11 @@ namespace Zongsoft.Web.Controls
 		#region 公共方法
 		public bool RenderProperty(HtmlTextWriter writer, PropertyMetadata property)
 		{
-			property.AttributeValue = property.Control.ResolveUrl(property.AttributeValue);
+			if(string.IsNullOrWhiteSpace(property.AttributeValue))
+				property.AttributeValue = "javascript:;";
+			else
+				property.AttributeValue = property.Control.ResolveUrl(property.AttributeValue);
+
 			return false;
 		}
 		#endregion

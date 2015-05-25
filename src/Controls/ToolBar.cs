@@ -141,14 +141,6 @@ namespace Zongsoft.Web.Controls
 				return;
 			}
 
-			if(!string.IsNullOrWhiteSpace(item.Name))
-				writer.AddAttribute(HtmlTextWriterAttribute.Name, item.Name);
-
-			if(!string.IsNullOrWhiteSpace(item.ToolTip))
-				writer.AddAttribute(HtmlTextWriterAttribute.Title, BindingUtility.FormatBindingValue(item.ToolTip, this.GetBindingSource()));
-
-			writer.AddAttribute(HtmlTextWriterAttribute.Href, string.IsNullOrWhiteSpace(item.Url) ? Utility.EmptyLink : BindingUtility.FormatBindingValue(item.Url, this.GetBindingSource()));
-
 			if(!string.IsNullOrWhiteSpace(item.Icon))
 			{
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "icon icon-" + item.Icon.Trim());
@@ -156,7 +148,14 @@ namespace Zongsoft.Web.Controls
 				writer.RenderEndTag();
 			}
 
+			if(!string.IsNullOrWhiteSpace(item.Name))
+				writer.AddAttribute(HtmlTextWriterAttribute.Name, item.Name);
+
+			if(!string.IsNullOrWhiteSpace(item.ToolTip))
+				writer.AddAttribute(HtmlTextWriterAttribute.Title, BindingUtility.FormatBindingValue(item.ToolTip, this.GetBindingSource()));
+
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, "toolbar-button");
+			writer.AddAttribute(HtmlTextWriterAttribute.Href, string.IsNullOrWhiteSpace(item.Url) ? Utility.EmptyLink : BindingUtility.FormatBindingValue(item.Url, this.GetBindingSource()));
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
 
 			if(!string.IsNullOrEmpty(item.Text))

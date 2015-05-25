@@ -38,7 +38,7 @@ namespace Zongsoft.Web.Controls
 		#region 公共属性
 		[Bindable(true)]
 		[DefaultValue("")]
-		[PropertyMetadata("src", PropertyRender = "UrlPropertyRender.Default", Renderable = false)]
+		[PropertyMetadata("src", PropertyRender = "UrlPropertyRender.Default")]
 		public string ImageUrl
 		{
 			get
@@ -53,7 +53,7 @@ namespace Zongsoft.Web.Controls
 
 		[Bindable(true)]
 		[DefaultValue("")]
-		[PropertyMetadata("href", PropertyRender = "UrlPropertyRender.Default")]
+		[PropertyMetadata("href", PropertyRender = "UrlPropertyRender.Default", Renderable = false)]
 		public string NavigateUrl
 		{
 			get
