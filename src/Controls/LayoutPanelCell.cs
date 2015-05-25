@@ -42,7 +42,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 构造函数
-		LayoutPanelCell()
+		public LayoutPanelCell()
 		{
 			_colSpan = 1;
 			_rowSpan = 1;
