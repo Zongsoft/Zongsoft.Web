@@ -200,9 +200,6 @@ namespace Zongsoft.Web.Controls
 
 			//生成所有子控件
 			this.RenderChildren(writer);
-
-			//调用基类同名方法
-			base.Render(writer);
 		}
 		#endregion
 

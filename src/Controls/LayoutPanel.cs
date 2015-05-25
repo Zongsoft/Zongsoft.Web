@@ -35,9 +35,12 @@ using System.Web.UI;
 namespace Zongsoft.Web.Controls
 {
 	/// <summary>
-	/// 
+	/// 提供布局的控件。
 	/// </summary>
 	/// <remarks>
+	///		<para>使用范例：</para>
+	///		<example>
+	///		<code>
 	///		<InputPanel id="" runat="server">
 	///			<InputBox id="" type="" runat="server" />
 	///			<InputBox id="" type="" runat="server" />
@@ -45,6 +48,8 @@ namespace Zongsoft.Web.Controls
 	///			<input name="submit" type="submit" value="" />
 	///			<input name="clear" type="reset" value="" />
 	///		</InputPanel>
+	///		</code>
+	///		</example>
 	/// </remarks>
 	[PersistChildren(true)]
 	[ParseChildren(false)]
@@ -114,7 +119,7 @@ namespace Zongsoft.Web.Controls
 			}
 
 			//调用基类同名方法
-			base.Render(writer);
+			//base.Render(writer);
 		}
 		#endregion
 
@@ -124,7 +129,7 @@ namespace Zongsoft.Web.Controls
 			//生成其他自定义属性
 			this.AddAttributes(writer);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layoutPanel layout-flow");
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout layout-flow");
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
 			for(int i = 0; i < controls.Count; i++)
@@ -152,7 +157,7 @@ namespace Zongsoft.Web.Controls
 			//生成其他自定义属性
 			this.AddAttributes(writer);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layoutPanel layout-table");
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout layout-table");
 			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
 			int columnIndex = 0;
@@ -267,7 +272,7 @@ namespace Zongsoft.Web.Controls
 
 		private IList<Control> GetControls()
 		{
-			List<Control> controls = new List<Control>();
+			var controls = new List<Control>();
 
 			foreach(Control control in this.Controls)
 			{

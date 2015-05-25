@@ -63,6 +63,7 @@ namespace Zongsoft.Web.Controls
 		[Category("Appearance")]
 		[DefaultValue("")]
 		[Localizable(true)]
+		[PropertyMetadata(false)]
 		public string Title
 		{
 			get
@@ -140,27 +141,24 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
-		protected override void CreateChildControls()
+		protected override void RenderBeginTag(HtmlTextWriter writer)
+		{
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "widget");
+			writer.RenderBeginTag(HtmlTextWriterTag.Div);
+		}
+
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
 		{
 			this.CreateHeader();
 			this.CreateContent();
-		}
-
-		protected override void Render(HtmlTextWriter writer)
-		{
-			if(!string.IsNullOrWhiteSpace(this.ID))
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "widget");
-			writer.RenderBeginTag(HtmlTextWriterTag.Div);
-
-			this.EnsureChildControls();
-			this.RenderChildren(writer);
-
-			writer.RenderEndTag();
 
 			//调用基类同名方法
-			base.Render(writer);
+			base.RenderContent(writer);
 		}
 		#endregion
 	}
