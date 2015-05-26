@@ -36,9 +36,8 @@ namespace Zongsoft.Web.Controls
 	public class CheckBox : InputBox
 	{
 		#region 构造函数
-		public CheckBox()
+		public CheckBox() : base(InputBoxType.CheckBox)
 		{
-			this.InputType = InputBoxType.CheckBox;
 		}
 		#endregion
 
@@ -60,6 +59,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写属性
+		[Browsable(false)]
 		[DefaultValue(InputBoxType.CheckBox)]
 		public override InputBoxType InputType
 		{
@@ -69,7 +69,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				if(value != InputBoxType.CheckBox)
+				if(value != InputBoxType.CheckBox && value != InputBoxType.Radio)
 					throw new NotSupportedException();
 
 				base.InputType = value;

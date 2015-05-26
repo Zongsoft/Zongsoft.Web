@@ -36,14 +36,12 @@ namespace Zongsoft.Web.Controls
 	public class TextBoxBase : InputBox
 	{
 		#region 构造函数
-		public TextBoxBase()
+		public TextBoxBase() : base(InputBoxType.Text)
 		{
-			this.InputType = InputBoxType.Text;
 		}
 
-		protected TextBoxBase(InputBoxType inputType)
+		protected TextBoxBase(InputBoxType inputType) : base(inputType)
 		{
-			this.InputType = inputType;
 		}
 		#endregion
 

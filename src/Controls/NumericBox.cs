@@ -113,6 +113,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写属性
+		[Browsable(false)]
 		[DefaultValue(InputBoxType.Number)]
 		public override InputBoxType InputType
 		{

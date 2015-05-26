@@ -33,18 +33,34 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class Editor : TextBoxBase
+	public class RadioBox : InputBox
 	{
 		#region 构造函数
-		public Editor()
+		public RadioBox() : base(InputBoxType.Radio)
 		{
-			this.CssClass = ":editor";
+		}
+		#endregion
+
+		#region 公共属性
+		[Bindable(true)]
+		[DefaultValue(false)]
+		[PropertyMetadata(PropertyRender = "BooleanPropertyRender.True")]
+		public bool Checked
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.Checked);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.Checked, value);
+			}
 		}
 		#endregion
 
 		#region 重写属性
 		[Browsable(false)]
-		[DefaultValue(InputBoxType.Text)]
+		[DefaultValue(InputBoxType.Radio)]
 		public override InputBoxType InputType
 		{
 			get
@@ -53,21 +69,11 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				if(value != InputBoxType.Text)
-					throw new ArgumentOutOfRangeException();
+				if(value != InputBoxType.Radio)
+					throw new NotSupportedException();
 
 				base.InputType = value;
 			}
-		}
-		#endregion
-
-		#region 重写方法
-		protected override void RenderBeginTag(HtmlTextWriter writer)
-		{
-			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
-				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
-
-			writer.RenderBeginTag(HtmlTextWriterTag.Textarea);
 		}
 		#endregion
 	}

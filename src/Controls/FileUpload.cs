@@ -36,13 +36,13 @@ namespace Zongsoft.Web.Controls
 	public class FileUpload : InputBox
 	{
 		#region 构造函数
-		public FileUpload()
+		public FileUpload() : base(InputBoxType.File)
 		{
-			this.InputType = InputBoxType.File;
 		}
 		#endregion
 
 		#region 重写属性
+		[Browsable(false)]
 		[DefaultValue(InputBoxType.File)]
 		public override InputBoxType InputType
 		{

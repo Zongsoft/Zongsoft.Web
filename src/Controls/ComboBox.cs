@@ -60,12 +60,7 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				var result = this.GetPropertyValue(() => this.Name);
-
-				if(string.IsNullOrWhiteSpace(result))
-					return this.ID;
-
-				return result;
+				return this.GetPropertyValue(() => this.Name);
 			}
 			set
 			{
@@ -195,6 +190,9 @@ namespace Zongsoft.Web.Controls
 		{
 			if(this.RenderMode == ComboBoxRenderMode.Classic)
 			{
+				if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
+					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
+
 				this.AddAttributes(writer);
 
 				//生成自动提交的脚本事件代码
@@ -208,6 +206,9 @@ namespace Zongsoft.Web.Controls
 			{
 				this.AddAttributes(writer, "ID", "Name");
 				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+
+				if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
+					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
 
 				this.AddAttributes(writer, "CssClass");
 
@@ -300,7 +301,7 @@ namespace Zongsoft.Web.Controls
 		{
 			if(this.DataSource != null)
 			{
-				IEnumerable dataSource = this.DataSource as IEnumerable;
+				var dataSource = this.DataSource as IEnumerable;
 
 				if(dataSource != null)
 				{

@@ -43,9 +43,9 @@ namespace Zongsoft.Web.Controls
 		[Category("Button")]
 		Submit,
 
-		[Category("Button")]
+		[Category("Switch")]
 		CheckBox,
-		[Category("Button")]
+		[Category("Switch")]
 		Radio,
 
 		Hidden,

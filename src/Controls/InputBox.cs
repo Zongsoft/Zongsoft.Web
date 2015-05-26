@@ -34,16 +34,16 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class InputBox : Literal
+	public class InputBox : DataBoundControl
 	{
 		#region 构造函数
 		public InputBox()
 		{
-			this.TagName = "input";
 		}
 
 		public InputBox(InputBoxType inputType)
 		{
+			this.InputType = inputType;
 		}
 		#endregion
 
@@ -156,6 +156,21 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
+		protected override void RenderBeginTag(HtmlTextWriter writer)
+		{
+			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
+				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
+
+			this.AddAttributes(writer);
+
+			writer.RenderBeginTag(HtmlTextWriterTag.Input);
+		}
+
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
+		}
+
 		protected override void Render(HtmlTextWriter writer)
 		{
 			//生成最外层的Div布局元素，即<div class="field">
@@ -170,18 +185,34 @@ namespace Zongsoft.Web.Controls
 
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "label");
 				writer.RenderBeginTag(HtmlTextWriterTag.Label);
-				writer.WriteEncodedText(this.Label);
 			}
 
-			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
-				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
+			if(this.InputType == InputBoxType.CheckBox || this.InputType == InputBoxType.Radio)
+			{
+				//调用基类同名方法(生成input元素及其内容)
+				base.Render(writer);
 
-			//调用基类同名方法
-			base.Render(writer);
+				//在input元素后面再生成Label文本
+				if(!string.IsNullOrWhiteSpace(this.Label))
+					writer.WriteEncodedText(this.Label);
 
-			//关闭Label标签
-			if(!string.IsNullOrWhiteSpace(this.Label))
-				writer.RenderEndTag();
+				//关闭Label标签
+				if(!string.IsNullOrWhiteSpace(this.Label))
+					writer.RenderEndTag();
+			}
+			else
+			{
+				//在input元素前面先生成Label文本
+				if(!string.IsNullOrWhiteSpace(this.Label))
+					writer.WriteEncodedText(this.Label);
+
+				//关闭Label标签
+				if(!string.IsNullOrWhiteSpace(this.Label))
+					writer.RenderEndTag();
+
+				//调用基类同名方法(生成input元素及其内容)
+				base.Render(writer);
+			}
 
 			//关闭最外层的Div布局元素，即生成</div>
 			writer.RenderEndTag();

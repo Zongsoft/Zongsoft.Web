@@ -110,6 +110,9 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[MergableProperty(false)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		public TreeViewNodeCollection Nodes
 		{
 			get
@@ -367,9 +370,9 @@ namespace Zongsoft.Web.Controls
 
 			TreeViewNode node = new TreeViewNode(key, key);
 
-			node.Text = BindingUtility.FormatBindingValue(binding.Text, target);
-			node.ToolTip = BindingUtility.FormatBindingValue(binding.ToolTip, target);
-			node.Url = BindingUtility.FormatBindingValue(binding.Url, target);
+			node.Text = BindingUtility.FormatBindingValue(binding.TextMember, target, true);
+			node.ToolTip = BindingUtility.FormatBindingValue(binding.ToolTipMember, target, true);
+			node.Url = BindingUtility.FormatBindingValue(binding.UrlMember, target, true);
 
 			return node;
 		}
@@ -467,19 +470,19 @@ namespace Zongsoft.Web.Controls
 				set;
 			}
 
-			public string Text
+			public string TextMember
 			{
 				get;
 				set;
 			}
 
-			public string ToolTip
+			public string ToolTipMember
 			{
 				get;
 				set;
 			}
 
-			public string Url
+			public string UrlMember
 			{
 				get;
 				set;
