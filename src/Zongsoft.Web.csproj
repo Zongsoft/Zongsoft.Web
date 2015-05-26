@@ -77,12 +77,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\BindingUtility.cs" />
+    <Compile Include="Controls\Button.cs" />
     <Compile Include="Controls\ChartLine.cs" />
     <Compile Include="Controls\ChartPoint.cs" />
     <Compile Include="Controls\ChartSerie.cs" />
     <Compile Include="Controls\ChartType.cs" />
     <Compile Include="Controls\CheckBox.cs" />
-    <Compile Include="Controls\CheckBoxGroup.cs" />
+    <Compile Include="Controls\Toggle.cs" />
+    <Compile Include="Controls\ToggleItem.cs" />
+    <Compile Include="Controls\ToggleItemCollection.cs" />
+    <Compile Include="Controls\ToggleType.cs" />
     <Compile Include="Controls\ComboBox.cs" />
     <Compile Include="Controls\ComboBoxItem.cs" />
     <Compile Include="Controls\ComboBoxItemCollection.cs" />
@@ -118,6 +122,7 @@
     <Compile Include="Controls\PropertyMetadata.cs" />
     <Compile Include="Controls\PropertyMetadataAttribute.cs" />
     <Compile Include="Controls\PropertyRenders.cs" />
+    <Compile Include="Controls\RadioBox.cs" />
     <Compile Include="Controls\ScrollbarMode.cs" />
     <Compile Include="Controls\Slider.cs" />
     <Compile Include="Controls\TabStrip.cs" />

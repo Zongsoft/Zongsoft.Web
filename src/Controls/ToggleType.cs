@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -26,14 +26,17 @@
 
 using System;
 using System.ComponentModel;
-using System.Collections.Generic;
-using System.Text;
-using System.Web;
-using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class CheckBoxGroup : DataBoundControl
+	/// <summary>
+	/// 表示开关控件的元素类型。
+	/// </summary>
+	public enum ToggleType
 	{
+		/// <summary>复选框(CheckBox)</summary>
+		Multiple,
+		/// <summary>单选框(RadioBox)</summary>
+		Single,
 	}
 }
