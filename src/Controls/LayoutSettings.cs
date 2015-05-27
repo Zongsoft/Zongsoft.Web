@@ -138,14 +138,19 @@ namespace Zongsoft.Web.Controls
 				var parts = text.Split(',');
 				var flex = new FluidLayoutFlex();
 
-				if(parts.Length > 0)
-					flex.Tiny = Zongsoft.Common.Convert.ConvertValue<int>(parts[0].Trim());
-				if(parts.Length > 1)
-					flex.Small = Zongsoft.Common.Convert.ConvertValue<int>(parts[1].Trim());
-				if(parts.Length > 2)
-					flex.Medium = Zongsoft.Common.Convert.ConvertValue<int>(parts[2].Trim());
-				if(parts.Length > 3)
-					flex.Large = Zongsoft.Common.Convert.ConvertValue<int>(parts[3].Trim());
+				if(parts.Length == 1)
+					flex.Tiny = flex.Small = flex.Medium = flex.Large = Zongsoft.Common.Convert.ConvertValue<int>(parts[0].Trim());
+				else
+				{
+					if(parts.Length > 0)
+						flex.Tiny = Zongsoft.Common.Convert.ConvertValue<int>(parts[0].Trim());
+					if(parts.Length > 1)
+						flex.Small = Zongsoft.Common.Convert.ConvertValue<int>(parts[1].Trim());
+					if(parts.Length > 2)
+						flex.Medium = Zongsoft.Common.Convert.ConvertValue<int>(parts[2].Trim());
+					if(parts.Length > 3)
+						flex.Large = Zongsoft.Common.Convert.ConvertValue<int>(parts[3].Trim());
+				}
 
 				return flex;
 			}
