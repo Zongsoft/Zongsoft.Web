@@ -42,9 +42,16 @@ namespace Zongsoft.Web.Controls
 	/// <remarks>
 	///	<![CDATA[
 	///	<div class="widget">
-	///		<div class="widget-header"><h3>{title}</h3></div>
-	///		<div class="widget-content">
+	///		<div class="widget-header">
+	///			<i class="widget-header-icon" />
+	///			<h3 class="widget-header-text">{title}</h3>
+	///			<p class="widget-header-description">{description}</p>
+	///		</div>
+	///		<div class="widget-body">
 	///		{ContentTemplate}
+	///		</div>
+	///		<div class=widget-footer">
+	///		{FooterTemplate}
 	///		</div>
 	///	</div>
 	///	]]>
@@ -55,10 +62,35 @@ namespace Zongsoft.Web.Controls
 	{
 		#region 成员变量
 		private ITemplate _headerTemplate;
-		private ITemplate _contentTemplate;
+		private ITemplate _footerTemplate;
+		private ITemplate _bodyTemplate;
+		#endregion
+
+		#region 构造函数
+		public Widget()
+		{
+			this.CssClass = "widget";
+		}
 		#endregion
 
 		#region 公共属性
+		[Bindable(true)]
+		[Category("Appearance")]
+		[DefaultValue("")]
+		[Localizable(false)]
+		[PropertyMetadata(false)]
+		public string Icon
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.Icon);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.Icon, value);
+			}
+		}
+
 		[Bindable(true)]
 		[Category("Appearance")]
 		[DefaultValue("")]
@@ -73,6 +105,23 @@ namespace Zongsoft.Web.Controls
 			set
 			{
 				this.SetPropertyValue(() => this.Title, value);
+			}
+		}
+
+		[Bindable(true)]
+		[Category("Appearance")]
+		[DefaultValue("")]
+		[Localizable(true)]
+		[PropertyMetadata(false)]
+		public string Description
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.Description);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.Description, value);
 			}
 		}
 
@@ -94,15 +143,30 @@ namespace Zongsoft.Web.Controls
 		[BrowsableAttribute(false)]
 		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
 		[TemplateContainerAttribute(typeof(Widget))]
-		public ITemplate ContentTemplate
+		public ITemplate FooterTemplate
 		{
 			get
 			{
-				return _contentTemplate;
+				return _footerTemplate;
 			}
 			set
 			{
-				_contentTemplate = value;
+				_footerTemplate = value;
+			}
+		}
+
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(Widget))]
+		public ITemplate BodyTemplate
+		{
+			get
+			{
+				return _bodyTemplate;
+			}
+			set
+			{
+				_bodyTemplate = value;
 			}
 		}
 		#endregion
@@ -115,10 +179,36 @@ namespace Zongsoft.Web.Controls
 
 			if(_headerTemplate == null)
 			{
-				container.Controls.Add(new HtmlGenericControl("h3")
+				HtmlControl control;
+
+				if(!string.IsNullOrWhiteSpace(this.Icon))
 				{
-					InnerText = this.Title,
-				});
+					control = new HtmlGenericControl("i");
+					control.Attributes.Add("class", "widget-header-icon icon icon-" + this.Icon.Trim().ToLowerInvariant());
+					container.Controls.Add(control);
+				}
+
+				if(!string.IsNullOrWhiteSpace(this.Title))
+				{
+					control = new HtmlGenericControl("h3")
+					{
+						InnerText = this.Title,
+					};
+
+					control.Attributes.Add("class", "widget-header-title");
+					container.Controls.Add(control);
+				}
+
+				if(!string.IsNullOrWhiteSpace(this.Description))
+				{
+					control = new HtmlGenericControl("p")
+					{
+						InnerText = this.Description,
+					};
+
+					control.Attributes.Add("class", "widget-header-description");
+					container.Controls.Add(control);
+				}
 			}
 			else
 			{
@@ -128,13 +218,27 @@ namespace Zongsoft.Web.Controls
 			this.Controls.Add(container);
 		}
 
-		protected virtual void CreateContent()
+		protected virtual void CreateFooter()
+		{
+			//如果没有指定脚模板则返回（即什么也不用生成）
+			if(_footerTemplate == null)
+				return;
+
+			HtmlGenericControl container = new HtmlGenericControl("div");
+			container.Attributes.Add("class", "widget-footer");
+
+			_footerTemplate.InstantiateIn(container);
+
+			this.Controls.Add(container);
+		}
+
+		protected virtual void CreateBody()
 		{
 			HtmlGenericControl container = new HtmlGenericControl("div");
-			container.Attributes.Add("class", "widget-content");
+			container.Attributes.Add("class", "widget-body");
 
-			if(_contentTemplate != null)
-				_contentTemplate.InstantiateIn(container);
+			if(_bodyTemplate != null)
+				_bodyTemplate.InstantiateIn(container);
 
 			this.Controls.Add(container);
 		}
@@ -143,7 +247,7 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "widget");
+			this.AddAttributes(writer);
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
 		}
 
@@ -155,7 +259,8 @@ namespace Zongsoft.Web.Controls
 		protected override void RenderContent(HtmlTextWriter writer)
 		{
 			this.CreateHeader();
-			this.CreateContent();
+			this.CreateBody();
+			this.CreateFooter();
 
 			//调用基类同名方法
 			base.RenderContent(writer);
