@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -25,15 +25,22 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
 
 namespace Zongsoft.Web.Controls
 {
+	/// <summary>
+	/// 表示布局方式的枚举。
+	/// </summary>
 	public enum LayoutMode
 	{
-		Flow,
+		/// <summary>流式布局</summary>
+		Fluid,
+
+		/// <summary>表格布局</summary>
 		Table,
+
+		/// <summary>响应式布局</summary>
+		Responsive,
 	}
 }

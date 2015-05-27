@@ -83,6 +83,7 @@
     <Compile Include="Controls\ChartSerie.cs" />
     <Compile Include="Controls\ChartType.cs" />
     <Compile Include="Controls\CheckBox.cs" />
+    <Compile Include="Controls\LayoutSettings.cs" />
     <Compile Include="Controls\Toggle.cs" />
     <Compile Include="Controls\ToggleItem.cs" />
     <Compile Include="Controls\ToggleItemCollection.cs" />

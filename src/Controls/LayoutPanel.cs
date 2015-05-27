@@ -55,8 +55,12 @@ namespace Zongsoft.Web.Controls
 	[ParseChildren(false)]
 	public class LayoutPanel : DataBoundControl
 	{
+		#region 成员字段
+		private TableLayoutSettings _tableLayoutSettings;
+		#endregion
+
 		#region 公共属性
-		[DefaultValue(LayoutMode.Flow)]
+		[DefaultValue(LayoutMode.Fluid)]
 		[PropertyMetadata(false)]
 		public LayoutMode LayoutMode
 		{
@@ -70,32 +74,35 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
-		[Bindable(true)]
 		[DefaultValue(2)]
 		[PropertyMetadata(false)]
-		public int LayoutColumns
+		public int LayoutColumnCount
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.LayoutColumns);
+				return this.GetPropertyValue(() => this.LayoutColumnCount);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.LayoutColumns, Math.Max(value, 1));
+				this.SetPropertyValue(() => this.LayoutColumnCount, Math.Max(value, 1));
 			}
 		}
 
-		[DefaultValue(true)]
-		[PropertyMetadata(false)]
-		public bool MergeLastCells
+		[NotifyParentProperty(true)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		public TableLayoutSettings TableLayoutSettings
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.MergeLastCells);
+				if(_tableLayoutSettings == null)
+					_tableLayoutSettings = new TableLayoutSettings();
+
+				return _tableLayoutSettings;
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.MergeLastCells, value);
+				_tableLayoutSettings = value;
 			}
 		}
 		#endregion
@@ -110,11 +117,14 @@ namespace Zongsoft.Web.Controls
 
 			switch(this.LayoutMode)
 			{
-				case Web.Controls.LayoutMode.Flow:
-					this.RenderFlowLayout(writer, controls);
+				case Web.Controls.LayoutMode.Fluid:
+					this.RenderFluidLayout(writer, controls);
 					break;
 				case Web.Controls.LayoutMode.Table:
 					this.RenderTableLayout(writer, controls);
+					break;
+				case Web.Controls.LayoutMode.Responsive:
+					this.RenderResponsiveLayout(writer, controls);
 					break;
 			}
 
@@ -124,22 +134,69 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 私有方法
-		private void RenderFlowLayout(HtmlTextWriter writer, IList<Control> controls)
+		private void RenderFluidLayout(HtmlTextWriter writer, IList<Control> controls)
 		{
 			//生成其他自定义属性
 			this.AddAttributes(writer);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout layout-flow");
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout layout-fluid");
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
 			for(int i = 0; i < controls.Count; i++)
 			{
-				if(i % this.LayoutColumns == 0)
+				var cell = controls[i] as LayoutPanelCell;
+
+				if(cell != null)
+				{
+					var text = new StringBuilder();
+					var flex = cell.FluidCellSettings.Flex;
+
+					if(flex.Tiny > 0)
+						text.AppendFormat(" flex-xs-{0}", flex.Tiny);
+
+					if(flex.Small > 0)
+						text.AppendFormat(" flex-sm-{0}", flex.Small);
+
+					if(flex.Medium > 0)
+						text.AppendFormat(" flex-md-{0}", flex.Medium);
+
+					if(flex.Large > 0)
+						text.AppendFormat(" flex-lg-{0}", flex.Large);
+
+					if(text.Length > 0)
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, text.ToString());
+					else
+						writer.AddAttribute(HtmlTextWriterAttribute.Class, "flex-md-12");
+				}
+				else
+				{
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, "flex-md-12");
+				}
+
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+				controls[i].RenderControl(writer);
+				writer.RenderEndTag();
+			}
+
+			writer.RenderEndTag();
+		}
+
+		private void RenderResponsiveLayout(HtmlTextWriter writer, IList<Control> controls)
+		{
+			//生成其他自定义属性
+			this.AddAttributes(writer);
+
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout layout-responsive");
+			writer.RenderBeginTag(HtmlTextWriterTag.Div);
+
+			for(int i = 0; i < controls.Count; i++)
+			{
+				if(i % this.LayoutColumnCount == 0)
 				{
 					if(i > 0)
 						writer.RenderEndTag();
 
-					writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout-flow-row");
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout-responsive-row");
 					writer.RenderBeginTag(HtmlTextWriterTag.Div);
 				}
 
@@ -161,13 +218,13 @@ namespace Zongsoft.Web.Controls
 			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
 			int columnIndex = 0;
-			int columnCount = this.LayoutColumns;
+			int columnCount = this.LayoutColumnCount;
 
 			//定义行合并的计数器数组：数组元素按下标依次对应到相应列；
 			//元素内容值表示对应列剩下待合并的行数，默认为零表示当前行对应的列无需合并即需要生成对应的<td/>元素；
 			//元素内容值为正数，表示其还需要合并的行数，即当前行无需对其生成对应的<td/>元素；
 			//元素内容值为负数，表示其需要一直合并，即当前行无需对其生成对应的<td/>元素；
-			var rowSpans = new int[this.LayoutColumns];
+			var rowSpans = new int[this.LayoutColumnCount];
 
 			for(int i = 0; i < controls.Count; i++)
 			{
@@ -180,7 +237,7 @@ namespace Zongsoft.Web.Controls
 					columnCount = rowSpans.Count(span => span == 0);
 				}
 
-				if(i == controls.Count - 1 && this.MergeLastCells)
+				if(i == controls.Count - 1 && this.TableLayoutSettings.MergeLastCells)
 				{
 					colSpan = columnCount - columnIndex;
 				}
@@ -190,9 +247,10 @@ namespace Zongsoft.Web.Controls
 
 					if(cell != null)
 					{
-						colSpan = Math.Min(cell.ColSpan, columnCount - columnIndex);
+						var cellSettings = cell.TableCellSettings;
+						colSpan = Math.Min(cellSettings.ColSpan, columnCount - columnIndex);
 
-						if(cell.RowSpan > 1 || cell.RowSpan == 0)
+						if(cellSettings.RowSpan > 1 || cellSettings.RowSpan == 0)
 						{
 							spanIndex = this.GetRowSpanIndex(rowSpans, columnIndex);
 
@@ -200,7 +258,7 @@ namespace Zongsoft.Web.Controls
 							{
 								for(int j = 0; j < colSpan; j++)
 								{
-									rowSpans[spanIndex + j] = cell.RowSpan == 0 ? -1 : cell.RowSpan;
+									rowSpans[spanIndex + j] = cellSettings.RowSpan == 0 ? -1 : cellSettings.RowSpan;
 								}
 							}
 						}
@@ -236,10 +294,10 @@ namespace Zongsoft.Web.Controls
 				}
 			}
 
-			if(columnIndex > 0 && columnIndex < this.LayoutColumns)
+			if(columnIndex > 0 && columnIndex < this.LayoutColumnCount)
 			{
-				if(this.LayoutColumns - columnIndex > 1)
-					writer.AddAttribute(HtmlTextWriterAttribute.Colspan, (this.LayoutColumns - columnIndex).ToString());
+				if(this.LayoutColumnCount - columnIndex > 1)
+					writer.AddAttribute(HtmlTextWriterAttribute.Colspan, (this.LayoutColumnCount - columnIndex).ToString());
 
 				writer.RenderBeginTag(HtmlTextWriterTag.Td);
 				writer.RenderEndTag();

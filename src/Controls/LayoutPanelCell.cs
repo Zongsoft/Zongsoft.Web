@@ -25,9 +25,9 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Web;
 using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
@@ -37,40 +37,50 @@ namespace Zongsoft.Web.Controls
 	public class LayoutPanelCell : Control
 	{
 		#region 成员变量
-		private int _colSpan;
-		private int _rowSpan;
+		private TableLayoutCellSettings _tableCellSettings;
+		private FluidLayoutCellSettings _fluidCellSettings;
 		#endregion
 
 		#region 构造函数
 		public LayoutPanelCell()
 		{
-			_colSpan = 1;
-			_rowSpan = 1;
 		}
 		#endregion
 
 		#region 公共属性
-		public int ColSpan
+		[NotifyParentProperty(true)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		public TableLayoutCellSettings TableCellSettings
 		{
 			get
 			{
-				return _colSpan;
+				if(_tableCellSettings == null)
+					_tableCellSettings = new TableLayoutCellSettings();
+
+				return _tableCellSettings;
 			}
 			set
 			{
-				_colSpan = Math.Max(value, 1);
+				_tableCellSettings = value;
 			}
 		}
 
-		public int RowSpan
+		[NotifyParentProperty(true)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		public FluidLayoutCellSettings FluidCellSettings
 		{
 			get
 			{
-				return _rowSpan;
+				if(_fluidCellSettings == null)
+					_fluidCellSettings = new FluidLayoutCellSettings();
+
+				return _fluidCellSettings;
 			}
 			set
 			{
-				_rowSpan = Math.Max(value, 1);
+				_fluidCellSettings = value;
 			}
 		}
 		#endregion
