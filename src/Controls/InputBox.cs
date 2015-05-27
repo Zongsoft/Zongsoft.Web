@@ -77,6 +77,20 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[DefaultValue(true)]
+		[PropertyMetadata(false)]
+		public bool IsRenderFieldTag
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.IsRenderFieldTag);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.IsRenderFieldTag, value);
+			}
+		}
+
 		[DefaultValue(InputBoxType.Text)]
 		[PropertyMetadata("type")]
 		public virtual InputBoxType InputType
@@ -173,9 +187,12 @@ namespace Zongsoft.Web.Controls
 
 		protected override void Render(HtmlTextWriter writer)
 		{
-			//生成最外层的Div布局元素，即<div class="field">
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
-			writer.RenderBeginTag(HtmlTextWriterTag.Div);
+			if(this.IsRenderFieldTag)
+			{
+				//生成最外层的Div布局元素，即<div class="field">
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+			}
 
 			//生成Label标签
 			if(!string.IsNullOrWhiteSpace(this.Label))
@@ -214,8 +231,11 @@ namespace Zongsoft.Web.Controls
 				base.Render(writer);
 			}
 
-			//关闭最外层的Div布局元素，即生成</div>
-			writer.RenderEndTag();
+			if(this.IsRenderFieldTag)
+			{
+				//关闭最外层的Div布局元素，即生成</div>
+				writer.RenderEndTag();
+			}
 		}
 		#endregion
 	}
