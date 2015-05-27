@@ -163,6 +163,9 @@ namespace Zongsoft.Web.Controls
 					if(flex.Large > 0)
 						text.AppendFormat(" flex-lg-{0}", flex.Large);
 
+					if(!string.IsNullOrWhiteSpace(cell.ID))
+						writer.AddAttribute(HtmlTextWriterAttribute.Id, cell.ID);
+
 					if(text.Length > 0)
 						writer.AddAttribute(HtmlTextWriterAttribute.Class, text.ToString());
 					else
