@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -33,6 +33,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.UI;
+using System.Web.UI.HtmlControls;
 
 namespace Zongsoft.Web.Controls
 {
@@ -41,6 +42,8 @@ namespace Zongsoft.Web.Controls
 	{
 		#region 成员变量
 		private ITemplate _emptyTemplate;
+		private ITemplate _headerTemplate;
+		private ITemplate _footerTemplate;
 		private GridColumnCollection _columns;
 		#endregion
 
@@ -96,7 +99,7 @@ namespace Zongsoft.Web.Controls
 
 		[BrowsableAttribute(false)]
 		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
-		[TemplateContainerAttribute(typeof(ListView))]
+		[TemplateContainerAttribute(typeof(Grid))]
 		public ITemplate EmptyTemplate
 		{
 			get
@@ -106,6 +109,36 @@ namespace Zongsoft.Web.Controls
 			set
 			{
 				_emptyTemplate = value;
+			}
+		}
+
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(Grid))]
+		public ITemplate HeaderTemplate
+		{
+			get
+			{
+				return _headerTemplate;
+			}
+			set
+			{
+				_headerTemplate = value;
+			}
+		}
+
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(Grid))]
+		public ITemplate FooterTemplate
+		{
+			get
+			{
+				return _footerTemplate;
+			}
+			set
+			{
+				_footerTemplate = value;
 			}
 		}
 
@@ -167,7 +200,23 @@ namespace Zongsoft.Web.Controls
 
 		protected override void RenderContent(HtmlTextWriter writer)
 		{
-			#region 表头部分
+			this.RenderTableHeader(writer);
+			this.RenderTableBody(writer);
+			this.RenderTableFooter(writer);
+		}
+		#endregion
+
+		#region 私有方法
+		private void RenderTableHeader(HtmlTextWriter writer)
+		{
+			if(_headerTemplate != null)
+			{
+				var container = new HtmlGenericControl("thead");
+				_footerTemplate.InstantiateIn(container);
+				container.RenderControl(writer);
+				return;
+			}
+
 			writer.RenderBeginTag(HtmlTextWriterTag.Thead);
 
 			//开始生成表头行
@@ -216,16 +265,37 @@ namespace Zongsoft.Web.Controls
 
 			//结束生成表头部分
 			writer.RenderEndTag();
-			#endregion
+		}
 
-			#region 表体部分
+		private void RenderTableFooter(HtmlTextWriter writer)
+		{
+			if(_footerTemplate == null)
+				return;
+
+			var container = new HtmlGenericControl("tfoot");
+			_footerTemplate.InstantiateIn(container);
+			container.RenderControl(writer);
+		}
+
+		private void RenderTableBody(HtmlTextWriter writer)
+		{
 			//生成表体标记(开始)
 			writer.RenderBeginTag(HtmlTextWriterTag.Tbody);
 
-			if(this.DataSource == null)
+			if(this.DataSource == null || (this.DataSource.GetType() == typeof(string) && ((string)this.DataSource).Length == 0))
 			{
 				if(_emptyTemplate != null)
-					_emptyTemplate.InstantiateIn(this);
+				{
+					var tr = new System.Web.UI.HtmlControls.HtmlTableRow();
+					var td = new System.Web.UI.HtmlControls.HtmlTableCell()
+					{
+						ColSpan = this.Columns.Count,
+					};
+
+					tr.Controls.Add(td);
+					_emptyTemplate.InstantiateIn(td);
+					tr.RenderControl(writer);
+				}
 			}
 			else
 			{
@@ -247,11 +317,8 @@ namespace Zongsoft.Web.Controls
 
 			//生成表体标记(结束)
 			writer.RenderEndTag();
-			#endregion
 		}
-		#endregion
 
-		#region 私有方法
 		private void GenerateSelection(HtmlTextWriter writer, object dataItem)
 		{
 			if(this.SelectionMode == Web.Controls.SelectionMode.None)
@@ -310,13 +377,13 @@ namespace Zongsoft.Web.Controls
 				else
 					writer.AddAttribute(HtmlTextWriterAttribute.Style, "display:none;");
 
-				//生成表体的数据列标记(开始)
+				//生成表体的数据列标记(<td>)
 				writer.RenderBeginTag(HtmlTextWriterTag.Td);
 
 				//调用当前表格列的生成方法
-				column.Render(writer, dataItem);
+				column.Render(writer, dataItem, rowIndex);
 
-				//生成表体的数据列标记(结束)
+				//生成表体的数据列标记(</td>)
 				writer.RenderEndTag();
 			}
 

@@ -33,6 +33,8 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
+	[DefaultProperty("Content")]
+	[ParseChildren(true, "Content")]
 	public class GridTemplateColumn : GridColumnBase
 	{
 		#region 成员字段
@@ -57,13 +59,82 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
-		protected override void OnRender(HtmlTextWriter writer, object dataItem)
+		protected override void OnRender(HtmlTextWriter writer, object dataItem, int index)
 		{
 			if(_content != null)
-				_content.InstantiateIn(this.Grid);
+			{
+				var container = new GridTemplateColumnControl(this, dataItem, index);
+				_content.InstantiateIn(container);
+				container.RenderControl(writer);
+			}
 
 			//调用基类同名方法
-			base.OnRender(writer, dataItem);
+			base.OnRender(writer, dataItem, index);
+		}
+		#endregion
+
+		#region 嵌套子类
+		public class GridTemplateColumnControl : Control, IDataItemContainer
+		{
+			#region 成员字段
+			private GridTemplateColumn _column;
+			private object _dataItem;
+			private int _index;
+			#endregion
+
+			#region 构造函数
+			public GridTemplateColumnControl(GridTemplateColumn column, object dataItem, int index)
+			{
+				if(column == null)
+					throw new ArgumentNullException("column");
+
+				_column = column;
+				_dataItem = dataItem;
+				_index = index;
+			}
+			#endregion
+
+			#region 公共属性
+			public GridTemplateColumn Column
+			{
+				get
+				{
+					return _column;
+				}
+			}
+
+			public object DataItem
+			{
+				get
+				{
+					return _dataItem;
+				}
+			}
+
+			public int Index
+			{
+				get
+				{
+					return _index;
+				}
+			}
+
+			public int DisplayIndex
+			{
+				get
+				{
+					return _index;
+				}
+			}
+
+			int IDataItemContainer.DataItemIndex
+			{
+				get
+				{
+					return _index;
+				}
+			}
+			#endregion
 		}
 		#endregion
 	}

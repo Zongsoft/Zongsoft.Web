@@ -210,7 +210,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 虚拟方法
-		protected virtual void OnRender(HtmlTextWriter writer, object dataItem)
+		protected virtual void OnRender(HtmlTextWriter writer, object dataItem, int index)
 		{
 			if(!string.IsNullOrWhiteSpace(this.Value))
 			{
@@ -230,9 +230,9 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 内部方法
-		internal void Render(HtmlTextWriter writer, object dataItem)
+		internal void Render(HtmlTextWriter writer, object dataItem, int index)
 		{
-			this.OnRender(writer, dataItem);
+			this.OnRender(writer, dataItem, index);
 		}
 		#endregion
 	}

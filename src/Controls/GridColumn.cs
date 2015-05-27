@@ -119,7 +119,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成内容
-		protected override void OnRender(HtmlTextWriter writer, object dataItem)
+		protected override void OnRender(HtmlTextWriter writer, object dataItem, int index)
 		{
 			if(!string.IsNullOrWhiteSpace(_navigateUrl))
 			{
@@ -185,7 +185,7 @@ namespace Zongsoft.Web.Controls
 				writer.RenderEndTag();
 
 			//调用基类同名方法
-			base.OnRender(writer, dataItem);
+			base.OnRender(writer, dataItem, index);
 		}
 		#endregion
 	}

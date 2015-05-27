@@ -112,7 +112,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
-		protected override void OnRender(HtmlTextWriter writer, object dataItem)
+		protected override void OnRender(HtmlTextWriter writer, object dataItem, int index)
 		{
 			writer.AddAttribute(HtmlTextWriterAttribute.Name, _commandType.ToString());
 			writer.AddAttribute(HtmlTextWriterAttribute.Href, BindingUtility.FormatBindingValue(_arguments, dataItem, true));
@@ -121,7 +121,7 @@ namespace Zongsoft.Web.Controls
 			writer.RenderEndTag();
 
 			//调用基类同名方法
-			base.OnRender(writer, dataItem);
+			base.OnRender(writer, dataItem, index);
 		}
 		#endregion
 	}
