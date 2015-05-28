@@ -131,7 +131,7 @@ namespace Zongsoft.Web.Controls
 					_flags[EVALUATE_VALUE] = false;
 				}
 
-				return _value;
+				return _value ?? this.DefaultValue;
 			}
 			set
 			{
