@@ -104,15 +104,26 @@ namespace Zongsoft.Web.Controls
 			return result;
 		}
 
-		public static string GetCssClass(string cssClass, string value)
+		public static string ResolveCssClass(string value, Func<string> getCssClass)
 		{
 			if(string.IsNullOrWhiteSpace(value))
-				return cssClass;
+				return null;
 
-			if(string.IsNullOrWhiteSpace(cssClass))
-				return value;
+			//使用 HashSet 将文本解析后的字符串数组元素进行去重处理
+			var parts = new HashSet<string>(value.ToLowerInvariant().Split(new[] { ' ', '\t', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries), StringComparer.OrdinalIgnoreCase);
 
-			return cssClass + " " + value;
+			//组合去重后的文本值
+			var resolvedValue = string.Join(" ", System.Linq.Enumerable.ToArray(parts));
+
+			if(value.Trim().StartsWith(":"))
+			{
+				var css = getCssClass();
+
+				if(!string.IsNullOrWhiteSpace(css))
+					return css.Trim() + " " + resolvedValue;
+			}
+
+			return resolvedValue;
 		}
 
 		public static bool IsChinese(char c)

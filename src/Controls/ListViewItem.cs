@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -33,26 +33,26 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class ListViewItem : Control, IDataItemContainer
+	public class ListViewItem : Literal, IDataItemContainer
 	{
 		#region 成员字段
-		private ListView _owner;
+		private ListView _listView;
 		private object _dataItem;
 		private int _index;
 		private int _displayIndex;
 		#endregion
 
 		#region 构造函数
-		internal ListViewItem(ListView owner, object dataItem, int index) : this(owner, dataItem, index, index)
+		internal ListViewItem(ListView listView, object dataItem, int index) : this(listView, dataItem, index, index)
 		{
 		}
 
-		internal ListViewItem(ListView owner, object dataItem, int index, int displayIndex)
+		internal ListViewItem(ListView listView, object dataItem, int index, int displayIndex)
 		{
-			if(owner == null)
-				throw new ArgumentNullException("owner");
+			if(listView == null)
+				throw new ArgumentNullException("listView");
 
-			_owner = owner;
+			_listView = listView;
 			_dataItem = dataItem;
 			_index = index;
 			_displayIndex = displayIndex;
@@ -64,7 +64,7 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return _owner.DataSource;
+				return _listView.DataSource;
 			}
 		}
 
@@ -100,21 +100,6 @@ namespace Zongsoft.Web.Controls
 			{
 				return _index;
 			}
-		}
-		#endregion
-
-		#region 重写方法
-		public override void RenderControl(HtmlTextWriter writer)
-		{
-			bool isGenerateDefaultTag = _owner.HeaderTemplate == null && _owner.FooterTemplate == null;
-
-			if(isGenerateDefaultTag)
-				writer.RenderBeginTag(HtmlTextWriterTag.Li);
-
-			this.RenderChildren(writer);
-
-			if(isGenerateDefaultTag)
-				writer.RenderEndTag();
 		}
 		#endregion
 	}

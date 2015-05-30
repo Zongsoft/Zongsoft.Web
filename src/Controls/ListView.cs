@@ -46,18 +46,25 @@ namespace Zongsoft.Web.Controls
 		private ITemplate _footerTemplate;
 		#endregion
 
+		#region 构造函数
+		public ListView()
+		{
+			this.CssClass = "ui list";
+		}
+		#endregion
+
 		#region 公共属性
-		[DefaultValue(false)]
+		[DefaultValue(ListViewType.List)]
 		[PropertyMetadata(false)]
-		public bool IsOrdered
+		public ListViewType ListType
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.IsOrdered);
+				return this.GetPropertyValue(() => this.ListType);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.IsOrdered, value);
+				this.SetPropertyValue(() => this.ListType, value);
 			}
 		}
 
@@ -75,17 +82,18 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[Bindable(true)]
 		[DefaultValue("")]
 		[PropertyMetadata(false)]
-		public string ItemTemplateText
+		public string ItemText
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.ItemTemplateText);
+				return this.GetPropertyValue(() => this.ItemText);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.ItemTemplateText, value);
+				this.SetPropertyValue(() => this.ItemText, value);
 			}
 		}
 
@@ -165,7 +173,7 @@ namespace Zongsoft.Web.Controls
 			}
 
 			//生成头部内容
-			this.CreateHeader();
+			var header = this.CreateHeader() ?? this;
 
 			if(this.DataSource == null)
 			{
@@ -180,7 +188,7 @@ namespace Zongsoft.Web.Controls
 				{
 					var item = new ListViewItem(this, this.DataSource, 0);
 					this.CreateItem(item);
-					this.Controls.Add(item);
+					header.Controls.Add(item);
 				}
 				else
 				{
@@ -190,7 +198,7 @@ namespace Zongsoft.Web.Controls
 					{
 						var item = new ListViewItem(this, dataItem, index++);
 						this.CreateItem(item);
-						this.Controls.Add(item);
+						header.Controls.Add(item);
 					}
 				}
 			}
@@ -198,68 +206,70 @@ namespace Zongsoft.Web.Controls
 			//生成脚部内容
 			this.CreateFooter();
 
-			//生成所有子控件
-			this.RenderChildren(writer);
+			//调用基类同名方法
+			base.Render(writer);
 		}
 		#endregion
 
 		#region 虚拟方法
-		protected virtual void CreateHeader()
+		protected virtual Control CreateHeader()
 		{
-			if(_headerTemplate == null && _footerTemplate == null)
+			if(_headerTemplate == null)
 			{
-				var text = new StringBuilder(this.IsOrdered ? "<ol" : "<ul", 64);
+				System.Web.UI.HtmlControls.HtmlGenericControl control = null;
 
-				if(!string.IsNullOrWhiteSpace(this.ID))
-					text.AppendFormat(" id=\"{0}\"", this.ID);
+				switch(this.ListType)
+				{
+					case ListViewType.List:
+						control = new System.Web.UI.HtmlControls.HtmlGenericControl("dl");
+						break;
+					case ListViewType.BulletList:
+						control = new System.Web.UI.HtmlControls.HtmlGenericControl("ul");
+						break;
+					case ListViewType.OrderedList:
+						control = new System.Web.UI.HtmlControls.HtmlGenericControl("ol");
+						break;
+				}
 
-				if(!string.IsNullOrWhiteSpace(this.CssClass))
-					text.AppendFormat(" class=\"{0}\"", this.CssClass);
+				if(control != null)
+				{
+					control.ID = this.ID;
+					control.Attributes.Add("class", this.CssClass);
+					this.Controls.Add(control);
+				}
 
-				text.Append(">");
-
-				this.Controls.Add(new LiteralControl(text.ToString()));
+				return control;
 			}
 			else
 			{
 				if(_headerTemplate != null)
 					_headerTemplate.InstantiateIn(this);
 			}
+
+			return null;
 		}
 
 		protected virtual void CreateFooter()
 		{
-			if(_headerTemplate == null && _footerTemplate == null)
-			{
-				this.Controls.Add(new LiteralControl(string.Format("</{0}>", this.IsOrdered ? "ol" : "ul")));
-			}
-			else
-			{
-				if(_footerTemplate != null)
-					_footerTemplate.InstantiateIn(this);
-			}
+			if(_footerTemplate != null)
+				_footerTemplate.InstantiateIn(this);
 		}
 
 		protected virtual void CreateItem(ListViewItem item)
 		{
-			if(_itemTemplate == null)
+			switch(this.ListType)
 			{
-				if(item.DataItem == null)
-					return;
-
-				var child = new System.Web.UI.LiteralControl();
-
-				if(string.IsNullOrWhiteSpace(this.ItemTemplateText))
-					child.Text = item.DataItem.ToString();
-				else
-					child.Text = BindingUtility.FormatBindingValue(this.ItemTemplateText, item);
-
-				item.Controls.Add(child);
+				case ListViewType.List:
+					item.TagName = "dt";
+					break;
+				case ListViewType.BulletList:
+				case ListViewType.OrderedList:
+					item.TagName = "li";
+					break;
 			}
-			else
-			{
+
+			if(_itemTemplate != null)
 				_itemTemplate.InstantiateIn(item);
-			}
 		}
 		#endregion
 	}

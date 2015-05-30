@@ -34,6 +34,7 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
+	[DefaultProperty("Value")]
 	public class InputBox : DataBoundControl
 	{
 		#region 构造函数
@@ -190,6 +191,7 @@ namespace Zongsoft.Web.Controls
 			if(this.IsRenderFieldTag)
 			{
 				//生成最外层的Div布局元素，即<div class="field">
+
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
 				writer.RenderBeginTag(HtmlTextWriterTag.Div);
 			}

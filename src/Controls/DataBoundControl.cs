@@ -69,12 +69,7 @@ namespace Zongsoft.Web.Controls
 			set
 			{
 				if(value != null && value.Length > 0)
-				{
-					value = value.Trim();
-
-					if(value.StartsWith(":"))
-						value = (this.CssClass + " " + value.Trim(':', ' ', '\t')).Trim();
-				}
+					value = Utility.ResolveCssClass(value, () => this.CssClass);
 
 				this.SetPropertyValue(() => this.CssClass, value);
 			}
@@ -92,6 +87,14 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 公共方法
+		public void SetAttributeValue(string attributeName, string attributeValue)
+		{
+			if(string.IsNullOrWhiteSpace(attributeName))
+				throw new ArgumentNullException("attributeName");
+
+			_properties[attributeName] = this.CreatePropertyMetadata(attributeName, attributeValue);
+		}
+
 		protected PropertyMetadata GetProperty(string name)
 		{
 			if(string.IsNullOrWhiteSpace(name))

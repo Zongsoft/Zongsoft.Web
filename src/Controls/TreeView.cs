@@ -385,12 +385,12 @@ namespace Zongsoft.Web.Controls
 			string cssClass = string.Empty;
 
 			if(flag == FIRSTNODE)
-				cssClass = Utility.GetCssClass(cssClass, "first");
+				cssClass = Utility.ResolveCssClass(":first", () => cssClass);
 			else if(flag == LASTNODE)
-				cssClass = Utility.GetCssClass(cssClass, "last");
+				cssClass = Utility.ResolveCssClass(":last", () => cssClass);
 
 			if(node.Selected)
-				cssClass = Utility.GetCssClass(cssClass, "selected");
+				cssClass = Utility.ResolveCssClass(":selected", () => cssClass);
 
 			if(!string.IsNullOrWhiteSpace(cssClass))
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, cssClass);

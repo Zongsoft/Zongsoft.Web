@@ -34,10 +34,20 @@ using System.Web.UI;
 namespace Zongsoft.Web.Controls
 {
 	[DefaultProperty("Text")]
-	[ParseChildren(true, "Text")]
-	[ControlBuilder(typeof(DataBoundControlBuilder))]
 	public class Literal : DataBoundControl
 	{
+		#region 构造函数
+		public Literal()
+		{
+		}
+
+		public Literal(string tagName, string cssClass = "")
+		{
+			this.TagName = tagName;
+			this.CssClass = cssClass;
+		}
+		#endregion
+
 		#region 公共属性
 		[DefaultValue("")]
 		[PropertyMetadata(false)]
@@ -112,8 +122,8 @@ namespace Zongsoft.Web.Controls
 					writer.Write(this.Text);
 			}
 
-			//生成所有子控件
-			this.RenderChildren(writer);
+			//调用基类同名方法(生成子控件集)
+			base.RenderContent(writer);
 		}
 		#endregion
 	}

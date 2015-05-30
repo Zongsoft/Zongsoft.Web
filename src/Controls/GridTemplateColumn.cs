@@ -74,7 +74,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 嵌套子类
-		public class GridTemplateColumnControl : Control, IDataItemContainer
+		internal class GridTemplateColumnControl : Control, IDataItemContainer
 		{
 			#region 成员字段
 			private GridTemplateColumn _column;

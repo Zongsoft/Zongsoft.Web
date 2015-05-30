@@ -37,6 +37,19 @@ namespace Zongsoft.Web.Controls
 	{
 		#region 公共属性
 		[Bindable(true)]
+		public string Name
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.Name);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.Name, value);
+			}
+		}
+
+		[Bindable(true)]
 		[DefaultValue("")]
 		[PropertyMetadata("src", PropertyRender = "UrlPropertyRender.Default")]
 		public string ImageUrl
@@ -69,15 +82,15 @@ namespace Zongsoft.Web.Controls
 		[Bindable(true)]
 		[DefaultValue("")]
 		[PropertyMetadata("alt")]
-		public string Title
+		public string Placeholder
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.Title);
+				return this.GetPropertyValue(() => this.Placeholder);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Title, value);
+				this.SetPropertyValue(() => this.Placeholder, value);
 			}
 		}
 
@@ -109,25 +122,31 @@ namespace Zongsoft.Web.Controls
 		#region 生成控件
 		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
-			this.AddAttributes(writer);
+			if(string.IsNullOrWhiteSpace(ImageUrl))
+			{
+				this.CssClass = ":icon " + this.Name.Trim().ToLowerInvariant();
 
-			if(!Unit.IsEmpty(this.Width))
-				writer.AddAttribute(HtmlTextWriterAttribute.Width, this.Width.ToString());
+				this.AddAttributes(writer, "ImageUrl", "Title");
 
-			if(!Unit.IsEmpty(this.Height))
-				writer.AddAttribute(HtmlTextWriterAttribute.Height, this.Height.ToString());
+				writer.RenderBeginTag(HtmlTextWriterTag.I);
+			}
+			else
+			{
+				this.AddAttributes(writer);
 
-			writer.RenderBeginTag(HtmlTextWriterTag.Img);
+				if(!Unit.IsEmpty(this.Width))
+					writer.AddAttribute(HtmlTextWriterAttribute.Width, this.Width.ToString());
+
+				if(!Unit.IsEmpty(this.Height))
+					writer.AddAttribute(HtmlTextWriterAttribute.Height, this.Height.ToString());
+
+				writer.RenderBeginTag(HtmlTextWriterTag.Img);
+			}
 		}
 
 		protected override void RenderEndTag(HtmlTextWriter writer)
 		{
 			writer.RenderEndTag();
-		}
-
-		protected override void RenderContent(HtmlTextWriter writer)
-		{
-			base.RenderContent(writer);
 		}
 
 		protected override void Render(HtmlTextWriter writer)

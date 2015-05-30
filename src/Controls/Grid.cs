@@ -219,7 +219,7 @@ namespace Zongsoft.Web.Controls
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Thead);
 
-			//开始生成表头行
+			//开始生成表头行(<tr>
 			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
 			//生成选择列
@@ -250,7 +250,7 @@ namespace Zongsoft.Web.Controls
 				if(!string.IsNullOrEmpty(style))
 					writer.AddAttribute(HtmlTextWriterAttribute.Style, style);
 
-				writer.RenderBeginTag(HtmlTextWriterTag.Td);
+				writer.RenderBeginTag(HtmlTextWriterTag.Th);
 
 				if(string.IsNullOrWhiteSpace(column.Title))
 					writer.Write("&nbsp;");
@@ -260,7 +260,7 @@ namespace Zongsoft.Web.Controls
 				writer.RenderEndTag();
 			}//表头列(结束)
 
-			//结束生成表头行
+			//结束生成表头行(</tr>
 			writer.RenderEndTag();
 
 			//结束生成表头部分
@@ -359,7 +359,7 @@ namespace Zongsoft.Web.Controls
 			if(dataItem == null)
 				return;
 
-			//生成表体的行标记(开始)
+			//生成表体的行标记(<tr>)
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, (rowIndex % 2 == 1 ? "odd" : "even"));
 			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
@@ -387,7 +387,7 @@ namespace Zongsoft.Web.Controls
 				writer.RenderEndTag();
 			}
 
-			//生成表体的行标记(结束)
+			//生成表体的行标记(</tr>)
 			writer.RenderEndTag();
 		}
 		#endregion
