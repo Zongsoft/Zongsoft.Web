@@ -324,10 +324,13 @@ namespace Zongsoft.Web.Controls
 			if(node == null || (!node.Visible))
 				return;
 
-			string cssClass = string.Empty;
+			string cssClass = "item";
 
 			if(node.Selected)
 				cssClass = Utility.ResolveCssClass(":selected", () => cssClass);
+
+			if(node.Nodes.Count > 0)
+				cssClass += " ui dropdown";
 
 			if(!string.IsNullOrWhiteSpace(cssClass))
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, cssClass);
@@ -344,6 +347,7 @@ namespace Zongsoft.Web.Controls
 
 			if(node.Nodes.Count > 0)
 			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "menu");
 				writer.RenderBeginTag(HtmlTextWriterTag.Ul);
 
 				for(int i = 0; i < node.Nodes.Count; i++)
