@@ -43,7 +43,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 构造函数
-		public LayoutFluidCell() : base("div", "column")
+		public LayoutFluidCell() : base("div")
 		{
 		}
 		#endregion
@@ -95,16 +95,16 @@ namespace Zongsoft.Web.Controls
 			if(_isNewRow)
 			{
 				if(_columnCount > 0)
-					this.CssClass = Utility.GetNumberString(_columnCount) + " column row";
+					this.CssClass = ":" + Utility.GetNumberString(_columnCount) + " column row";
 				else
-					this.CssClass = "row";
+					this.CssClass = ":row";
 			}
 			else
 			{
 				if(_columnCount > 0)
-					this.CssClass = (_flex == null ? Utility.GetNumberString(_columnCount) + " wide column" : _flex.ToString());
+					this.CssClass = ":" + (_flex == null ? Utility.GetNumberString(_columnCount) + " wide column" : _flex.ToString());
 				else
-					this.CssClass = (_flex == null ? "column" : _flex.ToString());
+					this.CssClass = ":" + (_flex == null ? "column" : _flex.ToString());
 			}
 
 			this.AddAttributes(writer);
