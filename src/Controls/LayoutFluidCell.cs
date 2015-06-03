@@ -39,12 +39,14 @@ namespace Zongsoft.Web.Controls
 		#region 成员字段
 		private bool _isNewRow;
 		private int _columnCount;
-		private FluidLayoutFlex _flex;
+		private LayoutFluidVisiblity _visiblity;
+		private LayoutFluidFlex _flex;
 		#endregion
 
 		#region 构造函数
 		public LayoutFluidCell() : base("div")
 		{
+			_visiblity = LayoutFluidVisiblity.None;
 		}
 		#endregion
 
@@ -73,12 +75,24 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
-		public FluidLayoutFlex Flex
+		public LayoutFluidVisiblity Visiblity
+		{
+			get
+			{
+				return _visiblity;
+			}
+			set
+			{
+				_visiblity = value;
+			}
+		}
+
+		public LayoutFluidFlex Flex
 		{
 			get
 			{
 				if(_flex == null)
-					_flex = new FluidLayoutFlex();
+					_flex = new LayoutFluidFlex();
 
 				return _flex;
 			}
@@ -95,16 +109,16 @@ namespace Zongsoft.Web.Controls
 			if(_isNewRow)
 			{
 				if(_columnCount > 0)
-					this.CssClass = ":" + Utility.GetNumberString(_columnCount) + " column row";
+					this.CssClass = ":" + Utility.GetNumberString(_columnCount) + " column row" + this.GetVisiblityString();
 				else
-					this.CssClass = ":row";
+					this.CssClass = ":row" + this.GetVisiblityString();
 			}
 			else
 			{
 				if(_columnCount > 0)
-					this.CssClass = ":" + (_flex == null ? Utility.GetNumberString(_columnCount) + " wide column" : _flex.ToString());
+					this.CssClass = ":" + (_flex == null ? Utility.GetNumberString(_columnCount) + " wide column" : _flex.ToString()) + this.GetVisiblityString();
 				else
-					this.CssClass = ":" + (_flex == null ? "column" : _flex.ToString());
+					this.CssClass = ":column " + (_flex == null ? "" : _flex.ToString()) + this.GetVisiblityString();
 			}
 
 			this.AddAttributes(writer);
@@ -141,20 +155,56 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
-		#region 重写方法
-		public override string ToString()
+		#region 私有方法
+		private string GetVisiblityString()
 		{
-			if(_isNewRow)
-				return "row";
+			if(_visiblity == LayoutFluidVisiblity.None)
+				return string.Empty;
 
-			return _flex == null ? "column" : _flex.ToString();
+			if(_visiblity == (LayoutFluidVisiblity.Phone | LayoutFluidVisiblity.Tablet | LayoutFluidVisiblity.Computer))
+				return string.Empty;
+
+			var text = string.Empty;
+
+			if((_visiblity & LayoutFluidVisiblity.Phone) == LayoutFluidVisiblity.Phone)
+				text += " mobile";
+
+			if((_visiblity & LayoutFluidVisiblity.Tablet) == LayoutFluidVisiblity.Tablet)
+				text += " tablet";
+
+			if((_visiblity & LayoutFluidVisiblity.Computer) == LayoutFluidVisiblity.Computer)
+				text += " computer";
+
+			if(!string.IsNullOrWhiteSpace(text))
+				text += " only ";
+
+			return text;
+		}
+		#endregion
+
+		#region 枚举定义
+		/// <summary>
+		/// 表示流式布局的可见性。
+		/// </summary>
+		[Flags]
+		public enum LayoutFluidVisiblity
+		{
+			/// <summary>不指定可见性</summary>
+			None = 0,
+
+			/// <summary>只有手机可见</summary>
+			Phone = 1,
+			/// <summary>只有平板可见</summary>
+			Tablet = 2,
+			/// <summary>只有电脑可见</summary>
+			Computer = 4,
 		}
 		#endregion
 
 		#region 嵌套子类
 		[Serializable]
-		[TypeConverter(typeof(FluidLayoutFlexConverter))]
-		public class FluidLayoutFlex
+		[TypeConverter(typeof(LayoutFluidFlexConverter))]
+		public class LayoutFluidFlex
 		{
 			public int Tiny;
 			public int Small;
@@ -163,11 +213,11 @@ namespace Zongsoft.Web.Controls
 			public int LargeWide;
 
 			#region 构造函数
-			public FluidLayoutFlex()
+			public LayoutFluidFlex()
 			{
 			}
 
-			public FluidLayoutFlex(int tiny, int small, int medium, int large, int largeWide)
+			public LayoutFluidFlex(int tiny, int small, int medium, int large, int largeWide)
 			{
 				this.Tiny = tiny;
 				this.Small = small;
@@ -202,13 +252,13 @@ namespace Zongsoft.Web.Controls
 			#endregion
 
 			#region 静态解析
-			public static FluidLayoutFlex Parse(string text)
+			public static LayoutFluidFlex Parse(string text)
 			{
 				if(string.IsNullOrWhiteSpace(text))
-					return new FluidLayoutFlex();
+					return new LayoutFluidFlex();
 
 				var parts = text.Split(',');
-				var flex = new FluidLayoutFlex();
+				var flex = new LayoutFluidFlex();
 
 				if(parts.Length == 1)
 					flex.Tiny = flex.Small = flex.Medium = flex.Large = flex.LargeWide = Zongsoft.Common.Convert.ConvertValue<int>(parts[0].Trim());
@@ -231,7 +281,7 @@ namespace Zongsoft.Web.Controls
 			#endregion
 		}
 
-		public class FluidLayoutFlexConverter : TypeConverter
+		public class LayoutFluidFlexConverter : TypeConverter
 		{
 			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 			{
@@ -257,7 +307,7 @@ namespace Zongsoft.Web.Controls
 				var text = value as string;
 
 				if(text != null)
-					return FluidLayoutFlex.Parse(text);
+					return LayoutFluidFlex.Parse(text);
 
 				return base.ConvertFrom(context, culture, value);
 			}
@@ -266,7 +316,7 @@ namespace Zongsoft.Web.Controls
 			{
 				if(destinationType == typeof(string))
 				{
-					var flex = value as FluidLayoutFlex;
+					var flex = value as LayoutFluidFlex;
 
 					if(flex == null)
 						return null;
@@ -276,8 +326,8 @@ namespace Zongsoft.Web.Controls
 
 				if(destinationType == typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor))
 				{
-					var ctor = typeof(FluidLayoutFlex).GetConstructor(new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) });
-					var flex = (FluidLayoutFlex)value;
+					var ctor = typeof(LayoutFluidFlex).GetConstructor(new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) });
+					var flex = (LayoutFluidFlex)value;
 					return new System.ComponentModel.Design.Serialization.InstanceDescriptor(ctor, new int[] { flex.Tiny, flex.Small, flex.Medium, flex.Large, flex.LargeWide });
 				}
 
