@@ -105,16 +105,20 @@ namespace Zongsoft.Web.Controls
 			return result;
 		}
 
+		//注意：原有版本的实现会对value参数的分解之后进行去重，但是在某些场合是不能去重的，所以，现在取消去重的功能实现了。
 		public static string ResolveCssClass(string value, Func<string> getCssClass)
 		{
 			if(string.IsNullOrWhiteSpace(value))
 				return null;
 
 			//使用 HashSet 将文本解析后的字符串数组元素进行去重处理
-			var parts = new HashSet<string>(value.ToLowerInvariant().Split(new[] { ' ', '\t', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries), StringComparer.OrdinalIgnoreCase);
+			//var parts = new HashSet<string>(value.ToLowerInvariant().Split(new[] { ' ', '\t', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries), StringComparer.OrdinalIgnoreCase);
 
 			//组合去重后的文本值
-			var resolvedValue = string.Join(" ", System.Linq.Enumerable.ToArray(parts));
+			//var resolvedValue = string.Join(" ", System.Linq.Enumerable.ToArray(parts));
+
+			var parts = value.ToLowerInvariant().Split(new[] { ' ', '\t', ',', ';', ':' }, StringSplitOptions.RemoveEmptyEntries);
+			var resolvedValue = string.Join(" ", parts);
 
 			if(value.Trim().StartsWith(":"))
 			{
