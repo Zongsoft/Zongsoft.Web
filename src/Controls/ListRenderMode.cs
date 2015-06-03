@@ -4,9 +4,9 @@ using System.ComponentModel;
 namespace Zongsoft.Web.Controls
 {
 	/// <summary>
-	/// 表示列表视图的类型。
+	/// 表示列表元素的生成方式。
 	/// </summary>
-	public enum ListViewType
+	public enum ListRenderMode
 	{
 		/// <summary>不生成列表标签</summary>
 		None,

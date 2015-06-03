@@ -56,7 +56,7 @@ namespace Zongsoft.Web.Controls
 	public class LayoutPanel : DataBoundControl
 	{
 		#region 成员字段
-		private TableLayoutSettings _tableLayoutSettings;
+		private LayoutTableSettings _tableLayoutSettings;
 		#endregion
 
 		#region 公共属性
@@ -91,12 +91,12 @@ namespace Zongsoft.Web.Controls
 		[NotifyParentProperty(true)]
 		[PersistenceMode(PersistenceMode.InnerProperty)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		public TableLayoutSettings TableLayoutSettings
+		public LayoutTableSettings LayoutTableSettings
 		{
 			get
 			{
 				if(_tableLayoutSettings == null)
-					_tableLayoutSettings = new TableLayoutSettings();
+					_tableLayoutSettings = new LayoutTableSettings();
 
 				return _tableLayoutSettings;
 			}
@@ -110,7 +110,7 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void Render(HtmlTextWriter writer)
 		{
-			IList<Control> controls = this.GetControls();
+			IList<Control> controls = Utility.GetVisibleChildren(this);
 
 			if(controls.Count < 1)
 				return;
@@ -139,46 +139,26 @@ namespace Zongsoft.Web.Controls
 			//生成其他自定义属性
 			this.AddAttributes(writer);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout layout-fluid");
+			if(this.LayoutColumnCount > 0)
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "ui " + Utility.GetNumberString(this.LayoutColumnCount) + " column grid layout layout-fluid");
+			else
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "ui grid layout layout-fluid");
+
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
-			for(int i = 0; i < controls.Count; i++)
+			foreach(Control control in controls)
 			{
-				var cell = controls[i] as LayoutPanelCell;
-
-				if(cell != null)
+				if(control is LayoutFluidCell)
 				{
-					var text = new StringBuilder();
-					var flex = cell.FluidCellSettings.Flex;
-
-					if(flex.Tiny > 0)
-						text.AppendFormat(" flex-xs-{0}", flex.Tiny);
-
-					if(flex.Small > 0)
-						text.AppendFormat(" flex-sm-{0}", flex.Small);
-
-					if(flex.Medium > 0)
-						text.AppendFormat(" flex-md-{0}", flex.Medium);
-
-					if(flex.Large > 0)
-						text.AppendFormat(" flex-lg-{0}", flex.Large);
-
-					if(!string.IsNullOrWhiteSpace(cell.ID))
-						writer.AddAttribute(HtmlTextWriterAttribute.Id, cell.ID);
-
-					if(text.Length > 0)
-						writer.AddAttribute(HtmlTextWriterAttribute.Class, text.ToString());
-					else
-						writer.AddAttribute(HtmlTextWriterAttribute.Class, "flex-md-12");
+					control.RenderControl(writer);
 				}
 				else
 				{
-					writer.AddAttribute(HtmlTextWriterAttribute.Class, "flex-md-12");
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, "column");
+					writer.RenderBeginTag(HtmlTextWriterTag.Div);
+					control.RenderControl(writer);
+					writer.RenderEndTag();
 				}
-
-				writer.RenderBeginTag(HtmlTextWriterTag.Div);
-				controls[i].RenderControl(writer);
-				writer.RenderEndTag();
 			}
 
 			writer.RenderEndTag();
@@ -240,20 +220,19 @@ namespace Zongsoft.Web.Controls
 					columnCount = rowSpans.Count(span => span == 0);
 				}
 
-				if(i == controls.Count - 1 && this.TableLayoutSettings.MergeLastCells)
+				if(i == controls.Count - 1 && this.LayoutTableSettings.MergeLastCells)
 				{
 					colSpan = columnCount - columnIndex;
 				}
 				else
 				{
-					LayoutPanelCell cell = controls[i] as LayoutPanelCell;
+					var cell = controls[i] as LayoutTableCell;
 
 					if(cell != null)
 					{
-						var cellSettings = cell.TableCellSettings;
-						colSpan = Math.Min(cellSettings.ColSpan, columnCount - columnIndex);
+						colSpan = Math.Min(cell.ColSpan, columnCount - columnIndex);
 
-						if(cellSettings.RowSpan > 1 || cellSettings.RowSpan == 0)
+						if(cell.RowSpan > 1 || cell.RowSpan == 0)
 						{
 							spanIndex = this.GetRowSpanIndex(rowSpans, columnIndex);
 
@@ -261,7 +240,7 @@ namespace Zongsoft.Web.Controls
 							{
 								for(int j = 0; j < colSpan; j++)
 								{
-									rowSpans[spanIndex + j] = cellSettings.RowSpan == 0 ? -1 : cellSettings.RowSpan;
+									rowSpans[spanIndex + j] = cell.RowSpan == 0 ? -1 : cell.RowSpan;
 								}
 							}
 						}
@@ -329,26 +308,6 @@ namespace Zongsoft.Web.Controls
 			}
 
 			return -1;
-		}
-
-		private IList<Control> GetControls()
-		{
-			var controls = new List<Control>();
-
-			foreach(Control control in this.Controls)
-			{
-				var literal = control as LiteralControl;
-
-				if(literal != null)
-				{
-					if(string.IsNullOrWhiteSpace(literal.Text))
-						continue;
-				}
-
-				controls.Add(control);
-			}
-
-			return controls;
 		}
 		#endregion
 	}

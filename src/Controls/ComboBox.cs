@@ -39,9 +39,10 @@ namespace Zongsoft.Web.Controls
 	[DefaultProperty("Items")]
 	[PersistChildren(true)]
 	[ParseChildren(true)]
-	public class ComboBox : CompositeDataBoundControl
+	public class ComboBox : CompositeDataBoundControl, INamingContainer
 	{
 		#region 成员变量
+		private ITemplate _itemTemplate;
 		private ComboBoxBinding _binding;
 		private ComboBoxItemCollection _items;
 		#endregion
@@ -49,7 +50,7 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public ComboBox()
 		{
-			this.CssClass = "select";
+			this.CssClass = "ui selection dropdown";
 			_items = new ComboBoxItemCollection();
 		}
 		#endregion
@@ -112,6 +113,20 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[DefaultValue(true)]
+		[PropertyMetadata(false)]
+		public bool IsRenderFieldTag
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.IsRenderFieldTag);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.IsRenderFieldTag, value);
+			}
+		}
+
 		[Bindable(true)]
 		[DefaultValue("")]
 		[PropertyMetadata(false)]
@@ -157,6 +172,21 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(ComboBox))]
+		public ITemplate ItemTemplate
+		{
+			get
+			{
+				return _itemTemplate;
+			}
+			set
+			{
+				_itemTemplate = value;
+			}
+		}
+
 		[MergableProperty(false)]
 		[PersistenceMode(PersistenceMode.InnerProperty)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
@@ -170,21 +200,36 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成控件
-		//protected override void Render(HtmlTextWriter writer)
-		//{
-		//	switch(this.RenderMode)
-		//	{
-		//		case ComboBoxRenderMode.Classic:
-		//			this.RenderClassic(writer);
-		//			break;
-		//		case ComboBoxRenderMode.Custom:
-		//			this.RenderCustom(writer);
-		//			break;
-		//	}
+		protected override void Render(HtmlTextWriter writer)
+		{
+			if(this.IsRenderFieldTag)
+			{
+				//生成最外层的Div布局元素，即<div class="field">
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
+				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+			}
 
-		//	//调用基类同名方法
-		//	base.Render(writer);
-		//}
+			//生成Label标签
+			if(!string.IsNullOrWhiteSpace(this.Label))
+			{
+				if(!string.IsNullOrWhiteSpace(this.ID))
+					writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
+
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "label");
+				writer.RenderBeginTag(HtmlTextWriterTag.Label);
+				writer.WriteEncodedText(this.Label);
+				writer.RenderEndTag();
+			}
+
+			//调用基类同名方法(生成下拉框元素及其内容)
+			base.Render(writer);
+
+			if(this.IsRenderFieldTag)
+			{
+				//关闭最外层的Div布局元素，即生成</div>
+				writer.RenderEndTag();
+			}
+		}
 
 		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
@@ -219,15 +264,15 @@ namespace Zongsoft.Web.Controls
 				writer.RenderBeginTag(HtmlTextWriterTag.Input);
 				writer.RenderEndTag();
 
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "select select-text");
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "default text");
 				writer.RenderBeginTag(HtmlTextWriterTag.Span);
 				writer.RenderEndTag();
 
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "select select-icon icon icon-dropdown");
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "dropdown icon");
 				writer.RenderBeginTag(HtmlTextWriterTag.I);
 				writer.RenderEndTag();
 
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "select select-list");
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "menu");
 				writer.RenderBeginTag(HtmlTextWriterTag.Dl);
 			}
 		}
@@ -254,42 +299,12 @@ namespace Zongsoft.Web.Controls
 		{
 			foreach(var item in _items)
 			{
-				if(this.RenderMode == ComboBoxRenderMode.Classic)
-					writer.AddAttribute(HtmlTextWriterAttribute.Value, item.Value);
-				else
-					writer.AddAttribute("data-value", item.Value);
+				var isSelected = this.SelectedIndex < 0 ? string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase) : this.SelectedIndex == index;
 
-				if(item.Disabled)
-					writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "disabled");
-
-				if(this.SelectedIndex < 0)
-				{
-					if(string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase))
-					{
-						if(this.RenderMode == ComboBoxRenderMode.Classic)
-							writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
-						else
-							writer.AddAttribute("data-selected", "selected");
-					}
-				}
-				else
-				{
-					if(this.SelectedIndex == index)
-					{
-						if(this.RenderMode == ComboBoxRenderMode.Classic)
-							writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
-						else
-							writer.AddAttribute("data-selected", "selected");
-					}
-				}
-
-				if(this.RenderMode == ComboBoxRenderMode.Classic)
-					writer.RenderBeginTag(HtmlTextWriterTag.Option);
-				else
-					writer.RenderBeginTag(HtmlTextWriterTag.Dt);
-
-				writer.WriteEncodedText(item.Text);
-				writer.RenderEndTag();
+				//if(_itemTemplate == null)
+					item.ToHtmlString(writer, this.RenderMode, isSelected);
+				//else
+				//	this.RenderItemTemplate(writer, item.Value, item, index);
 
 				index++;
 			}
@@ -299,277 +314,78 @@ namespace Zongsoft.Web.Controls
 
 		private int RenderDataItems(HtmlTextWriter writer, int index)
 		{
-			if(this.DataSource != null)
+			if(this.DataSource == null)
+				return index;
+
+			var dataSource = this.DataSource as IEnumerable;
+
+			if(dataSource == null)
 			{
-				var dataSource = this.DataSource as IEnumerable;
-
-				if(dataSource != null)
+				var item = new ComboBoxItem()
 				{
-					foreach(object dataItem in dataSource)
+					Value = BindingUtility.FormatBindingValue(_binding != null ? _binding.ValueMember : string.Empty, this.DataSource, true),
+					Text = BindingUtility.FormatBindingValue(_binding != null ? _binding.TextMember : string.Empty, this.DataSource, true),
+					Description = BindingUtility.FormatBindingValue(_binding != null ? _binding.DescriptionMember : string.Empty, this.DataSource, true),
+					Icon = BindingUtility.FormatBindingValue(_binding != null ? _binding.IconMember : string.Empty, this.DataSource, true),
+				};
+
+				var isSelected = this.SelectedIndex < 0 ? string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase) : this.SelectedIndex == index;
+
+				if(_itemTemplate == null)
+					item.ToHtmlString(writer, this.RenderMode, isSelected);
+				else
+					this.RenderItemTemplate(writer, item.Value, this.DataSource, index, isSelected);
+			}
+			else
+			{
+				foreach(object dataItem in dataSource)
+				{
+					var item = new ComboBoxItem()
 					{
-						string value = BindingUtility.FormatBindingValue(_binding != null ? _binding.ValueMember : string.Empty, dataItem, true);
+						Value = BindingUtility.FormatBindingValue(_binding != null ? _binding.ValueMember : string.Empty, dataItem, true),
+						Text = BindingUtility.FormatBindingValue(_binding != null ? _binding.TextMember : string.Empty, dataItem, true),
+						Description = BindingUtility.FormatBindingValue(_binding != null ? _binding.DescriptionMember : string.Empty, dataItem, true),
+						Icon = BindingUtility.FormatBindingValue(_binding != null ? _binding.IconMember : string.Empty, dataItem, true),
+					};
 
-						if(string.IsNullOrEmpty(value))
-							continue;
+					var isSelected = this.SelectedIndex < 0 ? string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase) : this.SelectedIndex == index;
 
-						if(this.RenderMode == ComboBoxRenderMode.Classic)
-							writer.AddAttribute(HtmlTextWriterAttribute.Value, value);
-						else
-							writer.AddAttribute("data-value", value);
-
-						if(this.SelectedIndex < 0)
-						{
-							if(string.Equals(this.SelectedValue, value, StringComparison.OrdinalIgnoreCase))
-							{
-								if(this.RenderMode == ComboBoxRenderMode.Classic)
-									writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
-								else
-									writer.AddAttribute("data-selected", "selected");
-							}
-						}
-						else
-						{
-							if(this.SelectedIndex == index)
-							{
-								if(this.RenderMode == ComboBoxRenderMode.Classic)
-									writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
-								else
-									writer.AddAttribute("data-selected", "selected");
-							}
-						}
-
-						if(this.RenderMode == ComboBoxRenderMode.Classic)
-							writer.RenderBeginTag(HtmlTextWriterTag.Option);
-						else
-							writer.RenderBeginTag(HtmlTextWriterTag.Dt);
-
-						writer.WriteEncodedText(BindingUtility.FormatBindingValue(_binding != null ? _binding.TextMember : string.Empty, dataItem, true));
-						writer.RenderEndTag();
-
-						index++;
-					}
+					if(_itemTemplate == null)
+						item.ToHtmlString(writer, this.RenderMode, isSelected);
+					else
+						this.RenderItemTemplate(writer, item.Value, dataItem, index, isSelected);
 				}
 			}
 
-			return index;
+			return ++index;
 		}
 
-		private void RenderCustom(HtmlTextWriter writer)
+		private void RenderItemTemplate(HtmlTextWriter writer, string value, object dataItem, int index, bool isSelected)
 		{
-			if(string.IsNullOrWhiteSpace(this.ID))
-				throw new InvalidOperationException("The ID property is null or empty.");
+			DataItemContainer<ComboBox> container;
 
-			int index = 0;
-			string displayName = this.ID + "-combobox";
-			string selectedText = null;
-			string selectedValue = null;
-
-			//生成下拉框视图的开始标签<div>
-			writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID + "-view");
-			writer.AddAttribute(HtmlTextWriterAttribute.Style, "display:none");
-			writer.RenderBeginTag(HtmlTextWriterTag.Div);
-
-			//生成下拉框视图内的列表开始标签<ul>
-			writer.RenderBeginTag(HtmlTextWriterTag.Ul);
-
-			foreach(var item in _items)
+			if(this.RenderMode == ComboBoxRenderMode.Classic)
 			{
-				writer.AddAttribute("zs:value", item.Value);
+				container = new DataItemContainer<ComboBox>(this, dataItem, index, "option");
+				container.SetAttributeValue("value", value);
 
-				if(item.Disabled)
-					writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "disabled");
-
-				writer.RenderBeginTag(HtmlTextWriterTag.Li);
-				writer.WriteEncodedText(item.Text);
-				writer.RenderEndTag();
-
-				if(this.SelectedIndex < 0)
-				{
-					if(string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase))
-					{
-						selectedText = item.Text;
-						selectedValue = item.Value;
-					}
-				}
-				else
-				{
-					if(this.SelectedIndex == index)
-					{
-						selectedText = item.Text;
-						selectedValue = item.Value;
-					}
-				}
-
-				index++;
+				if(isSelected)
+					container.SetAttributeValue("selected", "selected");
 			}
-
-			if(this.DataSource != null && _binding != null)
+			else
 			{
-				IEnumerable dataSource = this.DataSource as IEnumerable;
+				container = new DataItemContainer<ComboBox>(this, dataItem, index, "dt", "item");
+				container.SetAttributeValue("data-value", value);
 
-				if(dataSource != null)
+				if(isSelected)
 				{
-					foreach(object dataItem in dataSource)
-					{
-						string value = BindingUtility.FormatBindingValue(_binding.ValueMember, dataItem, true);
-
-						if(string.IsNullOrEmpty(value))
-							continue;
-
-						if(this.SelectedIndex < 0)
-						{
-							if(string.Equals(this.SelectedValue, value, StringComparison.OrdinalIgnoreCase))
-							{
-								selectedText = BindingUtility.FormatBindingValue(_binding.TextMember, dataItem, true);
-								selectedValue = value;
-							}
-						}
-						else
-						{
-							if(this.SelectedIndex == index)
-							{
-								selectedText = BindingUtility.FormatBindingValue(_binding.TextMember, dataItem, true);
-								selectedValue = value;
-							}
-						}
-
-						writer.AddAttribute("zs:value", value);
-
-						writer.RenderBeginTag(HtmlTextWriterTag.Li);
-						writer.WriteEncodedText(BindingUtility.FormatBindingValue(_binding.TextMember, dataItem, true));
-						writer.RenderEndTag();
-
-						index++;
-					}
+					container.SetAttributeValue("data-selected", "selected");
+					container.CssClass = "active selected item";
 				}
 			}
 
-			//生成下拉框视图内的列表结束标签</ul>
-			writer.RenderEndTag();
-
-			//生成下拉框视图内的隐藏域(开始)
-			writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-			writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
-			writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "combobox");
-			writer.AddAttribute(HtmlTextWriterAttribute.Value, selectedValue);
-			writer.RenderBeginTag(HtmlTextWriterTag.Input);
-			writer.RenderEndTag();
-			//生成下拉框视图内的隐藏域(完成)
-
-			//生成下拉框视图的结束标签</div>
-			writer.RenderEndTag();
-
-			if(!string.IsNullOrWhiteSpace(this.Label))
-			{
-				writer.AddAttribute(HtmlTextWriterAttribute.For, displayName);
-				writer.RenderBeginTag(HtmlTextWriterTag.Label);
-				writer.WriteEncodedText(this.Label);
-				writer.RenderEndTag();
-			}
-
-			writer.AddAttribute(HtmlTextWriterAttribute.Id, displayName);
-			writer.AddAttribute(HtmlTextWriterAttribute.Name, displayName);
-			writer.AddAttribute(HtmlTextWriterAttribute.Type, "text");
-			writer.AddAttribute(HtmlTextWriterAttribute.ReadOnly, "readonly");
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "combobox-input");
-			writer.AddAttribute(HtmlTextWriterAttribute.Value, selectedText);
-			writer.RenderBeginTag(HtmlTextWriterTag.Input);
-			writer.RenderEndTag();
-		}
-
-		private void RenderClassic(HtmlTextWriter writer)
-		{
-			int index = 0;
-
-			if(!string.IsNullOrWhiteSpace(this.Label))
-			{
-				if(!string.IsNullOrWhiteSpace(this.ID))
-					writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
-
-				writer.RenderBeginTag(HtmlTextWriterTag.Label);
-				writer.WriteEncodedText(this.Label);
-				writer.RenderEndTag();
-			}
-
-			if(!string.IsNullOrWhiteSpace(this.ID))
-			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
-				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
-			}
-
-			if(!string.IsNullOrWhiteSpace(this.CssClass))
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, this.CssClass);
-
-			//生成自动提交的脚本事件代码
-			if(this.AutoSubmit)
-				writer.AddAttribute(HtmlTextWriterAttribute.Onchange, @"javascript:var current = this.parentNode;while(current != null && current.tagName.toLowerCase() != 'form'){current = current.parentNode;}if(current != null && current.tagName.toLowerCase() == 'form')current.submit();", false);
-
-			//生成控件标记(开始)
-			writer.RenderBeginTag(HtmlTextWriterTag.Select);
-
-			foreach(var item in _items)
-			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Value, item.Value);
-
-				if(item.Disabled)
-					writer.AddAttribute(HtmlTextWriterAttribute.Disabled, "disabled");
-
-				if(this.SelectedIndex < 0)
-				{
-					if(string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase))
-						writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
-				}
-				else
-				{
-					if(this.SelectedIndex == index)
-						writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
-				}
-
-				writer.RenderBeginTag(HtmlTextWriterTag.Option);
-				writer.WriteEncodedText(item.Text);
-				writer.RenderEndTag();
-
-				index++;
-			}
-
-			if(this.DataSource != null)
-			{
-				IEnumerable dataSource = this.DataSource as IEnumerable;
-
-				if(dataSource != null)
-				{
-					foreach(object dataItem in dataSource)
-					{
-						string value = BindingUtility.FormatBindingValue(_binding != null ? _binding.ValueMember : string.Empty, dataItem, true);
-
-						if(string.IsNullOrEmpty(value))
-							continue;
-
-						writer.AddAttribute(HtmlTextWriterAttribute.Value, value);
-
-						if(this.SelectedIndex < 0)
-						{
-							if(string.Equals(this.SelectedValue, value, StringComparison.OrdinalIgnoreCase))
-								writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
-						}
-						else
-						{
-							if(this.SelectedIndex == index)
-								writer.AddAttribute(HtmlTextWriterAttribute.Selected, "selected");
-						}
-
-						writer.RenderBeginTag(HtmlTextWriterTag.Option);
-						writer.WriteEncodedText(BindingUtility.FormatBindingValue(_binding != null ? _binding.TextMember : string.Empty, dataItem, true));
-						writer.RenderEndTag();
-
-						index++;
-					}
-				}
-			}
-
-			//生成控件标记(结束)
-			writer.RenderEndTag();
+			_itemTemplate.InstantiateIn(container);
+			container.RenderControl(writer);
 		}
 		#endregion
 
@@ -584,6 +400,18 @@ namespace Zongsoft.Web.Controls
 			}
 
 			public string ValueMember
+			{
+				get;
+				set;
+			}
+
+			public string DescriptionMember
+			{
+				get;
+				set;
+			}
+
+			public string IconMember
 			{
 				get;
 				set;

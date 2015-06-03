@@ -40,6 +40,7 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public InputBox()
 		{
+			this.CssClass = "ui input";
 		}
 
 		public InputBox(InputBoxType inputType)
@@ -78,17 +79,43 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
-		[DefaultValue(true)]
 		[PropertyMetadata(false)]
-		public bool IsRenderFieldTag
+		protected bool IsRenderFieldTag
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.IsRenderFieldTag);
+				return !string.IsNullOrWhiteSpace(this.FieldTagName);
+			}
+		}
+
+		[DefaultValue("div")]
+		[PropertyMetadata(false)]
+		public string FieldTagName
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.FieldTagName);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.IsRenderFieldTag, value);
+				this.SetPropertyValue(() => this.FieldTagName, value);
+			}
+		}
+
+		[DefaultValue("field")]
+		[PropertyMetadata(false)]
+		public string FieldCssClass
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.FieldCssClass);
+			}
+			set
+			{
+				if(value != null && value.Length > 0)
+					value = Utility.ResolveCssClass(value, () => this.FieldCssClass);
+
+				this.SetPropertyValue(() => this.FieldCssClass, value);
 			}
 		}
 
@@ -107,34 +134,34 @@ namespace Zongsoft.Web.Controls
 				switch(value)
 				{
 					case InputBoxType.Button:
-						this.CssClass = "btn";
+						this.CssClass = ":ui button btn";
 						break;
 					case InputBoxType.Reset:
-						this.CssClass = "btn btn-reset";
+						this.CssClass = ":ui button btn btn-reset";
 						break;
 					case InputBoxType.Submit:
-						this.CssClass = "btn btn-primary";
+						this.CssClass = ":ui button primary btn btn-primary";
 						break;
 					case InputBoxType.File:
-						this.CssClass = "file";
+						this.CssClass = ":file";
 						break;
 					case InputBoxType.Image:
-						this.CssClass = "image";
+						this.CssClass = ":image";
 						break;
 					case InputBoxType.CheckBox:
-						this.CssClass = "checkbox";
+						this.CssClass = ":ui checkbox";
 						break;
 					case InputBoxType.Radio:
-						this.CssClass = "radio";
+						this.CssClass = ":ui radio checkbox";
 						break;
 					case InputBoxType.Text:
-						this.CssClass = "input";
+						this.CssClass = ":ui input";
 						break;
 					case InputBoxType.Password:
-						this.CssClass = "input input-password";
+						this.CssClass = ":ui input input-password";
 						break;
 					default:
-						this.CssClass = "input " + value.ToString().ToLowerInvariant();
+						this.CssClass = ":ui input " + value.ToString().ToLowerInvariant();
 						break;
 				}
 			}
@@ -176,7 +203,7 @@ namespace Zongsoft.Web.Controls
 			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
 
-			this.AddAttributes(writer);
+			this.AddAttributes(writer, "CssClass");
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Input);
 		}
@@ -191,53 +218,69 @@ namespace Zongsoft.Web.Controls
 			if(this.IsRenderFieldTag)
 			{
 				//生成最外层的Div布局元素，即<div class="field">
-
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
-				writer.RenderBeginTag(HtmlTextWriterTag.Div);
-			}
-
-			//生成Label标签
-			if(!string.IsNullOrWhiteSpace(this.Label))
-			{
-				if(!string.IsNullOrWhiteSpace(this.ID))
-					writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
-
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "label");
-				writer.RenderBeginTag(HtmlTextWriterTag.Label);
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, this.FieldCssClass);
+				writer.RenderBeginTag(this.FieldTagName);
 			}
 
 			if(this.InputType == InputBoxType.CheckBox || this.InputType == InputBoxType.Radio)
 			{
+				//生成输入框的外层元素，即<div class="ui input">
+				if(!string.IsNullOrWhiteSpace(this.CssClass))
+				{
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, this.GetCssClass());
+					writer.RenderBeginTag(HtmlTextWriterTag.Div);
+				}
+
 				//调用基类同名方法(生成input元素及其内容)
 				base.Render(writer);
 
-				//在input元素后面再生成Label文本
-				if(!string.IsNullOrWhiteSpace(this.Label))
-					writer.WriteEncodedText(this.Label);
-
-				//关闭Label标签
-				if(!string.IsNullOrWhiteSpace(this.Label))
-					writer.RenderEndTag();
+				//在input元素后面再生成Label标签
+				this.RenderLabel(writer);
 			}
 			else
 			{
-				//在input元素前面先生成Label文本
-				if(!string.IsNullOrWhiteSpace(this.Label))
-					writer.WriteEncodedText(this.Label);
+				//在input元素前面先生成Label标签
+				this.RenderLabel(writer);
 
-				//关闭Label标签
-				if(!string.IsNullOrWhiteSpace(this.Label))
-					writer.RenderEndTag();
+				//生成输入框的外层元素，即<div class="ui input">
+				if(!string.IsNullOrWhiteSpace(this.CssClass))
+				{
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, this.GetCssClass());
+					writer.RenderBeginTag(HtmlTextWriterTag.Div);
+				}
 
 				//调用基类同名方法(生成input元素及其内容)
 				base.Render(writer);
 			}
+
+			//关闭输入框的外层元素，即</div>
+			if(!string.IsNullOrWhiteSpace(this.CssClass))
+				writer.RenderEndTag();
 
 			if(this.IsRenderFieldTag)
 			{
 				//关闭最外层的Div布局元素，即生成</div>
 				writer.RenderEndTag();
 			}
+		}
+
+		protected virtual string GetCssClass()
+		{
+			return this.CssClass;
+		}
+
+		protected virtual void RenderLabel(HtmlTextWriter writer)
+		{
+			if(string.IsNullOrWhiteSpace(this.Label))
+				return;
+
+			if(!string.IsNullOrWhiteSpace(this.ID))
+				writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
+
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, "label");
+			writer.RenderBeginTag(HtmlTextWriterTag.Label);
+			writer.WriteEncodedText(this.Label);
+			writer.RenderEndTag();
 		}
 		#endregion
 	}

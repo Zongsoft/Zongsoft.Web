@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2011-2013 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -25,15 +25,16 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
 
 namespace Zongsoft.Web.Controls
 {
 	public enum ComboBoxRenderMode
 	{
+		/// <summary>标准的下拉框</summary>
 		Classic,
+
+		/// <summary>自定义结构的下拉框</summary>
 		Custom,
 	}
 }

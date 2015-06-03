@@ -44,85 +44,37 @@ namespace Zongsoft.Web.Controls
 	[ParseChildren(true)]
 	public class TreeView : CompositeDataBoundControl
 	{
-		#region 私有常量
-		private const int FIRSTNODE = 1;
-		private const int LASTNODE = 2;
-		#endregion
-
-		#region 事件声明
-		public event EventHandler<TreeViewNodeRenderEventArgs> NodeRender;
-		#endregion
-
 		#region 成员变量
-		private TreeViewBinding _nodeBinding;
-		private TreeViewBinding _rootNodeBinding;
-		private TreeViewBinding _leafNodeBinding;
+		private ITemplate _emptyTemplate;
+		private ITemplate _nodeTemplate;
 		private TreeViewNodeCollection _nodes;
 		#endregion
 
 		#region 构造函数
 		public TreeView()
 		{
-			_nodes = new TreeViewNodeCollection();
+			this.CssClass = "ui list";
 		}
 		#endregion
 
 		#region 公共属性
-		[NotifyParentProperty(true)]
-		[PersistenceMode(PersistenceMode.InnerProperty)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		public TreeViewBinding NodeBinding
+		[DefaultValue(ListRenderMode.List)]
+		[PropertyMetadata(false)]
+		public ListRenderMode RenderMode
 		{
 			get
 			{
-				if(_nodeBinding == null)
-					System.Threading.Interlocked.CompareExchange(ref _nodeBinding, new TreeViewBinding(), null);
-
-				return _nodeBinding;
+				return this.GetPropertyValue(() => this.RenderMode);
 			}
-		}
-
-		[NotifyParentProperty(true)]
-		[PersistenceMode(PersistenceMode.InnerProperty)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		public TreeViewBinding RootNodeBinding
-		{
-			get
+			set
 			{
-				if(_rootNodeBinding == null)
-					System.Threading.Interlocked.CompareExchange(ref _rootNodeBinding, new TreeViewBinding(), null);
-
-				return _rootNodeBinding;
-			}
-		}
-
-		[NotifyParentProperty(true)]
-		[PersistenceMode(PersistenceMode.InnerProperty)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		public TreeViewBinding LeafNodeBinding
-		{
-			get
-			{
-				if(_leafNodeBinding == null)
-					System.Threading.Interlocked.CompareExchange(ref _leafNodeBinding, new TreeViewBinding(), null);
-
-				return _leafNodeBinding;
-			}
-		}
-
-		[MergableProperty(false)]
-		[PersistenceMode(PersistenceMode.InnerProperty)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		public TreeViewNodeCollection Nodes
-		{
-			get
-			{
-				return _nodes;
+				this.SetPropertyValue(() => this.RenderMode, value);
 			}
 		}
 
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string LoadingPath
 		{
 			get
@@ -137,6 +89,7 @@ namespace Zongsoft.Web.Controls
 
 		[Bindable(true)]
 		[DefaultValue(ScrollbarMode.None)]
+		[PropertyMetadata(false)]
 		public ScrollbarMode ScrollbarMode
 		{
 			get
@@ -151,6 +104,7 @@ namespace Zongsoft.Web.Controls
 
 		[Bindable(true)]
 		[DefaultValue(SelectionMode.None)]
+		[PropertyMetadata(false)]
 		public SelectionMode SelectionMode
 		{
 			get
@@ -165,6 +119,7 @@ namespace Zongsoft.Web.Controls
 
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string SelectedPath
 		{
 			get
@@ -177,8 +132,62 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[PropertyMetadata(false)]
+		public bool HasNodes
+		{
+			get
+			{
+				return _nodes != null && _nodes.Count > 0;
+			}
+		}
+
+		[MergableProperty(false)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		public TreeViewNodeCollection Nodes
+		{
+			get
+			{
+				if(_nodes == null)
+					System.Threading.Interlocked.CompareExchange(ref _nodes, new TreeViewNodeCollection(), null);
+
+				return _nodes;
+			}
+		}
+
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(TreeView))]
+		public ITemplate EmptyTemplate
+		{
+			get
+			{
+				return _emptyTemplate;
+			}
+			set
+			{
+				_emptyTemplate = value;
+			}
+		}
+
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(TreeView))]
+		public ITemplate NodeTemplate
+		{
+			get
+			{
+				return _nodeTemplate;
+			}
+			set
+			{
+				_nodeTemplate = value;
+			}
+		}
+
 		[Bindable(true)]
 		[TypeConverter(typeof(UnitConverter))]
+		[PropertyMetadata(false)]
 		public Unit Height
 		{
 			get
@@ -193,6 +202,7 @@ namespace Zongsoft.Web.Controls
 
 		[Bindable(true)]
 		[TypeConverter(typeof(UnitConverter))]
+		[PropertyMetadata(false)]
 		public Unit Width
 		{
 			get
@@ -209,19 +219,31 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void Render(HtmlTextWriter writer)
 		{
-			if(_nodes.Count < 1)
-				return;
+			if((_nodes == null || _nodes.Count < 1) && this.DataSource == null)
+			{
+				if(_emptyTemplate != null)
+					_emptyTemplate.InstantiateIn(this);
+			}
 
-			//生成数据源对应的子树
-			this.GenerateNodes();
+			base.Render(writer);
+		}
 
-			if(!string.IsNullOrWhiteSpace(this.ID))
-				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
+		protected override void RenderBeginTag(HtmlTextWriter writer)
+		{
+			var tagName = "div";
 
-			if(string.IsNullOrWhiteSpace(this.CssClass))
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "tree");
-			else
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, this.CssClass);
+			switch(this.RenderMode)
+			{
+				case ListRenderMode.List:
+					tagName = "dl";
+					break;
+				case ListRenderMode.BulletList:
+				case ListRenderMode.OrderedList:
+					tagName = "ul";
+					break;
+			}
+
+			this.AddAttributes(writer);
 
 			if(!Unit.IsEmpty(this.Height))
 				writer.AddStyleAttribute(HtmlTextWriterStyle.Height, this.Height.ToString());
@@ -242,22 +264,26 @@ namespace Zongsoft.Web.Controls
 					break;
 			}
 
-			if(_nodes.Count > 0)
+			writer.RenderBeginTag(tagName);
+		}
+
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
+			if(_nodes == null || _nodes.Count < 1)
+				return;
+
+			for(int i = 0; i < _nodes.Count; i++)
 			{
-				writer.RenderBeginTag(HtmlTextWriterTag.Ul);
-
-				for(int i = 0; i < _nodes.Count; i++)
-				{
-					this.RenderNode(writer,
-									_nodes[i],
-									i == 0 ? FIRSTNODE : (i == _nodes.Count - 1 ? LASTNODE : 0));
-				}
-
-				writer.RenderEndTag();
+				this.RenderNode(writer, _nodes[i], i, 0);
 			}
 
-			//调用基类同名方法
-			base.Render(writer);
+			if(string.IsNullOrWhiteSpace(this.LoadingPath))
+				this.RenderDataNodes(writer, this.DataSource, 0, 0);
 		}
 		#endregion
 
@@ -292,102 +318,13 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
-		#region 虚拟方法
-		protected virtual void OnNodeRender(TreeViewNodeRenderEventArgs args)
-		{
-			if(this.NodeRender != null)
-				this.NodeRender(this, args);
-		}
-		#endregion
-
 		#region 私有方法
-		private void GenerateNodes()
-		{
-			var loadingNode = this.Find(this.LoadingPath);
-
-			if(loadingNode == null)
-				this.GenerateNodes(this.DataSource, _nodes);
-			else
-				this.GenerateNodes(this.DataSource, loadingNode.Nodes);
-		}
-
-		private void GenerateNodes(object target, TreeViewNodeCollection nodes)
-		{
-			if(target == null || nodes == null)
-				return;
-
-			TreeViewBinding binding = nodes.Owner == null ? (_rootNodeBinding ?? _nodeBinding) : _nodeBinding;
-
-			PropertyDescriptor childrenProperty = TypeDescriptor.GetProperties(target).Find(_nodeBinding.ChildrenPropertyName, true);
-			if(childrenProperty == null)
-				throw new InvalidOperationException(string.Format("The '{0}' children property is not found.", _nodeBinding.ChildrenPropertyName));
-
-			IEnumerable children = childrenProperty.GetValue(target) as IEnumerable;
-			if(children == null)
-				throw new InvalidOperationException(string.Format("The '{0}' children property is not enumerable.", childrenProperty.Name));
-
-			if(nodes.Owner == null)
-				binding = _rootNodeBinding ?? _nodeBinding;
-			else
-			{
-				if(Utility.IsEmpty(children))
-					binding = _leafNodeBinding ?? _nodeBinding;
-			}
-
-			TreeViewNode node = this.GetNode(target, binding);
-			if(node == null)
-				return;
-
-			nodes.Add(node);
-
-			if((!string.IsNullOrWhiteSpace(this.SelectedPath)) && string.Equals(node.FullPath, this.SelectedPath, StringComparison.OrdinalIgnoreCase))
-				node.Selected = true;
-
-			foreach(object child in children)
-			{
-				if(child == null)
-					continue;
-
-				GenerateNodes(child, node.Nodes);
-			}
-		}
-
-		private TreeViewNode GetNode(object target, TreeViewBinding binding)
-		{
-			if(target == null || binding == null)
-				return null;
-
-			string key = string.Empty;
-			PropertyDescriptor property = TypeDescriptor.GetProperties(target).Find(binding.KeyPropertyName, true);
-
-			if(property != null)
-			{
-				var value = property.GetValue(target);
-
-				if(value != null)
-					key = value.ToString();
-			}
-
-			TreeViewNode node = new TreeViewNode(key, key);
-
-			node.Text = BindingUtility.FormatBindingValue(binding.TextMember, target, true);
-			node.ToolTip = BindingUtility.FormatBindingValue(binding.ToolTipMember, target, true);
-			node.Url = BindingUtility.FormatBindingValue(binding.UrlMember, target, true);
-
-			return node;
-		}
-
-		private void RenderNode(HtmlTextWriter writer, TreeViewNode node, int flag)
+		private void RenderNode(HtmlTextWriter writer, TreeViewNode node, int index, int depth)
 		{
 			if(node == null || (!node.Visible))
 				return;
 
 			string cssClass = string.Empty;
-
-			if(flag == FIRSTNODE)
-				cssClass = Utility.ResolveCssClass(":first", () => cssClass);
-			else if(flag == LASTNODE)
-				cssClass = Utility.ResolveCssClass(":last", () => cssClass);
 
 			if(node.Selected)
 				cssClass = Utility.ResolveCssClass(":selected", () => cssClass);
@@ -395,24 +332,14 @@ namespace Zongsoft.Web.Controls
 			if(!string.IsNullOrWhiteSpace(cssClass))
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, cssClass);
 
-			writer.RenderBeginTag(HtmlTextWriterTag.Li);
+			writer.RenderBeginTag(this.GetNodeTagName());
 
-			//writer.AddAttribute(HtmlTextWriterAttribute.Class, "tree-node");
-			writer.RenderBeginTag(HtmlTextWriterTag.Div);
-
-			if(!string.IsNullOrWhiteSpace(node.Icon))
-			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, node.Icon.Trim() + " icon");
-				writer.RenderBeginTag(HtmlTextWriterTag.I);
-				writer.RenderEndTag();
-			}
+			if(node.Image != null)
+				node.Image.ToHtmlString(writer);
 
 			writer.AddAttribute(HtmlTextWriterAttribute.Href, string.IsNullOrWhiteSpace(node.Url) ? Utility.EmptyLink : node.Url);
 			writer.RenderBeginTag(HtmlTextWriterTag.A);
 			writer.WriteEncodedText(node.Text);
-			writer.RenderEndTag();
-
-			//关闭<div class="tree-node">元素
 			writer.RenderEndTag();
 
 			if(node.Nodes.Count > 0)
@@ -423,69 +350,108 @@ namespace Zongsoft.Web.Controls
 				{
 					this.RenderNode(writer,
 									node.Nodes[i],
-									i == 0 ? FIRSTNODE : (i == node.Nodes.Count - 1 ? LASTNODE : 0));
+									i, depth + 1);
 				}
 
 				writer.RenderEndTag();
 			}
 
+			if(!string.IsNullOrWhiteSpace(this.LoadingPath) && string.Equals(this.SelectedPath, node.FullPath, StringComparison.OrdinalIgnoreCase))
+				this.RenderDataNodes(writer, this.DataSource, index, depth);
+
 			writer.RenderEndTag();
+		}
+
+		private void RenderDataNodes(HtmlTextWriter writer, object dataSource, int index, int depth)
+		{
+			if(dataSource == null)
+				return;
+
+			this.RenderNodeTemplate(writer, new TreeViewNodeContainer(this, dataSource, index, this.GetNodeTagName(), "item")
+			{
+				Depth = depth,
+			});
+
+			var dataChildren = dataSource.GetType().GetProperty("").GetValue(dataSource);
+
+			if(dataChildren == null)
+				return;
+
+			var dataItems = dataChildren as IEnumerable;
+
+			if(dataChildren.GetType() == typeof(string) || dataItems == null)
+			{
+				this.RenderDataNodes(writer, dataChildren, 0, depth + 1);
+			}
+			else
+			{
+				int i = 0;
+
+				foreach(var dataItem in dataItems)
+				{
+					this.RenderDataNodes(writer, dataItem, i++, depth + 1);
+				}
+			}
+		}
+
+		private void RenderNodeTemplate(HtmlTextWriter writer, TreeViewNodeContainer container)
+		{
+			if(_nodeTemplate != null)
+			{
+				_nodeTemplate.InstantiateIn(container);
+
+				if(Utility.GetVisibleChildrenCount(container) > 0)
+					container.RenderControl(writer);
+			}
+		}
+
+		private string GetNodeTagName()
+		{
+			switch(this.RenderMode)
+			{
+				case ListRenderMode.None:
+					return "div";
+				case ListRenderMode.List:
+					return "dt";
+				case ListRenderMode.BulletList:
+				case ListRenderMode.OrderedList:
+					return "li";
+			}
+
+			return "div";
 		}
 		#endregion
 
 		#region 嵌套子类
-		[Serializable]
-		public class TreeViewBinding
+		internal class TreeViewNodeContainer : DataItemContainer<TreeView>
 		{
-			#region 成员变量
-			private string _childrenPropertyName;
+			#region 成员字段
+			private int _depth;
 			#endregion
 
 			#region 构造函数
-			public TreeViewBinding()
+			internal TreeViewNodeContainer(TreeView owner, object dataItem, int index, string tagName = null, string cssClass = null)
+				: base(owner, dataItem, index, index, tagName, cssClass)
 			{
-				_childrenPropertyName = "Children";
+			}
+
+			internal TreeViewNodeContainer(TreeView owner, object dataItem, int index, int displayIndex, string tagName = null, string cssClass = null)
+				: base(owner, dataItem, index, displayIndex, tagName, cssClass)
+			{
 			}
 			#endregion
 
 			#region 公共属性
-			public string ChildrenPropertyName
+			public int Depth
 			{
 				get
 				{
-					return _childrenPropertyName;
+					return _depth;
 				}
-				set
+				internal set
 				{
-					if(string.IsNullOrWhiteSpace(value))
-						throw new ArgumentNullException();
-
-					_childrenPropertyName = value.Trim();
+					_depth = value;
 				}
-			}
-
-			public string KeyPropertyName
-			{
-				get;
-				set;
-			}
-
-			public string TextMember
-			{
-				get;
-				set;
-			}
-
-			public string ToolTipMember
-			{
-				get;
-				set;
-			}
-
-			public string UrlMember
-			{
-				get;
-				set;
 			}
 			#endregion
 		}

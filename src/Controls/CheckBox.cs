@@ -56,10 +56,25 @@ namespace Zongsoft.Web.Controls
 				this.SetPropertyValue(() => this.Checked, value);
 			}
 		}
+
+		[DefaultValue(false)]
+		[PropertyMetadata(false)]
+		public bool IsRadio
+		{
+			get
+			{
+				return this.InputType == InputBoxType.Radio;
+			}
+			set
+			{
+				this.InputType = value ? InputBoxType.Radio : InputBoxType.CheckBox;
+			}
+		}
 		#endregion
 
 		#region 重写属性
 		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[DefaultValue(InputBoxType.CheckBox)]
 		public override InputBoxType InputType
 		{

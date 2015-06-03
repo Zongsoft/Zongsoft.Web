@@ -38,7 +38,7 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public Editor()
 		{
-			this.CssClass = ":editor";
+			this.CssClass = "editor";
 		}
 		#endregion
 

@@ -35,17 +35,24 @@ namespace Zongsoft.Web.Controls
 {
 	public class ImageBox : DataBoundControl
 	{
+		#region 构造函数
+		public ImageBox()
+		{
+			this.CssClass = "ui image";
+		}
+		#endregion
+
 		#region 公共属性
 		[Bindable(true)]
-		public string Name
+		public string Icon
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.Name);
+				return this.GetPropertyValue(() => this.Icon);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Name, value);
+				this.SetPropertyValue(() => this.Icon, value);
 			}
 		}
 
@@ -124,7 +131,7 @@ namespace Zongsoft.Web.Controls
 		{
 			if(string.IsNullOrWhiteSpace(ImageUrl))
 			{
-				this.CssClass = ":icon " + this.Name.Trim().ToLowerInvariant();
+				this.CssClass = ":icon " + this.Icon.Trim().ToLowerInvariant();
 
 				this.AddAttributes(writer, "ImageUrl", "Title");
 

@@ -49,16 +49,16 @@ namespace Zongsoft.Web.Controls
 		}
 
 		[DefaultValue("")]
-		public string Name
+		public string Icon
 		{
 			get
 			{
-				var value = this.GetPropertyValue(() => this.Name);
+				var value = this.GetPropertyValue(() => this.Icon);
 				return BindingUtility.FormatBindingValue(value, this.BindingSource);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Name, value);
+				this.SetPropertyValue(() => this.Icon, value);
 			}
 		}
 
@@ -77,15 +77,15 @@ namespace Zongsoft.Web.Controls
 		}
 
 		[DefaultValue("")]
-		public string ImageCssClass
+		public string CssClass
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.ImageCssClass);
+				return this.GetPropertyValue(() => this.CssClass);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.ImageCssClass, Utility.ResolveCssClass(value, () => this.ImageCssClass));
+				this.SetPropertyValue(() => this.CssClass, Utility.ResolveCssClass(value, () => this.CssClass));
 			}
 		}
 
@@ -171,16 +171,16 @@ namespace Zongsoft.Web.Controls
 				writer.Write("<a class=\"image\" href=\"{0}\">", this.NavigateUrl);
 
 			if(this.Dimension != Dimension.None)
-				this.ImageCssClass = ":" + this.Dimension.ToString();
+				this.CssClass = ":" + this.Dimension.ToString();
 
 			if(string.IsNullOrWhiteSpace(ImageUrl))
 			{
-				if(!string.IsNullOrWhiteSpace(this.Name))
-					this.ImageCssClass = ":icon " + this.Name.Trim();
+				if(!string.IsNullOrWhiteSpace(this.Icon))
+					this.CssClass = ":icon " + this.Icon.Trim();
 
 				writer.Write("<i");
 
-				this.WriteAttribute(writer, "class", this.ImageCssClass);
+				this.WriteAttribute(writer, "class", this.CssClass);
 
 				writer.WriteLine("></i>");
 			}
@@ -188,7 +188,7 @@ namespace Zongsoft.Web.Controls
 			{
 				writer.Write("<img");
 
-				this.WriteAttribute(writer, "class", this.ImageCssClass);
+				this.WriteAttribute(writer, "class", this.CssClass);
 				this.WriteAttribute(writer, "alt", this.Placeholder);
 				this.WriteAttribute(writer, "src", this.ImageUrl);
 
@@ -210,11 +210,11 @@ namespace Zongsoft.Web.Controls
 			Literal control;
 
 			if(this.Dimension != Dimension.None)
-				this.ImageCssClass = ":" + this.Dimension.ToString();
+				this.CssClass = ":" + this.Dimension.ToString();
 
 			if(string.IsNullOrWhiteSpace(this.ImageUrl))
 			{
-				var css = Utility.ResolveCssClass(":" + this.Name, () => this.ImageCssClass);
+				var css = Utility.ResolveCssClass(":" + this.Icon, () => this.CssClass);
 				control = new Literal("i", "icon" + (string.IsNullOrWhiteSpace(css) ? "" : " " + css));
 			}
 			else
@@ -232,8 +232,8 @@ namespace Zongsoft.Web.Controls
 					control.SetAttributeValue("height", this.Height.ToString());
 			}
 
-			if(!string.IsNullOrWhiteSpace(this.ImageCssClass))
-				control.SetAttributeValue("class", this.ImageCssClass);
+			if(!string.IsNullOrWhiteSpace(this.CssClass))
+				control.CssClass = this.CssClass;
 
 			if(string.IsNullOrWhiteSpace(this.NavigateUrl))
 				return control;

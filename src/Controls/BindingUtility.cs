@@ -115,7 +115,8 @@ namespace Zongsoft.Web.Controls
 		public static string FormatBindingValue(string bindingText, object bindingSource, BindingFormatter format, bool isResolvedText = false)
 		{
 			if(string.IsNullOrWhiteSpace(bindingText))
-				return bindingSource != null ? bindingSource.ToString() : string.Empty;
+				return string.Empty;
+				//return bindingSource != null ? bindingSource.ToString() : string.Empty;
 
 			var matched = BindingExpressionRegex.IsMatch(bindingText);
 

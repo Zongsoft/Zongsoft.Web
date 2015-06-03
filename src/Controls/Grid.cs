@@ -50,7 +50,7 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public Grid()
 		{
-			this.CssClass = "table table-striped";
+			this.CssClass = "ui table striped";
 			_columns = new GridColumnCollection(this);
 		}
 		#endregion

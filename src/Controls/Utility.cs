@@ -28,6 +28,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
@@ -124,6 +125,87 @@ namespace Zongsoft.Web.Controls
 			}
 
 			return resolvedValue;
+		}
+
+		public static IList<Control> GetVisibleChildren(System.Web.UI.Control container)
+		{
+			if(container == null)
+				return new Control[0];
+
+			var controls = new List<Control>();
+
+			foreach(Control control in container.Controls)
+			{
+				var literal = control as LiteralControl;
+
+				if(literal != null)
+				{
+					if(string.IsNullOrWhiteSpace(literal.Text))
+						continue;
+				}
+
+				if(control.Visible)
+					controls.Add(control);
+			}
+
+			return controls;
+		}
+
+		public static int GetVisibleChildrenCount(System.Web.UI.Control container)
+		{
+			if(container == null || (!container.HasControls()))
+				return 0;
+
+			int count = 0;
+
+			foreach(System.Web.UI.Control control in container.Controls)
+			{
+				if(control.Visible)
+					count++;
+			}
+
+			return count;
+		}
+
+		public static string GetNumberString(int number)
+		{
+			switch(number)
+			{
+				case 1:
+					return "one";
+				case 2:
+					return "two";
+				case 3:
+					return "three";
+				case 4:
+					return "four";
+				case 5:
+					return "five";
+				case 6:
+					return "six";
+				case 7:
+					return "seven";
+				case 8:
+					return "eight";
+				case 9:
+					return "nine";
+				case 10:
+					return "ten";
+				case 11:
+					return "eleven";
+				case 12:
+					return "twelve";
+				case 13:
+					return "thirteen";
+				case 14:
+					return "fourteen";
+				case 15:
+					return "fifteen";
+				case 16:
+					return "sixteen";
+			}
+
+			return string.Empty;
 		}
 
 		public static bool IsChinese(char c)

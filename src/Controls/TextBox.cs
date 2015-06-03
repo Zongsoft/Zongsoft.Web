@@ -33,8 +33,14 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
+	[PersistChildren(true)]
+	[ParseChildren(true)]
 	public class TextBox : TextBoxBase
 	{
+		#region 成员字段
+		private TextBoxButton _button;
+		#endregion
+
 		#region 公共属性
 		[Bindable(true)]
 		[PropertyMetadata("data-icon")]
@@ -49,9 +55,60 @@ namespace Zongsoft.Web.Controls
 				this.SetPropertyValue(() => this.Icon, value);
 			}
 		}
+
+		[DefaultValue(HorizontalAlignment.Right)]
+		[PropertyMetadata("data-icon-align")]
+		public HorizontalAlignment IconAlignment
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.IconAlignment);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.IconAlignment, value);
+			}
+		}
+
+		[NotifyParentProperty(true)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		[PropertyMetadata(false)]
+		public TextBoxButton Button
+		{
+			get
+			{
+				if(_button == null)
+					System.Threading.Interlocked.CompareExchange(ref _button, new TextBoxButton(), null);
+
+				return _button;
+			}
+			set
+			{
+				_button = value;
+			}
+		}
 		#endregion
 
 		#region 重写方法
+		protected override string GetCssClass()
+		{
+			var css = base.GetCssClass();
+
+			if(!string.IsNullOrWhiteSpace(this.Icon))
+			{
+				if(this.IconAlignment == HorizontalAlignment.Left)
+					css = Utility.ResolveCssClass(":left icon", () => css);
+				else
+					css = Utility.ResolveCssClass(":icon", () => css);
+			}
+
+			if(_button != null)
+				css = Utility.ResolveCssClass(":action", () => css);
+
+			return css;
+		}
+
 		protected override void RenderEndTag(HtmlTextWriter writer)
 		{
 			//调用基类同名方法
@@ -59,9 +116,45 @@ namespace Zongsoft.Web.Controls
 
 			if(!string.IsNullOrWhiteSpace(this.Icon))
 			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "icon icon-" + this.Icon.Trim().ToLowerInvariant());
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "icon " + this.Icon.Trim().ToLowerInvariant());
 				writer.RenderBeginTag(HtmlTextWriterTag.I);
 				writer.RenderEndTag();
+			}
+
+			if(_button != null)
+			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "ui icon button");
+				writer.RenderBeginTag(HtmlTextWriterTag.A);
+
+				if(!string.IsNullOrWhiteSpace(_button.Icon))
+				{
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, "icon " + _button.Icon.ToString().ToLowerInvariant());
+					writer.RenderBeginTag(HtmlTextWriterTag.I);
+					writer.RenderEndTag();
+				}
+
+				if(!string.IsNullOrWhiteSpace(_button.Text))
+					writer.WriteEncodedText(_button.Text);
+
+				writer.RenderEndTag();
+			}
+		}
+		#endregion
+
+		#region 嵌套子类
+		[Serializable]
+		public class TextBoxButton
+		{
+			public string Icon
+			{
+				get;
+				set;
+			}
+
+			public string Text
+			{
+				get;
+				set;
 			}
 		}
 		#endregion

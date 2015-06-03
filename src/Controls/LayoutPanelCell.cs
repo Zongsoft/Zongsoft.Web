@@ -34,7 +34,7 @@ namespace Zongsoft.Web.Controls
 {
 	[PersistChildren(true)]
 	[ParseChildren(false)]
-	public class LayoutPanelCell : Control
+	public class LayoutPanelCell : Literal
 	{
 		#region 成员变量
 		private TableLayoutCellSettings _tableCellSettings;
@@ -42,7 +42,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 构造函数
-		public LayoutPanelCell()
+		public LayoutPanelCell() : base("div", "column")
 		{
 		}
 		#endregion

@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2015 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2011-2015 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -26,17 +26,53 @@
 
 using System;
 using System.ComponentModel;
+using System.Collections.Generic;
+using System.Web;
+using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	/// <summary>
-	/// 表示开关控件的元素类型。
-	/// </summary>
-	public enum ToggleType
+	[PersistChildren(true)]
+	[ParseChildren(false)]
+	public class LayoutTableCell : Literal
 	{
-		/// <summary>复选框(CheckBox)</summary>
-		Multiple,
-		/// <summary>单选框(RadioBox)</summary>
-		Single,
+		#region 成员变量
+		private int _colSpan;
+		private int _rowSpan;
+		#endregion
+
+		#region 构造函数
+		public LayoutTableCell()
+		{
+			_colSpan = 1;
+			_rowSpan = 1;
+		}
+		#endregion
+
+		#region 公共属性
+		public int ColSpan
+		{
+			get
+			{
+				return _colSpan;
+			}
+			set
+			{
+				_colSpan = Math.Max(value, 1);
+			}
+		}
+
+		public int RowSpan
+		{
+			get
+			{
+				return _rowSpan;
+			}
+			set
+			{
+				_rowSpan = Math.Max(value, 1);
+			}
+		}
+		#endregion
 	}
 }

@@ -54,17 +54,17 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 公共属性
-		[DefaultValue(ListViewType.List)]
+		[DefaultValue(ListRenderMode.List)]
 		[PropertyMetadata(false)]
-		public ListViewType ListType
+		public ListRenderMode RenderMode
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.ListType);
+				return this.GetPropertyValue(() => this.RenderMode);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.ListType, value);
+				this.SetPropertyValue(() => this.RenderMode, value);
 			}
 		}
 
@@ -186,7 +186,7 @@ namespace Zongsoft.Web.Controls
 
 				if(dataSource == null)
 				{
-					var item = new ListViewItem(this, this.DataSource, 0);
+					var item = new DataItemContainer<ListView>(this, this.DataSource, 0);
 					this.CreateItem(item);
 					header.Controls.Add(item);
 				}
@@ -196,7 +196,7 @@ namespace Zongsoft.Web.Controls
 
 					foreach(var dataItem in dataSource)
 					{
-						var item = new ListViewItem(this, dataItem, index++);
+						var item = new DataItemContainer<ListView>(this, dataItem, index++);
 						this.CreateItem(item);
 						header.Controls.Add(item);
 					}
@@ -214,39 +214,36 @@ namespace Zongsoft.Web.Controls
 		#region 虚拟方法
 		protected virtual Control CreateHeader()
 		{
-			if(_headerTemplate == null)
+			Control container = null;
+
+			switch(this.RenderMode)
 			{
-				System.Web.UI.HtmlControls.HtmlGenericControl control = null;
-
-				switch(this.ListType)
-				{
-					case ListViewType.List:
-						control = new System.Web.UI.HtmlControls.HtmlGenericControl("dl");
-						break;
-					case ListViewType.BulletList:
-						control = new System.Web.UI.HtmlControls.HtmlGenericControl("ul");
-						break;
-					case ListViewType.OrderedList:
-						control = new System.Web.UI.HtmlControls.HtmlGenericControl("ol");
-						break;
-				}
-
-				if(control != null)
-				{
-					control.ID = this.ID;
-					control.Attributes.Add("class", this.CssClass);
-					this.Controls.Add(control);
-				}
-
-				return control;
-			}
-			else
-			{
-				if(_headerTemplate != null)
-					_headerTemplate.InstantiateIn(this);
+				case ListRenderMode.List:
+					container = new Literal("dl", this.CssClass);
+					break;
+				case ListRenderMode.BulletList:
+					container = new Literal("ul", this.CssClass);
+					break;
+				case ListRenderMode.OrderedList:
+					container = new Literal("ol", this.CssClass);
+					break;
 			}
 
-			return null;
+			if(container != null)
+			{
+				container.ID = this.ID;
+				this.Controls.Add(container);
+			}
+
+			if(_headerTemplate != null)
+			{
+				if(container == null)
+					container = this;
+
+				_headerTemplate.InstantiateIn(container);
+			}
+
+			return container;
 		}
 
 		protected virtual void CreateFooter()
@@ -255,15 +252,15 @@ namespace Zongsoft.Web.Controls
 				_footerTemplate.InstantiateIn(this);
 		}
 
-		protected virtual void CreateItem(ListViewItem item)
+		protected virtual void CreateItem(DataItemContainer<ListView> item)
 		{
-			switch(this.ListType)
+			switch(this.RenderMode)
 			{
-				case ListViewType.List:
+				case ListRenderMode.List:
 					item.TagName = "dt";
 					break;
-				case ListViewType.BulletList:
-				case ListViewType.OrderedList:
+				case ListRenderMode.BulletList:
+				case ListRenderMode.OrderedList:
 					item.TagName = "li";
 					break;
 			}

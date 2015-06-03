@@ -38,6 +38,7 @@ namespace Zongsoft.Web.Controls
 	public class ItemView : Literal, INamingContainer
 	{
 		#region 成员字段
+		private Image _image;
 		private ITemplate _headerTemplate;
 		private ITemplate _footerTemplate;
 		private ITemplate _contentTemplate;
@@ -60,11 +61,14 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.Image);
+				if(_image == null)
+					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
+
+				return _image;
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Image, value);
+				_image = value;
 			}
 		}
 

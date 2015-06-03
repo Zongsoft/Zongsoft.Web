@@ -25,9 +25,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 
 namespace Zongsoft.Web.Controls
 {
@@ -38,6 +36,8 @@ namespace Zongsoft.Web.Controls
 		private bool _disabled;
 		private string _text;
 		private string _value;
+		private Image _image;
+		private string _description;
 		#endregion
 
 		#region 公共属性
@@ -75,6 +75,113 @@ namespace Zongsoft.Web.Controls
 			{
 				_value = value;
 			}
+		}
+
+		public string Icon
+		{
+			get
+			{
+				return _image == null ? null : _image.Icon;
+			}
+			set
+			{
+				if(_image == null)
+					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
+
+				_image.Icon = value;
+			}
+		}
+
+		public Image Image
+		{
+			get
+			{
+				if(_image == null)
+					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
+
+				return _image;
+			}
+			set
+			{
+				_image = value;
+			}
+		}
+
+		public string Description
+		{
+			get
+			{
+				return _description;
+			}
+			set
+			{
+				_description = value;
+			}
+		}
+		#endregion
+
+		#region 公共方法
+		public void ToHtmlString(TextWriter writer, ComboBoxRenderMode renderMode, bool isSelected)
+		{
+			if(renderMode == ComboBoxRenderMode.Classic)
+			{
+				writer.Write("<option");
+				this.WriteAttribute(writer, "value", this.Value);
+			}
+			else
+			{
+				writer.Write("<dt");
+
+				this.WriteAttribute(writer, "data-value", this.Value);
+				this.WriteAttribute(writer, "class", "item" + (isSelected ? " active selected" : ""));
+			}
+
+			if(this.Disabled)
+				this.WriteAttribute(writer, "disabled", "disabled");
+
+			if(isSelected)
+			{
+				if(renderMode == ComboBoxRenderMode.Classic)
+					this.WriteAttribute(writer, "selected", "selected");
+				else
+					this.WriteAttribute(writer, "data-selected", "selected");
+			}
+
+			writer.Write(">");
+
+			if(this.Image != null)
+				this.Image.ToHtmlString(writer);
+
+			writer.Write(this.Text);
+
+			if(!string.IsNullOrWhiteSpace(this.Description))
+			{
+				writer.Write("<span");
+				this.WriteAttribute(writer, "class", "right floated description");
+				writer.Write(">");
+				writer.Write(this.Description);
+				writer.Write("</span>");
+			}
+
+			if(renderMode == ComboBoxRenderMode.Classic)
+				writer.WriteLine("</option>");
+			else
+				writer.WriteLine("</dt>");
+		}
+		#endregion
+
+		#region 私有方法
+		private bool WriteAttribute(TextWriter writer, string name, string value)
+		{
+			if(writer == null)
+				throw new ArgumentNullException("writer");
+
+			if(string.IsNullOrWhiteSpace(name))
+				return false;
+
+			writer.Write(" {0}=\"{1}\"", name, value);
+
+			return true;
 		}
 		#endregion
 	}

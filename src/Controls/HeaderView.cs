@@ -37,7 +37,9 @@ namespace Zongsoft.Web.Controls
 	[ParseChildren(true)]
 	public class HeaderView : Literal
 	{
+		#region 成员字段
 		private Image _image;
+		#endregion
 
 		#region 构造函数
 		public HeaderView()
@@ -56,6 +58,9 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
+				if(_image == null)
+					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
+
 				return _image;
 			}
 			set

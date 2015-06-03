@@ -37,7 +37,7 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public Button()
 		{
-			this.CssClass = "btn button";
+			this.CssClass = "ui button btn";
 		}
 		#endregion
 

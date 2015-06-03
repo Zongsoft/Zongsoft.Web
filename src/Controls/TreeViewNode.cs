@@ -38,13 +38,13 @@ namespace Zongsoft.Web.Controls
 		private string _name;
 		private string _text;
 		private string _url;
-		private string _icon;
 		private string _toolTip;
 		private string _description;
 		private string _fullPath;
 		private int _depth;
 		private bool _selected;
 		private bool _visible;
+		private Image _image;
 		private TreeViewNode _parent;
 		private TreeViewNodeCollection _nodes;
 		#endregion
@@ -100,10 +100,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				if(string.IsNullOrWhiteSpace(value))
-					throw new ArgumentNullException();
-
-				_text = value;
+				_text = value ?? string.Empty;
 			}
 		}
 
@@ -119,18 +116,30 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
-		/// <summary>
-		/// 获取或设置图标名称。
-		/// </summary>
 		public string Icon
 		{
 			get
 			{
-				return _icon;
+				return _image == null ? null : _image.Icon;
 			}
 			set
 			{
-				_icon = value;
+				if(_image == null)
+					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
+
+				_image.Icon = value;
+			}
+		}
+
+		public Image Image
+		{
+			get
+			{
+				return _image;
+			}
+			set
+			{
+				_image = value;
 			}
 		}
 
