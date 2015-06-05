@@ -196,7 +196,7 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void RenderContent(HtmlTextWriter writer)
 		{
-			if(this.Image != null)
+			if(_image != null)
 			{
 				var cssClass = "image";
 
@@ -264,12 +264,15 @@ namespace Zongsoft.Web.Controls
 				return;
 			}
 
-			var control = new Literal("div", "description")
+			if(!string.IsNullOrWhiteSpace(this.ContentText))
 			{
-				Text = this.ContentText,
-			};
+				var control = new Literal("div", "description")
+				{
+					Text = this.ContentText,
+				};
 
-			container.Controls.Add(control);
+				container.Controls.Add(control);
+			}
 		}
 
 		protected virtual void GenerateContentFooter(DataBoundControl container)
@@ -280,12 +283,15 @@ namespace Zongsoft.Web.Controls
 				return;
 			}
 
-			var control = new Literal("div", "extra")
+			if(!string.IsNullOrWhiteSpace(this.FooterText))
 			{
-				Text = this.FooterText,
-			};
+				var control = new Literal("div", "extra")
+				{
+					Text = this.FooterText,
+				};
 
-			container.Controls.Add(control);
+				container.Controls.Add(control);
+			}
 		}
 		#endregion
 	}
