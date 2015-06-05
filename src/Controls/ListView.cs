@@ -182,9 +182,9 @@ namespace Zongsoft.Web.Controls
 			}
 			else
 			{
-				IEnumerable dataSource = this.DataSource as IEnumerable;
+				IEnumerable dataItems = this.DataSource as IEnumerable;
 
-				if(dataSource == null)
+				if(dataItems == null || dataItems.GetType() == typeof(string))
 				{
 					var item = new DataItemContainer<ListView>(this, this.DataSource, 0);
 					this.CreateItem(item);
@@ -194,7 +194,7 @@ namespace Zongsoft.Web.Controls
 				{
 					int index = 1;
 
-					foreach(var dataItem in dataSource)
+					foreach(var dataItem in dataItems)
 					{
 						var item = new DataItemContainer<ListView>(this, dataItem, index++);
 						this.CreateItem(item);
