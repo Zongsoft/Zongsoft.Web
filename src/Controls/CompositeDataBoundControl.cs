@@ -26,10 +26,11 @@
 
 using System;
 using System.ComponentModel;
+using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class CompositeDataBoundControl : DataBoundControl
+	public class CompositeDataBoundControl : DataBoundControl, INamingContainer
 	{
 		#region 公共属性
 		[Bindable(true)]
