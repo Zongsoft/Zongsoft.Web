@@ -40,8 +40,8 @@ using System.Web.UI.HtmlControls;
 namespace Zongsoft.Web.Controls
 {
 	[DefaultProperty("Nodes")]
-	[PersistChildren(true)]
 	[ParseChildren(true)]
+	[PersistChildren(false)]
 	public class TreeView : CompositeDataBoundControl, INamingContainer
 	{
 		#region 成员字段
@@ -442,10 +442,14 @@ namespace Zongsoft.Web.Controls
 
 			foreach(var dataItem in dataItems)
 			{
+				FormExtension.PushDataItem(this.Page, dataItem);
+
 				this.RenderNodeTemplate(writer, new TreeViewNodeContainer(this, dataItem, index++, this.GetItemTagName(), this.ItemCssClass)
 				{
 					Depth = depth,
 				});
+
+				FormExtension.PopDataItem(this.Page);
 			}
 
 			if(renderListTag)
