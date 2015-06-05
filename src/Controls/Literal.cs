@@ -114,6 +114,14 @@ namespace Zongsoft.Web.Controls
 
 		protected override void RenderContent(HtmlTextWriter writer)
 		{
+			foreach(var child in this.Controls)
+			{
+				var literalControl = child as LiteralControl;
+
+				if(literalControl != null)
+					literalControl.Text = BindingUtility.FormatBindingValue(literalControl.Text, this.GetBindingSource());
+			}
+
 			if(!string.IsNullOrWhiteSpace(this.Text))
 			{
 				if(this.TextEncoded)
