@@ -83,6 +83,7 @@
     <Compile Include="Controls\ChartType.cs" />
     <Compile Include="Controls\CheckBox.cs" />
     <Compile Include="Controls\DataItemContainer.cs" />
+    <Compile Include="Controls\FormExtension.cs" />
     <Compile Include="Controls\HeaderView.cs" />
     <Compile Include="Controls\Image.cs" />
     <Compile Include="Controls\Dimension.cs" />
