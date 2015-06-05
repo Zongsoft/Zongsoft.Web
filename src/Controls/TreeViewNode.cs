@@ -41,6 +41,8 @@ namespace Zongsoft.Web.Controls
 		private string _toolTip;
 		private string _description;
 		private string _fullPath;
+		private string _cssClass;
+		private string _ListCssClass;
 		private int _depth;
 		private bool _selected;
 		private bool _visible;
@@ -79,6 +81,7 @@ namespace Zongsoft.Web.Controls
 			_selected = false;
 			_visible = true;
 			_parent = null;
+			_cssClass = "item";
 			_nodes = new TreeViewNodeCollection(this);
 		}
 		#endregion
@@ -164,6 +167,30 @@ namespace Zongsoft.Web.Controls
 			set
 			{
 				_description = value ?? string.Empty;
+			}
+		}
+
+		public string CssClass
+		{
+			get
+			{
+				return _cssClass;
+			}
+			set
+			{
+				_cssClass = value;
+			}
+		}
+
+		public string ListCssClass
+		{
+			get
+			{
+				return _ListCssClass;
+			}
+			set
+			{
+				_ListCssClass = value;
 			}
 		}
 

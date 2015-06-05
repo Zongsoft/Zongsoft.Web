@@ -42,9 +42,9 @@ namespace Zongsoft.Web.Controls
 	[DefaultProperty("Nodes")]
 	[PersistChildren(true)]
 	[ParseChildren(true)]
-	public class TreeView : CompositeDataBoundControl
+	public class TreeView : CompositeDataBoundControl, INamingContainer
 	{
-		#region 成员变量
+		#region 成员字段
 		private ITemplate _emptyTemplate;
 		private ITemplate _nodeTemplate;
 		private TreeViewNodeCollection _nodes;
@@ -69,6 +69,20 @@ namespace Zongsoft.Web.Controls
 			set
 			{
 				this.SetPropertyValue(() => this.RenderMode, value);
+			}
+		}
+
+		[DefaultValue(false)]
+		[PropertyMetadata(false)]
+		public bool IsDropdown
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.IsDropdown);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.IsDropdown, value);
 			}
 		}
 
@@ -138,6 +152,46 @@ namespace Zongsoft.Web.Controls
 			get
 			{
 				return _nodes != null && _nodes.Count > 0;
+			}
+		}
+
+		[PropertyMetadata(false)]
+		public string DataPropertyName
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.DataPropertyName);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.DataPropertyName, value);
+			}
+		}
+
+		[DefaultValue("item")]
+		[PropertyMetadata(false)]
+		public string ItemCssClass
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.ItemCssClass);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.ItemCssClass, value);
+			}
+		}
+
+		[PropertyMetadata(false)]
+		public string ListCssClass
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.ListCssClass);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.ListCssClass, value);
 			}
 		}
 
@@ -216,77 +270,6 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
-		#region 重写方法
-		protected override void Render(HtmlTextWriter writer)
-		{
-			if((_nodes == null || _nodes.Count < 1) && this.DataSource == null)
-			{
-				if(_emptyTemplate != null)
-					_emptyTemplate.InstantiateIn(this);
-			}
-
-			base.Render(writer);
-		}
-
-		protected override void RenderBeginTag(HtmlTextWriter writer)
-		{
-			var tagName = "div";
-
-			switch(this.RenderMode)
-			{
-				case ListRenderMode.List:
-					tagName = "dl";
-					break;
-				case ListRenderMode.BulletList:
-				case ListRenderMode.OrderedList:
-					tagName = "ul";
-					break;
-			}
-
-			this.AddAttributes(writer);
-
-			if(!Unit.IsEmpty(this.Height))
-				writer.AddStyleAttribute(HtmlTextWriterStyle.Height, this.Height.ToString());
-
-			if(!Unit.IsEmpty(this.Width))
-				writer.AddStyleAttribute(HtmlTextWriterStyle.Width, this.Height.ToString());
-
-			switch(this.ScrollbarMode)
-			{
-				case Web.Controls.ScrollbarMode.Horizontal:
-					writer.AddStyleAttribute(HtmlTextWriterStyle.OverflowX, "scroll");
-					break;
-				case Web.Controls.ScrollbarMode.Vertical:
-					writer.AddStyleAttribute(HtmlTextWriterStyle.OverflowY, "scroll");
-					break;
-				case Web.Controls.ScrollbarMode.Both:
-					writer.AddStyleAttribute(HtmlTextWriterStyle.Overflow, "scroll");
-					break;
-			}
-
-			writer.RenderBeginTag(tagName);
-		}
-
-		protected override void RenderEndTag(HtmlTextWriter writer)
-		{
-			writer.RenderEndTag();
-		}
-
-		protected override void RenderContent(HtmlTextWriter writer)
-		{
-			if(_nodes == null || _nodes.Count < 1)
-				return;
-
-			for(int i = 0; i < _nodes.Count; i++)
-			{
-				this.RenderNode(writer, _nodes[i], i, 0);
-			}
-
-			if(string.IsNullOrWhiteSpace(this.LoadingPath))
-				this.RenderDataNodes(writer, this.DataSource, 0, 0);
-		}
-		#endregion
-
 		#region 公共方法
 		public TreeViewNode Find(string path)
 		{
@@ -318,24 +301,82 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
+		#region 重写方法
+		protected override void Render(HtmlTextWriter writer)
+		{
+			if((_nodes == null || _nodes.Count < 1) && this.DataSource == null)
+			{
+				if(_emptyTemplate != null)
+					_emptyTemplate.InstantiateIn(this);
+			}
+
+			base.Render(writer);
+		}
+
+		protected override void RenderBeginTag(HtmlTextWriter writer)
+		{
+			this.AddAttributes(writer);
+
+			if(!Unit.IsEmpty(this.Height))
+				writer.AddStyleAttribute(HtmlTextWriterStyle.Height, this.Height.ToString());
+
+			if(!Unit.IsEmpty(this.Width))
+				writer.AddStyleAttribute(HtmlTextWriterStyle.Width, this.Height.ToString());
+
+			switch(this.ScrollbarMode)
+			{
+				case Web.Controls.ScrollbarMode.Horizontal:
+					writer.AddStyleAttribute(HtmlTextWriterStyle.OverflowX, "scroll");
+					break;
+				case Web.Controls.ScrollbarMode.Vertical:
+					writer.AddStyleAttribute(HtmlTextWriterStyle.OverflowY, "scroll");
+					break;
+				case Web.Controls.ScrollbarMode.Both:
+					writer.AddStyleAttribute(HtmlTextWriterStyle.Overflow, "scroll");
+					break;
+			}
+
+			writer.RenderBeginTag(this.GetListTagName());
+		}
+
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
+			if(_nodes != null)
+			{
+				for(int i = 0; i < _nodes.Count; i++)
+				{
+					this.RenderNode(writer, _nodes[i], 0, i);
+				}
+			}
+
+			if(string.IsNullOrWhiteSpace(this.LoadingPath))
+				this.RenderDataNodes(writer, this.DataSource as IEnumerable, 0, 0, false);
+		}
+		#endregion
+
 		#region 私有方法
-		private void RenderNode(HtmlTextWriter writer, TreeViewNode node, int index, int depth)
+		private void RenderNode(HtmlTextWriter writer, TreeViewNode node, int depth, int index = 0)
 		{
 			if(node == null || (!node.Visible))
 				return;
 
-			string cssClass = "item";
+			string cssClass = node.CssClass;
 
 			if(node.Selected)
 				cssClass = Utility.ResolveCssClass(":selected", () => cssClass);
 
-			if(node.Nodes.Count > 0)
-				cssClass += " ui dropdown";
+			if(this.IsDropdown && node.Nodes.Count > 0)
+				cssClass = Utility.ResolveCssClass(":ui dropdown", () => cssClass);
 
 			if(!string.IsNullOrWhiteSpace(cssClass))
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, cssClass);
 
-			writer.RenderBeginTag(this.GetNodeTagName());
+			writer.RenderBeginTag(this.GetItemTagName());
 
 			if(node.Image != null)
 				node.Image.ToHtmlString(writer);
@@ -347,55 +388,68 @@ namespace Zongsoft.Web.Controls
 
 			if(node.Nodes.Count > 0)
 			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "menu");
-				writer.RenderBeginTag(HtmlTextWriterTag.Ul);
+				cssClass = node.ListCssClass;
+
+				if(this.IsDropdown)
+					cssClass = Utility.ResolveCssClass(":menu", () => cssClass);
+
+				if(!string.IsNullOrWhiteSpace(cssClass))
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, cssClass);
+
+				writer.RenderBeginTag(this.GetListTagName());
 
 				for(int i = 0; i < node.Nodes.Count; i++)
 				{
 					this.RenderNode(writer,
 									node.Nodes[i],
-									i, depth + 1);
+									depth + 1, i);
 				}
 
 				writer.RenderEndTag();
 			}
 
 			if(!string.IsNullOrWhiteSpace(this.LoadingPath) && string.Equals(this.SelectedPath, node.FullPath, StringComparison.OrdinalIgnoreCase))
-				this.RenderDataNodes(writer, this.DataSource, index, depth);
+				this.RenderDataNodes(writer, this.DataSource as IEnumerable, depth, index, true);
 
 			writer.RenderEndTag();
 		}
 
-		private void RenderDataNodes(HtmlTextWriter writer, object dataSource, int index, int depth)
+		private void RenderDataNodes(HtmlTextWriter writer, IEnumerable dataItems, int depth, int index = 0, bool renderListTag = true)
 		{
-			if(dataSource == null)
+			if(dataItems == null || (dataItems is ICollection && ((ICollection)dataItems).Count < 1))
 				return;
 
-			this.RenderNodeTemplate(writer, new TreeViewNodeContainer(this, dataSource, index, this.GetNodeTagName(), "item")
+			if(Zongsoft.Common.TypeExtension.IsAssignableFrom(typeof(ICollection<>), dataItems.GetType()))
 			{
-				Depth = depth,
-			});
+				var property = dataItems.GetType().GetProperty("Count", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-			var dataChildren = dataSource.GetType().GetProperty("").GetValue(dataSource);
-
-			if(dataChildren == null)
-				return;
-
-			var dataItems = dataChildren as IEnumerable;
-
-			if(dataChildren.GetType() == typeof(string) || dataItems == null)
-			{
-				this.RenderDataNodes(writer, dataChildren, 0, depth + 1);
+				if(property != null && Zongsoft.Common.Convert.ConvertValue<int>(property.GetValue(dataItems)) < 1)
+					return;
 			}
-			else
-			{
-				int i = 0;
 
-				foreach(var dataItem in dataItems)
+			if(renderListTag)
+			{
+				var cssClass = this.ListCssClass;
+
+				if(this.IsDropdown)
+					cssClass = Utility.ResolveCssClass(":menu", () => cssClass);
+
+				if(!string.IsNullOrWhiteSpace(cssClass))
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, cssClass);
+
+				writer.RenderBeginTag(this.GetListTagName());
+			}
+
+			foreach(var dataItem in dataItems)
+			{
+				this.RenderNodeTemplate(writer, new TreeViewNodeContainer(this, dataItem, index++, this.GetItemTagName(), this.ItemCssClass)
 				{
-					this.RenderDataNodes(writer, dataItem, i++, depth + 1);
-				}
+					Depth = depth,
+				});
 			}
+
+			if(renderListTag)
+				writer.RenderEndTag();
 		}
 
 		private void RenderNodeTemplate(HtmlTextWriter writer, TreeViewNodeContainer container)
@@ -409,12 +463,25 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
-		private string GetNodeTagName()
+		private string GetListTagName()
 		{
 			switch(this.RenderMode)
 			{
-				case ListRenderMode.None:
-					return "div";
+				case ListRenderMode.List:
+					return "dl";
+				case ListRenderMode.BulletList:
+					return "ul";
+				case ListRenderMode.OrderedList:
+					return "ol";
+			}
+
+			return "div";
+		}
+
+		private string GetItemTagName()
+		{
+			switch(this.RenderMode)
+			{
 				case ListRenderMode.List:
 					return "dt";
 				case ListRenderMode.BulletList:
@@ -456,6 +523,24 @@ namespace Zongsoft.Web.Controls
 				{
 					_depth = value;
 				}
+			}
+			#endregion
+
+			#region 重写方法
+			protected override void RenderContent(HtmlTextWriter writer)
+			{
+				//调用基类同名方法(生成当前节点的内容)
+				base.RenderContent(writer);
+
+				if(string.IsNullOrWhiteSpace(this.Owner.DataPropertyName))
+					return;
+
+				var dataProperty = this.DataItem.GetType().GetProperty(this.Owner.DataPropertyName, (BindingFlags.Instance | BindingFlags.Public));
+
+				if(dataProperty == null)
+					throw new InvalidOperationException();
+
+				this.Owner.RenderDataNodes(writer, dataProperty.GetValue(this.DataItem) as IEnumerable, _depth + 1, 0, true);
 			}
 			#endregion
 		}
