@@ -34,14 +34,34 @@ namespace Zongsoft.Web.Controls
 {
 	public class Button : DataBoundControl
 	{
+		#region 成员字段
+		private Image _image;
+		private ButtonType _buttonType;
+		#endregion
+
 		#region 构造函数
 		public Button()
 		{
-			this.CssClass = "ui button btn";
+			_buttonType = Web.Controls.ButtonType.Normal;
+			this.CssClass = "ui basic button btn";
 		}
 		#endregion
 
 		#region 公共属性
+		[DefaultValue(ButtonType.Normal)]
+		[PropertyMetadata(false)]
+		public ButtonType ButtonType
+		{
+			get
+			{
+				return _buttonType;
+			}
+			set
+			{
+				_buttonType = value;
+			}
+		}
+
 		[Bindable(true)]
 		public string Name
 		{
@@ -56,6 +76,7 @@ namespace Zongsoft.Web.Controls
 		}
 
 		[Bindable(true)]
+		[PropertyMetadata(false)]
 		public string Value
 		{
 			get
@@ -67,6 +88,67 @@ namespace Zongsoft.Web.Controls
 				this.SetPropertyValue(() => this.Value, value);
 			}
 		}
+
+		[Bindable(true)]
+		public string Text
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.Text);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.Text, value);
+			}
+		}
+
+		[Bindable(true)]
+		[DefaultValue("")]
+		[PropertyMetadata(false)]
+		public string Icon
+		{
+			get
+			{
+				return _image == null ? null : _image.Icon;
+			}
+			set
+			{
+				this.Image.Icon = value;
+			}
+		}
+
+		[NotifyParentProperty(true)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		[PropertyMetadata(false)]
+		public Image Image
+		{
+			get
+			{
+				if(_image == null)
+					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
+
+				return _image;
+			}
+			set
+			{
+				_image = value;
+			}
+		}
+
+		[DefaultValue(HorizontalAlignment.Right)]
+		[PropertyMetadata("data-icon-align")]
+		public HorizontalAlignment IconAlignment
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.IconAlignment);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.IconAlignment, value);
+			}
+		}
 		#endregion
 
 		#region 重写方法
@@ -76,12 +158,31 @@ namespace Zongsoft.Web.Controls
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
 
 			this.AddAttributes(writer);
-			writer.RenderBeginTag(HtmlTextWriterTag.Button);
+
+			if(this.ButtonType == ButtonType.Link)
+			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Href, string.IsNullOrWhiteSpace(this.Value) ? Utility.EmptyLink : this.Value);
+				writer.RenderBeginTag(HtmlTextWriterTag.A);
+			}
+			else
+			{
+				writer.AddAttribute(HtmlTextWriterAttribute.Value, this.Value);
+				writer.RenderBeginTag(HtmlTextWriterTag.Button);
+			}
 		}
 
 		protected override void RenderEndTag(HtmlTextWriter writer)
 		{
 			writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
+			if(_image != null)
+				_image.ToHtmlString(writer);
+
+			if(this.Text != null)
+				writer.Write(this.Text);
 		}
 		#endregion
 	}
