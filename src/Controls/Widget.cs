@@ -124,10 +124,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				if(_image == null)
-					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
-
-				_image.Icon = value;
+				this.Image.Icon = value;
 			}
 		}
 
