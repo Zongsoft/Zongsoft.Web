@@ -365,7 +365,7 @@ namespace Zongsoft.Web.Controls
 			if(node == null || (!node.Visible))
 				return;
 
-			string cssClass = node.CssClass;
+			string cssClass = node.CssClass ?? this.ItemCssClass;
 
 			if(node.Selected)
 				cssClass = Utility.ResolveCssClass(":selected", () => cssClass);
@@ -429,7 +429,7 @@ namespace Zongsoft.Web.Controls
 
 			if(renderListTag)
 			{
-				var cssClass = this.ListCssClass;
+				var cssClass = this.ListCssClass ?? this.ListCssClass;
 
 				if(this.IsDropdown)
 					cssClass = Utility.ResolveCssClass(":menu", () => cssClass);

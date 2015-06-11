@@ -102,7 +102,6 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
-		[Bindable(true)]
 		[DefaultValue("")]
 		[PropertyMetadata(false)]
 		public string Icon
@@ -137,7 +136,7 @@ namespace Zongsoft.Web.Controls
 		}
 
 		[DefaultValue(HorizontalAlignment.Right)]
-		[PropertyMetadata("data-icon-align")]
+		[PropertyMetadata(false)]
 		public HorizontalAlignment IconAlignment
 		{
 			get

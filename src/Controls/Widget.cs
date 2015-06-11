@@ -77,6 +77,7 @@ namespace Zongsoft.Web.Controls
 		public Widget()
 		{
 			this.CssClass = "widget";
+			_settings = new WidgetSettings();
 		}
 		#endregion
 
@@ -113,7 +114,6 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
-		[Bindable(true)]
 		[DefaultValue("")]
 		[PropertyMetadata(false)]
 		public string Icon
@@ -230,7 +230,6 @@ namespace Zongsoft.Web.Controls
 
 			if(this.Image != null)
 			{
-				//var control = new Literal("i", "widget-header-icon icon icon-" + this.Icon.Trim().ToLowerInvariant());
 				var control = this.Image.ToHtmlControl();
 				header.Controls.Add(control);
 			}
@@ -327,10 +326,10 @@ namespace Zongsoft.Web.Controls
 				HeaderContainerTagName = "div";
 				HeaderContainerCssClass = "widget-header ui top attached message";
 
-				BodyContainerTagName = null;
+				BodyContainerTagName = "div";
 				BodyContainerCssClass = "widget-body ui attached segment";
 
-				FooterContainerTagName = "div";
+				FooterContainerTagName = null;
 				FooterContainerCssClass = "ui bottom attached segment";
 			}
 			#endregion
