@@ -38,12 +38,12 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public ImageBox()
 		{
-			this.CssClass = "ui image";
 		}
 		#endregion
 
 		#region 公共属性
 		[Bindable(true)]
+		[PropertyMetadata(false)]
 		public string Icon
 		{
 			get
@@ -131,6 +131,9 @@ namespace Zongsoft.Web.Controls
 		{
 			if(string.IsNullOrWhiteSpace(ImageUrl))
 			{
+				if(string.IsNullOrWhiteSpace(this.Icon))
+					return;
+
 				this.CssClass = ":icon " + this.Icon.Trim().ToLowerInvariant();
 
 				this.AddAttributes(writer, "ImageUrl", "Title");
@@ -139,6 +142,8 @@ namespace Zongsoft.Web.Controls
 			}
 			else
 			{
+				this.CssClass = ":ui image";
+
 				this.AddAttributes(writer);
 
 				if(!Unit.IsEmpty(this.Width))
@@ -153,6 +158,9 @@ namespace Zongsoft.Web.Controls
 
 		protected override void RenderEndTag(HtmlTextWriter writer)
 		{
+			if(string.IsNullOrWhiteSpace(this.ImageUrl) && string.IsNullOrWhiteSpace(this.Icon))
+				return;
+
 			writer.RenderEndTag();
 		}
 
@@ -161,7 +169,7 @@ namespace Zongsoft.Web.Controls
 			if(!string.IsNullOrWhiteSpace(this.NavigateUrl))
 			{
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "image");
-				writer.AddAttribute(HtmlTextWriterAttribute.Href, this.NavigateUrl);
+				writer.AddAttribute(HtmlTextWriterAttribute.Href, this.ResolveUrl(this.NavigateUrl));
 				writer.RenderBeginTag(HtmlTextWriterTag.A);
 			}
 
