@@ -41,10 +41,11 @@ namespace Zongsoft.Web.Controls
 		{
 		}
 
-		public Literal(string tagName, string cssClass = "")
+		public Literal(string tagName, string cssClass = "", string text = null)
 		{
 			this.TagName = tagName;
 			this.CssClass = cssClass;
+			this.Text = text;
 		}
 		#endregion
 
@@ -119,7 +120,7 @@ namespace Zongsoft.Web.Controls
 				var literalControl = child as LiteralControl;
 
 				if(literalControl != null)
-					literalControl.Text = BindingUtility.FormatBindingValue(literalControl.Text, this.GetBindingSource());
+					literalControl.Text = BindingUtility.FormatBindingValue(literalControl.Text, BindingUtility.GetBindingSource(literalControl));
 			}
 
 			if(!string.IsNullOrWhiteSpace(this.Text))

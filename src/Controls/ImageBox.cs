@@ -169,7 +169,7 @@ namespace Zongsoft.Web.Controls
 			if(!string.IsNullOrWhiteSpace(this.NavigateUrl))
 			{
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "image");
-				writer.AddAttribute(HtmlTextWriterAttribute.Href, this.ResolveUrl(this.NavigateUrl));
+				writer.AddAttribute(HtmlTextWriterAttribute.Href, this.NavigateUrl);
 				writer.RenderBeginTag(HtmlTextWriterTag.A);
 			}
 

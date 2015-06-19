@@ -78,6 +78,7 @@
     <Compile Include="Controls\BindingUtility.cs" />
     <Compile Include="Controls\Button.cs" />
     <Compile Include="Controls\ButtonType.cs" />
+    <Compile Include="Controls\CardView.cs" />
     <Compile Include="Controls\ChartLine.cs" />
     <Compile Include="Controls\ChartPoint.cs" />
     <Compile Include="Controls\ChartSerie.cs" />

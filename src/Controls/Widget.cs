@@ -225,6 +225,11 @@ namespace Zongsoft.Web.Controls
 				return;
 			}
 
+			this.CreateHeaderContent(container);
+		}
+
+		protected virtual void CreateHeaderContent(Control container)
+		{
 			var header = new Literal("h3", "ui header");
 			container.Controls.Add(header);
 
@@ -277,10 +282,6 @@ namespace Zongsoft.Web.Controls
 
 		protected virtual void CreateBody()
 		{
-			//如果没有指定内容模板则返回（即什么也不用生成）
-			if(_bodyTemplate == null)
-				return;
-
 			Control container = this;
 
 			if(_settings != null && _settings.BodyContainerRequired)
@@ -289,7 +290,14 @@ namespace Zongsoft.Web.Controls
 				this.Controls.Add(container);
 			}
 
-			_bodyTemplate.InstantiateIn(container);
+			if(_bodyTemplate != null)
+				_bodyTemplate.InstantiateIn(container);
+			else
+				this.CreateBodyContent(container);
+		}
+
+		protected virtual void CreateBodyContent(Control container)
+		{
 		}
 		#endregion
 
@@ -331,6 +339,18 @@ namespace Zongsoft.Web.Controls
 
 				FooterContainerTagName = null;
 				FooterContainerCssClass = "ui bottom attached segment";
+			}
+
+			public WidgetSettings(string headerContainerTagName, string headerContainerCssClass,
+			                      string bodyContainerTagName, string bodyContainerCssClass,
+			                      string footerContainerTagName, string footerContainerCssClass)
+			{
+				this.HeaderContainerTagName = headerContainerTagName;
+				this.HeaderContainerCssClass = headerContainerCssClass;
+				this.BodyContainerTagName = bodyContainerTagName;
+				this.BodyContainerCssClass = bodyContainerCssClass;
+				this.FooterContainerTagName = footerContainerTagName;
+				this.FooterContainerCssClass = footerContainerCssClass;
 			}
 			#endregion
 
