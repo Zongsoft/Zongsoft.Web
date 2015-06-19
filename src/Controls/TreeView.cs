@@ -147,15 +147,6 @@ namespace Zongsoft.Web.Controls
 		}
 
 		[PropertyMetadata(false)]
-		public bool HasNodes
-		{
-			get
-			{
-				return _nodes != null && _nodes.Count > 0;
-			}
-		}
-
-		[PropertyMetadata(false)]
 		public string DataPropertyName
 		{
 			get
@@ -195,6 +186,15 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[PropertyMetadata(false)]
+		public bool HasNodes
+		{
+			get
+			{
+				return _nodes != null && _nodes.Count > 0;
+			}
+		}
+
 		[MergableProperty(false)]
 		[PersistenceMode(PersistenceMode.InnerProperty)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
@@ -203,7 +203,7 @@ namespace Zongsoft.Web.Controls
 			get
 			{
 				if(_nodes == null)
-					System.Threading.Interlocked.CompareExchange(ref _nodes, new TreeViewNodeCollection(), null);
+					System.Threading.Interlocked.CompareExchange(ref _nodes, new TreeViewNodeCollection(this), null);
 
 				return _nodes;
 			}

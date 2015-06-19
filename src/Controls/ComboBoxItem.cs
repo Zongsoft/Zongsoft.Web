@@ -33,6 +33,7 @@ namespace Zongsoft.Web.Controls
 	public class ComboBoxItem
 	{
 		#region 成员变量
+		private ComboBox _comboBox;
 		private bool _disabled;
 		private string _text;
 		private string _value;
@@ -41,6 +42,21 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 公共属性
+		public ComboBox ComboBox
+		{
+			get
+			{
+				return _comboBox;
+			}
+			internal set
+			{
+				if(value == null)
+					throw new ArgumentNullException();
+
+				_comboBox = value;
+			}
+		}
+
 		public bool Disabled
 		{
 			get
@@ -85,10 +101,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				if(_image == null)
-					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
-
-				_image.Icon = value;
+				this.Image.Icon = value;
 			}
 		}
 
@@ -97,7 +110,7 @@ namespace Zongsoft.Web.Controls
 			get
 			{
 				if(_image == null)
-					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
+					System.Threading.Interlocked.CompareExchange(ref _image, new Image(_comboBox), null);
 
 				return _image;
 			}

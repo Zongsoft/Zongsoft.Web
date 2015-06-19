@@ -41,6 +41,12 @@ namespace Zongsoft.Web.Controls
 	[ParseChildren(true)]
 	public class CardView : Widget
 	{
+		#region 成员字段
+		private ITemplate _contentTemplate;
+		private ITemplate _contentHeaderTemplate;
+		private ITemplate _contentFooterTemplate;
+		#endregion
+
 		#region 构造函数
 		public CardView()
 		{
@@ -50,19 +56,48 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 公共属性
-		[Bindable(true)]
-		[DefaultValue("")]
-		[Localizable(true)]
-		[PropertyMetadata(false)]
-		public string Content
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(CardView))]
+		public ITemplate ContentTemplate
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.Content);
+				return _contentTemplate;
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Content, value);
+				_contentTemplate = value;
+			}
+		}
+
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(CardView))]
+		public ITemplate ContentHeaderTemplate
+		{
+			get
+			{
+				return _contentHeaderTemplate;
+			}
+			set
+			{
+				_contentHeaderTemplate = value;
+			}
+		}
+
+		[BrowsableAttribute(false)]
+		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
+		[TemplateContainerAttribute(typeof(CardView))]
+		public ITemplate ContentFooterTemplate
+		{
+			get
+			{
+				return _contentFooterTemplate;
+			}
+			set
+			{
+				_contentFooterTemplate = value;
 			}
 		}
 		#endregion
@@ -86,11 +121,37 @@ namespace Zongsoft.Web.Controls
 		protected override void CreateBodyContent(Control container)
 		{
 			var content = new Literal("div", "content");
-			content.Controls.Add(new Literal("h3", "header", this.Title));
-			content.Controls.Add(new Literal("div", "meta", this.Description));
-			content.Controls.Add(new Literal("div", "description", this.Content));
-
+			this.CreateContentHeader(content);
+			this.CreateContent(content);
 			container.Controls.Add(content);
+
+			var extra = new Literal("div", "extra content");
+			this.CreateContentFooter(extra);
+			container.Controls.Add(extra);
+		}
+		#endregion
+
+		#region 虚拟方法
+		protected virtual void CreateContent(Control container)
+		{
+			if(_contentTemplate != null)
+				_contentTemplate.InstantiateIn(container);
+			else
+				container.Controls.Add(new Literal("div", "description", this.Description));
+		}
+
+		protected virtual void CreateContentHeader(Control container)
+		{
+			if(_contentHeaderTemplate != null)
+				_contentHeaderTemplate.InstantiateIn(container);
+			else
+				container.Controls.Add(new Literal("h3", "header", this.Title));
+		}
+
+		protected virtual void CreateContentFooter(Control container)
+		{
+			if(_contentFooterTemplate != null)
+				_contentFooterTemplate.InstantiateIn(container);
 		}
 		#endregion
 	}

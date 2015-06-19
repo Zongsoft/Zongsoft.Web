@@ -33,6 +33,17 @@ namespace Zongsoft.Web.Controls
 {
 	public class Image : Zongsoft.ComponentModel.NotifyObject
 	{
+		#region 成员字段
+		private DataBoundControl _control;
+		#endregion
+
+		#region 构造函数
+		public Image(DataBoundControl control = null)
+		{
+			_control = control;
+		}
+		#endregion
+
 		#region 公共属性
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -40,11 +51,10 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.BindingSource);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.BindingSource, value);
+				if(_control == null)
+					return null;
+
+				return _control.GetBindingSource();
 			}
 		}
 

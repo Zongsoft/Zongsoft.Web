@@ -31,10 +31,30 @@ using System.Text;
 
 namespace Zongsoft.Web.Controls
 {
-	public class ComboBoxItemCollection : Collection<ComboBoxItem>
+	public class ComboBoxItemCollection : Zongsoft.Collections.Collection<ComboBoxItem>
 	{
-		public ComboBoxItemCollection()
+		private ComboBox _owner;
+
+		public ComboBoxItemCollection(ComboBox owner)
 		{
+			if(owner == null)
+				throw new ArgumentNullException("owner");
+
+			_owner = owner;
+		}
+
+		protected override void InsertItems(int index, IEnumerable<ComboBoxItem> items)
+		{
+			if(items == null)
+				return;
+
+			foreach(var item in items)
+			{
+				if(item != null)
+					item.ComboBox = _owner;
+			}
+
+			base.InsertItems(index, items);
 		}
 	}
 }

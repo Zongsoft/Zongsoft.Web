@@ -137,7 +137,7 @@ namespace Zongsoft.Web.Controls
 			get
 			{
 				if(_image == null)
-					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
+					System.Threading.Interlocked.CompareExchange(ref _image, new Image(this), null);
 
 				return _image;
 			}

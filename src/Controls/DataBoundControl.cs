@@ -261,7 +261,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 保护方法
-		protected object GetBindingSource()
+		internal protected object GetBindingSource()
 		{
 			return BindingUtility.GetBindingSource(this);
 		}

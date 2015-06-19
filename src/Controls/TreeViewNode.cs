@@ -47,6 +47,7 @@ namespace Zongsoft.Web.Controls
 		private bool _selected;
 		private bool _visible;
 		private Image _image;
+		private TreeView _treeView;
 		private TreeViewNode _parent;
 		private TreeViewNodeCollection _nodes;
 		#endregion
@@ -82,11 +83,22 @@ namespace Zongsoft.Web.Controls
 			_visible = true;
 			_parent = null;
 			_cssClass = "item";
-			_nodes = new TreeViewNodeCollection(this);
 		}
 		#endregion
 
 		#region 公共属性
+		public TreeView TreeView
+		{
+			get
+			{
+				return _treeView;
+			}
+			internal set
+			{
+				_treeView = value;
+			}
+		}
+
 		public string Name
 		{
 			get
@@ -127,10 +139,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				if(_image == null)
-					System.Threading.Interlocked.CompareExchange(ref _image, new Image(), null);
-
-				_image.Icon = value;
+				this.Image.Icon = value;
 			}
 		}
 
@@ -138,6 +147,9 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
+				if(_image == null)
+					System.Threading.Interlocked.CompareExchange(ref _image, new Image(_treeView), null);
+
 				return _image;
 			}
 			set
@@ -299,10 +311,21 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		public bool HasNodes
+		{
+			get
+			{
+				return _nodes != null && _nodes.Count > 0;
+			}
+		}
+
 		public TreeViewNodeCollection Nodes
 		{
 			get
 			{
+				if(_nodes == null)
+					System.Threading.Interlocked.CompareExchange(ref _nodes, new TreeViewNodeCollection(_treeView, this), null);
+
 				return _nodes;
 			}
 		}

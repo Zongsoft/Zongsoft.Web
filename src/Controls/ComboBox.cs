@@ -51,7 +51,7 @@ namespace Zongsoft.Web.Controls
 		public ComboBox()
 		{
 			this.CssClass = "ui selection dropdown";
-			_items = new ComboBoxItemCollection();
+			_items = new ComboBoxItemCollection(this);
 		}
 		#endregion
 

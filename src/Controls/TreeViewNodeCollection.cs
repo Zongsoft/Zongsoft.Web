@@ -38,32 +38,36 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 成员变量
-		private TreeViewNode _owner;
+		private TreeView _treeView;
+		private TreeViewNode _parent;
 		#endregion
 
 		#region 构造函数
-		public TreeViewNodeCollection() : base(StringComparer.OrdinalIgnoreCase)
+		internal TreeViewNodeCollection(TreeView owner, TreeViewNode parent = null) : base(StringComparer.OrdinalIgnoreCase)
 		{
-			_owner = null;
-			_syncRoot = new object();
-		}
+			//if(owner == null)
+			//	throw new ArgumentNullException("owner");
 
-		internal TreeViewNodeCollection(TreeViewNode owner) : base(StringComparer.OrdinalIgnoreCase)
-		{
-			if(owner == null)
-				throw new ArgumentNullException("owner");
-
-			_owner = owner;
+			_treeView = owner;
+			_parent = parent;
 			_syncRoot = new object();
 		}
 		#endregion
 
 		#region 公共属性
-		public TreeViewNode Owner
+		public TreeView TreeView
 		{
 			get
 			{
-				return _owner;
+				return _treeView;
+			}
+		}
+
+		public TreeViewNode Parent
+		{
+			get
+			{
+				return _parent;
 			}
 		}
 		#endregion
@@ -82,7 +86,8 @@ namespace Zongsoft.Web.Controls
 			if(item.Parent != null)
 				throw new ArgumentException();
 
-			item.Parent = _owner;
+			item.TreeView = _treeView;
+			item.Parent = _parent;
 
 			//调用基类同名方法
 			base.SetItem(index, item);
@@ -98,7 +103,8 @@ namespace Zongsoft.Web.Controls
 				if(item.Parent != null)
 					throw new ArgumentException();
 
-				item.Parent = _owner;
+				item.TreeView = _treeView;
+				item.Parent = _parent;
 			}
 
 			//使用同步锁，以确保不与删除和清除方法冲突
@@ -116,7 +122,10 @@ namespace Zongsoft.Web.Controls
 				var item = base[index];
 
 				if(item != null)
+				{
+					item.TreeView = null;
 					item.Parent = null;
+				}
 
 				//调用基类同名方法
 				base.RemoveItem(index);
@@ -130,7 +139,10 @@ namespace Zongsoft.Web.Controls
 				foreach(var item in base.Items)
 				{
 					if(item != null)
+					{
+						item.TreeView = null;
 						item.Parent = null;
+					}
 				}
 
 				//调用基类同名方法
