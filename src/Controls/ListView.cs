@@ -196,9 +196,13 @@ namespace Zongsoft.Web.Controls
 
 					foreach(var dataItem in dataItems)
 					{
+						FormExtension.PushDataItem(this.Page, dataItem);
+
 						var item = new DataItemContainer<ListView>(this, dataItem, index++);
 						this.CreateItem(item);
 						header.Controls.Add(item);
+
+						FormExtension.PopDataItem(this.Page);
 					}
 				}
 			}

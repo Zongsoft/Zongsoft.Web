@@ -35,262 +35,142 @@ namespace Zongsoft.Web.Controls
 	[DefaultProperty("Title")]
 	[PersistChildren(true)]
 	[ParseChildren(true)]
-	public class ItemView : Literal, INamingContainer
+	public class ItemView : Widget
 	{
 		#region 成员字段
-		private Image _image;
-		private ITemplate _headerTemplate;
-		private ITemplate _footerTemplate;
-		private ITemplate _contentTemplate;
+		private ViewPartCollection _headerParts;
+		private ViewPartCollection _footerParts;
 		#endregion
 
 		#region 构造函数
 		public ItemView()
 		{
 			this.TagName = "div";
-			this.CssClass = "item";
+			this.CssClass = "ui item";
+			this.Settings = new WidgetSettings("", "image", "div", "content", "div", "extra");
 		}
 		#endregion
 
 		#region 公共属性
-		[NotifyParentProperty(true)]
+		[DefaultValue("")]
+		[PropertyMetadata(false)]
+		public string TagName
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.TagName);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.TagName, value);
+			}
+		}
+
+		[MergableProperty(false)]
 		[PersistenceMode(PersistenceMode.InnerProperty)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		[PropertyMetadata(false)]
-		public Image Image
+		public ViewPartCollection HeaderParts
 		{
 			get
 			{
-				if(_image == null)
-					System.Threading.Interlocked.CompareExchange(ref _image, new Image(this), null);
+				if(_headerParts == null)
+					_headerParts = new ViewPartCollection(this);
 
-				return _image;
-			}
-			set
-			{
-				_image = value;
+				return _headerParts;
 			}
 		}
 
-		[Bindable(true)]
-		[DefaultValue("")]
-		[PropertyMetadata("href", PropertyRender = "UrlPropertyRender.Default", Renderable = false)]
-		public string NavigateUrl
+		[MergableProperty(false)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		public ViewPartCollection FooterParts
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.NavigateUrl);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.NavigateUrl, value);
-			}
-		}
+				if(_footerParts == null)
+					_footerParts = new ViewPartCollection(this);
 
-		[Bindable(true)]
-		[DefaultValue("")]
-		[PropertyMetadata(false)]
-		public string ContentText
-		{
-			get
-			{
-				return this.GetPropertyValue(() => this.ContentText);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.ContentText, value);
-			}
-		}
-
-		[Bindable(true)]
-		[DefaultValue("")]
-		[PropertyMetadata(false)]
-		public string HeaderTitle
-		{
-			get
-			{
-				return this.GetPropertyValue(() => this.HeaderTitle);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.HeaderTitle, value);
-			}
-		}
-
-		[Bindable(true)]
-		[DefaultValue("")]
-		[PropertyMetadata(false)]
-		public string HeaderDescription
-		{
-			get
-			{
-				return this.GetPropertyValue(() => this.HeaderDescription);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.HeaderDescription, value);
-			}
-		}
-
-		[Bindable(true)]
-		[DefaultValue("")]
-		[PropertyMetadata(false)]
-		public string FooterText
-		{
-			get
-			{
-				return this.GetPropertyValue(() => this.FooterText);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.FooterText, value);
-			}
-		}
-
-		[BrowsableAttribute(false)]
-		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
-		[TemplateContainerAttribute(typeof(ItemView))]
-		public ITemplate ContentTemplate
-		{
-			get
-			{
-				return _contentTemplate;
-			}
-			set
-			{
-				_contentTemplate = value;
-			}
-		}
-
-		[BrowsableAttribute(false)]
-		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
-		[TemplateContainerAttribute(typeof(ItemView))]
-		public ITemplate HeaderTemplate
-		{
-			get
-			{
-				return _headerTemplate;
-			}
-			set
-			{
-				_headerTemplate = value;
-			}
-		}
-
-		[BrowsableAttribute(false)]
-		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
-		[TemplateContainerAttribute(typeof(ItemView))]
-		public ITemplate FooterTemplate
-		{
-			get
-			{
-				return _footerTemplate;
-			}
-			set
-			{
-				_footerTemplate = value;
+				return _footerParts;
 			}
 		}
 		#endregion
 
 		#region 重写方法
-		protected override void RenderContent(HtmlTextWriter writer)
+		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
-			if(_image != null)
+			if(!string.IsNullOrWhiteSpace(this.TagName))
 			{
-				var cssClass = "image";
-
-				if(this.Image.Dimension != Dimension.None)
-					cssClass = this.Image.Dimension.ToString().ToLowerInvariant() + " ui image";
-
-				var imageContainer = new Literal("div", cssClass);
-				imageContainer.Controls.Add(this.Image.ToHtmlControl());
-				this.Controls.Add(imageContainer);
+				this.AddAttributes(writer);
+				writer.RenderBeginTag(this.TagName);
 			}
-
-			var container = new Literal("div", "content");
-			this.Controls.Add(container);
-
-			this.GenerateContentHeader(container);
-			this.GenerateContentBody(container);
-			this.GenerateContentFooter(container);
-
-			//调用基类同名方法(以确保生成所有子控件)
-			base.RenderContent(writer);
 		}
-		#endregion
 
-		#region 虚拟方法
-		protected virtual void GenerateContentHeader(DataBoundControl container)
+		protected override void RenderEndTag(HtmlTextWriter writer)
 		{
-			if(_headerTemplate != null)
-			{
-				_headerTemplate.InstantiateIn(container);
-				return;
-			}
+			if(!string.IsNullOrWhiteSpace(this.TagName))
+				writer.RenderEndTag();
+		}
 
-			if(!string.IsNullOrWhiteSpace(this.HeaderTitle))
+		protected override void CreateHeaderContent(Control container)
+		{
+			if(this.Image != null && !string.IsNullOrWhiteSpace(this.Image.ImageUrl))
 			{
-				Literal headerTitle;
-
-				if(string.IsNullOrWhiteSpace(this.NavigateUrl))
-					headerTitle = new Literal("div", "header");
-				else
+				if(string.IsNullOrWhiteSpace(this.Image.NavigateUrl))
 				{
-					headerTitle = new Literal("a", "header");
-					headerTitle.SetAttributeValue("href", this.NavigateUrl);
+					var imageCss = "top aligned image";
+
+					if(this.Image.Dimension != Dimension.None)
+						imageCss = "ui top aligned " + this.Image.Dimension.ToString() + " image";
+
+					var literal = new Literal("div", imageCss);
+					container.Controls.Add(literal);
+					container = literal;
 				}
 
-				headerTitle.Text = this.HeaderTitle;
-				container.Controls.Add(headerTitle);
-			}
-
-			if(!string.IsNullOrWhiteSpace(this.HeaderDescription))
-			{
-				var control = new Literal("div", "meta")
-				{
-					Text = this.HeaderDescription,
-				};
-
-				container.Controls.Add(control);
+				container.Controls.Add(this.Image.ToHtmlControl());
 			}
 		}
 
-		protected virtual void GenerateContentBody(DataBoundControl container)
+		protected override void CreateBodyContent(Control container)
 		{
-			if(_contentTemplate != null)
+			if(string.IsNullOrWhiteSpace(this.NavigateUrl))
+				container.Controls.Add(new Literal("h3", "header", this.Title));
+			else
+				container.Controls.Add(new Literal("a", "header", this.Title, new KeyValuePair<string, string>("href", this.ResolveUrl(this.NavigateUrl))));
+
+			if(_headerParts != null && _headerParts.Count > 0)
 			{
-				_contentTemplate.InstantiateIn(container);
-				return;
+				var meta = new Literal("div", "meta");
+				container.Controls.Add(meta);
+				Utility.GenerateParts(meta, _headerParts);
 			}
 
-			if(!string.IsNullOrWhiteSpace(this.ContentText))
-			{
-				var control = new Literal("div", "description")
-				{
-					Text = this.ContentText,
-				};
+			container.Controls.Add(new Literal("div", "description", this.Description));
+		}
 
-				container.Controls.Add(control);
+		protected override void CreateFooterContent(Control container)
+		{
+			if(_footerParts != null && _footerParts.Count > 0)
+			{
+				Utility.GenerateParts(container, _footerParts);
 			}
 		}
 
-		protected virtual void GenerateContentFooter(DataBoundControl container)
+		protected override void CreateFooter(Control container)
 		{
-			if(_footerTemplate != null)
-			{
-				_footerTemplate.InstantiateIn(container);
-				return;
-			}
+			container = this.BodyContainer;
 
-			if(!string.IsNullOrWhiteSpace(this.FooterText))
-			{
-				var control = new Literal("div", "extra")
-				{
-					Text = this.FooterText,
-				};
+			if(this.FooterTemplate != null)
+				this.CreateFooterContent(this.FooterContainer ?? container);
 
-				container.Controls.Add(control);
+			base.CreateFooter(container);
+		}
+
+		protected override bool FooterContainerRequired
+		{
+			get
+			{
+				return base.FooterContainerRequired && (this.FooterTemplate != null || (_footerParts != null && _footerParts.Count > 0));
 			}
 		}
 		#endregion

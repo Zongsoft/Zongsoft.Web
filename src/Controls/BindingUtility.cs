@@ -91,15 +91,42 @@ namespace Zongsoft.Web.Controls
 				return Zongsoft.Common.Convert.ConvertValue(memberValue, valueType);
 			}
 
-			memberValue = GetMemberValue(bindingSource, bindings[0].BindingPath, true);
+			var text = string.Empty;
+			var position = 0;
 
-			if(memberValue != null && !string.IsNullOrWhiteSpace(bindings[0].BindingFormat))
-				return string.Format("{0:" + bindings[0].BindingFormat + "}", memberValue);
+			foreach(var binding in bindings)
+			{
+				if(binding.Index > 0)
+					text += bindingText.Substring(position, binding.Index - position);
 
-			if(memberValue != null)
-				return Zongsoft.Common.Convert.ConvertValue(memberValue, valueType);
+				memberValue = GetMemberValue(bindingSource, binding.BindingPath, true);
+
+				if(memberValue != null)
+				{
+					if(string.IsNullOrWhiteSpace(binding.BindingFormat))
+						memberValue = Zongsoft.Common.Convert.ConvertValue(memberValue, valueType);
+					else
+						memberValue = string.Format("{0:" + binding.BindingFormat + "}", memberValue);
+				}
+
+				text += memberValue;
+				position = binding.Index + binding.Length;
+			}
+
+			if(valueType == typeof(string))
+				return text;
 
 			return memberValue;
+
+			//memberValue = GetMemberValue(bindingSource, bindings[0].BindingPath, true);
+
+			//if(memberValue == null)
+			//	return null;
+
+			//if(string.IsNullOrWhiteSpace(bindings[0].BindingFormat))
+			//	return Zongsoft.Common.Convert.ConvertValue(memberValue, valueType);
+			//else
+			//	return string.Format("{0:" + bindings[0].BindingFormat + "}", memberValue);
 		}
 
 		public static string FormatBindingValue(string bindingText, object bindingSource, bool isResolvedText = false)
@@ -115,7 +142,7 @@ namespace Zongsoft.Web.Controls
 		public static string FormatBindingValue(string bindingText, object bindingSource, BindingFormatter format, bool isResolvedText = false)
 		{
 			if(string.IsNullOrWhiteSpace(bindingText))
-				return string.Empty;
+				return bindingText;
 				//return bindingSource != null ? bindingSource.ToString() : string.Empty;
 
 			var matched = BindingExpressionRegex.IsMatch(bindingText);

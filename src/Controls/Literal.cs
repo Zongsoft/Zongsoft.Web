@@ -41,11 +41,17 @@ namespace Zongsoft.Web.Controls
 		{
 		}
 
-		public Literal(string tagName, string cssClass = "", string text = null)
+		public Literal(string tagName, string cssClass = "", string text = null, params KeyValuePair<string, string>[] attributes)
 		{
 			this.TagName = tagName;
 			this.CssClass = cssClass;
 			this.Text = text;
+
+			if(attributes != null && attributes.Length > 0)
+			{
+				foreach(var attribute in attributes)
+					this.SetAttributeValue(attribute.Key, attribute.Value);
+			}
 		}
 		#endregion
 

@@ -69,6 +69,9 @@ namespace Zongsoft.Web.Controls
 		private ITemplate _headerTemplate;
 		private ITemplate _footerTemplate;
 		private ITemplate _bodyTemplate;
+		private Control _headerContainer;
+		private Control _footerContainer;
+		private Control _bodyContainer;
 		private Image _image;
 		private WidgetSettings _settings;
 		#endregion
@@ -95,6 +98,22 @@ namespace Zongsoft.Web.Controls
 			set
 			{
 				this.SetPropertyValue(() => this.Title, value);
+			}
+		}
+
+		[Bindable(true)]
+		[DefaultValue("")]
+		[Localizable(true)]
+		[PropertyMetadata("href", PropertyRender = "UrlPropertyRender.Default", Renderable = false)]
+		public string NavigateUrl
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.NavigateUrl);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.NavigateUrl, value);
 			}
 		}
 
@@ -208,24 +227,56 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
-		#region 虚拟方法
-		protected virtual void CreateHeader()
+		#region 保护属性
+		protected virtual Control HeaderContainer
 		{
-			Control container = this;
-
-			if(_settings != null && _settings.HeaderContainerRequired)
+			get
 			{
-				container = _settings.CreateHeaderContainer();
-				this.Controls.Add(container);
+				if(_headerContainer == null && this.HeaderContainerRequired)
+					_headerContainer = _settings.CreateFooterContainer();
+
+				return _headerContainer;
+			}
+		}
+
+		protected virtual Control BodyContainer
+		{
+			get
+			{
+				if(_bodyContainer == null && this.BodyContainerRequired)
+					_bodyContainer = _settings.CreateBodyContainer();
+
+				return _bodyContainer;
+			}
+		}
+
+		protected virtual Control FooterContainer
+		{
+			get
+			{
+				if(_footerContainer == null && this.FooterContainerRequired)
+					_footerContainer = _settings.CreateFooterContainer();
+
+				return _footerContainer;
+			}
+		}
+		#endregion
+
+		#region 虚拟方法
+		protected virtual void CreateHeader(Control container)
+		{
+			var header = this.HeaderContainer;
+
+			if(header != null)
+			{
+				container.Controls.Add(header);
+				container = header;
 			}
 
 			if(_headerTemplate != null)
-			{
 				_headerTemplate.InstantiateIn(container);
-				return;
-			}
-
-			this.CreateHeaderContent(container);
+			else
+				this.CreateHeaderContent(container);
 		}
 
 		protected virtual void CreateHeaderContent(Control container)
@@ -244,10 +295,13 @@ namespace Zongsoft.Web.Controls
 
 			if(!string.IsNullOrWhiteSpace(this.Title))
 			{
-				var control = new Literal("span", "widget-header-title")
+				var control = new Literal("a", "widget-header-title")
 				{
 					Text = this.Title,
 				};
+
+				if(!string.IsNullOrWhiteSpace(this.NavigateUrl))
+					control.SetAttributeValue("href", this.ResolveUrl(this.NavigateUrl));
 
 				content.Controls.Add(control);
 			}
@@ -263,31 +317,14 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
-		protected virtual void CreateFooter()
+		protected virtual void CreateBody(Control container)
 		{
-			//如果没有指定脚模板则返回（即什么也不用生成）
-			if(_footerTemplate == null)
-				return;
+			var body = this.BodyContainer;
 
-			Control container = this;
-
-			if(_settings != null && _settings.FooterContainerRequired)
+			if(body != null)
 			{
-				container = _settings.CreateFooterContainer();
-				this.Controls.Add(container);
-			}
-
-			_footerTemplate.InstantiateIn(container);
-		}
-
-		protected virtual void CreateBody()
-		{
-			Control container = this;
-
-			if(_settings != null && _settings.BodyContainerRequired)
-			{
-				container = _settings.CreateBodyContainer();
-				this.Controls.Add(container);
+				container.Controls.Add(body);
+				container = body;
 			}
 
 			if(_bodyTemplate != null)
@@ -298,6 +335,56 @@ namespace Zongsoft.Web.Controls
 
 		protected virtual void CreateBodyContent(Control container)
 		{
+		}
+
+		protected virtual void CreateFooter(Control container)
+		{
+			var footer = this.FooterContainer;
+
+			if(footer != null)
+			{
+				container.Controls.Add(footer);
+				container = footer;
+			}
+
+			if(_footerTemplate != null)
+				_footerTemplate.InstantiateIn(container);
+			else
+				this.CreateFooterContent(container);
+		}
+
+		protected virtual void CreateFooterContent(Control container)
+		{
+		}
+
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		protected virtual bool HeaderContainerRequired
+		{
+			get
+			{
+				return _settings != null && !string.IsNullOrWhiteSpace(_settings.HeaderContainerTagName);
+			}
+		}
+
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		protected virtual bool BodyContainerRequired
+		{
+			get
+			{
+				return _settings != null && !string.IsNullOrWhiteSpace(_settings.BodyContainerTagName);
+			}
+		}
+
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		protected virtual bool FooterContainerRequired
+		{
+			get
+			{
+				return _settings != null && !string.IsNullOrWhiteSpace(_settings.FooterContainerTagName);
+			}
 		}
 		#endregion
 
@@ -315,9 +402,9 @@ namespace Zongsoft.Web.Controls
 
 		protected override void RenderContent(HtmlTextWriter writer)
 		{
-			this.CreateHeader();
-			this.CreateBody();
-			this.CreateFooter();
+			this.CreateHeader(this);
+			this.CreateBody(this);
+			this.CreateFooter(this);
 
 			//调用基类同名方法
 			base.RenderContent(writer);
@@ -328,99 +415,112 @@ namespace Zongsoft.Web.Controls
 		[Serializable]
 		public class WidgetSettings
 		{
+			#region 成员字段
+			private string _headerContainerTagName;
+			private string _headerContainerCssClass;
+			private string _bodyContainerTagName;
+			private string _bodyContainerCssClass;
+			private string _footerContainerTagName;
+			private string _footerContainerCssClass;
+			#endregion
+
 			#region 构造函数
 			public WidgetSettings()
 			{
-				HeaderContainerTagName = "div";
-				HeaderContainerCssClass = "widget-header ui top attached message";
+				_headerContainerTagName = "div";
+				_headerContainerCssClass = "widget-header ui top attached message";
 
-				BodyContainerTagName = "div";
-				BodyContainerCssClass = "widget-body ui attached segment";
+				_bodyContainerTagName = "div";
+				_bodyContainerCssClass = "widget-body ui attached segment";
 
-				FooterContainerTagName = null;
-				FooterContainerCssClass = "ui bottom attached segment";
+				_footerContainerTagName = null;
+				_footerContainerCssClass = "ui bottom attached segment";
 			}
 
 			public WidgetSettings(string headerContainerTagName, string headerContainerCssClass,
 			                      string bodyContainerTagName, string bodyContainerCssClass,
 			                      string footerContainerTagName, string footerContainerCssClass)
 			{
-				this.HeaderContainerTagName = headerContainerTagName;
-				this.HeaderContainerCssClass = headerContainerCssClass;
-				this.BodyContainerTagName = bodyContainerTagName;
-				this.BodyContainerCssClass = bodyContainerCssClass;
-				this.FooterContainerTagName = footerContainerTagName;
-				this.FooterContainerCssClass = footerContainerCssClass;
-			}
-			#endregion
-
-			#region 只读属性
-			[Browsable(false)]
-			[EditorBrowsable(EditorBrowsableState.Never)]
-			public bool HeaderContainerRequired
-			{
-				get
-				{
-					return !string.IsNullOrWhiteSpace(this.HeaderContainerTagName);
-				}
-			}
-
-			[Browsable(false)]
-			[EditorBrowsable(EditorBrowsableState.Never)]
-			public bool BodyContainerRequired
-			{
-				get
-				{
-					return !string.IsNullOrWhiteSpace(this.BodyContainerTagName);
-				}
-			}
-
-			[Browsable(false)]
-			[EditorBrowsable(EditorBrowsableState.Never)]
-			public bool FooterContainerRequired
-			{
-				get
-				{
-					return !string.IsNullOrWhiteSpace(this.FooterContainerTagName);
-				}
+				_headerContainerTagName = headerContainerTagName;
+				_headerContainerCssClass = headerContainerCssClass;
+				_bodyContainerTagName = bodyContainerTagName;
+				_bodyContainerCssClass = bodyContainerCssClass;
+				_footerContainerTagName = footerContainerTagName;
+				_footerContainerCssClass = footerContainerCssClass;
 			}
 			#endregion
 
 			#region 读写属性
 			public string HeaderContainerTagName
 			{
-				get;
-				set;
+				get
+				{
+					return _headerContainerTagName;
+				}
+				set
+				{
+					_headerContainerTagName = value;
+				}
 			}
 
 			public string HeaderContainerCssClass
 			{
-				get;
-				set;
+				get
+				{
+					return _headerContainerCssClass;
+				}
+				set
+				{
+					_headerContainerCssClass = value;
+				}
 			}
 
 			public string BodyContainerTagName
 			{
-				get;
-				set;
+				get
+				{
+					return _bodyContainerTagName;
+				}
+				set
+				{
+					_bodyContainerTagName = value;
+				}
 			}
 
 			public string BodyContainerCssClass
 			{
-				get;
-				set;
+				get
+				{
+					return _bodyContainerCssClass;
+				}
+				set
+				{
+					_bodyContainerCssClass = value;
+				}
 			}
 
 			public string FooterContainerTagName
 			{
-				get;
-				set;
+				get
+				{
+					return _footerContainerTagName;
+				}
+				set
+				{
+					_footerContainerTagName = value;
+				}
 			}
 
 			public string FooterContainerCssClass
 			{
-				get;
-				set;
+				get
+				{
+					return _footerContainerCssClass;
+				}
+				set
+				{
+					_footerContainerCssClass = value;
+				}
 			}
 			#endregion
 

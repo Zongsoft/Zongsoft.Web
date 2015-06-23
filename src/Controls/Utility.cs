@@ -225,5 +225,48 @@ namespace Zongsoft.Web.Controls
 
 			return !enumerable.GetEnumerator().MoveNext();
 		}
+
+		public static void GenerateParts(Control container, ICollection<ViewPart> parts)
+		{
+			if(parts == null || parts.Count < 1)
+				return;
+
+			foreach(var part in parts)
+			{
+				Literal wrapper = null;
+				var css = Utility.ResolveCssClass(part.Alignment == HorizontalAlignment.Right ? ":right floated" : string.Empty, () => part.CssClass);
+
+				if(string.IsNullOrWhiteSpace(part.NavigateUrl))
+					wrapper = new Literal("span", css);
+				else
+				{
+					wrapper = new Literal("a", css);
+					wrapper.SetAttributeValue("href", part.NavigateUrl);
+				}
+
+				container.Controls.Add(wrapper);
+
+				if(part.IconAlignment == HorizontalAlignment.Left)
+				{
+					if(!string.IsNullOrWhiteSpace(part.Icon))
+						(wrapper ?? container).Controls.Add(new Literal("i", part.Icon + " icon"));
+
+					(wrapper ?? container).Controls.Add(new Literal()
+					{
+						Text = part.Text,
+					});
+				}
+				else
+				{
+					(wrapper ?? container).Controls.Add(new Literal()
+					{
+						Text = part.Text,
+					});
+
+					if(!string.IsNullOrWhiteSpace(part.Icon))
+						(wrapper ?? container).Controls.Add(new Literal("i", part.Icon + " icon"));
+				}
+			}
+		}
 	}
 }

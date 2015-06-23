@@ -42,62 +42,44 @@ namespace Zongsoft.Web.Controls
 	public class CardView : Widget
 	{
 		#region 成员字段
-		private ITemplate _contentTemplate;
-		private ITemplate _contentHeaderTemplate;
-		private ITemplate _contentFooterTemplate;
+		private ViewPartCollection _headerParts;
+		private ViewPartCollection _footerParts;
 		#endregion
 
 		#region 构造函数
 		public CardView()
 		{
 			this.CssClass = "ui card";
-			this.Settings = new WidgetSettings("", "image", "", "", "", "ui bottom attached");
+			this.Settings = new WidgetSettings("", "image", "div", "content", "", "");
 		}
 		#endregion
 
 		#region 公共属性
-		[BrowsableAttribute(false)]
-		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
-		[TemplateContainerAttribute(typeof(CardView))]
-		public ITemplate ContentTemplate
+		[MergableProperty(false)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		public ViewPartCollection HeaderParts
 		{
 			get
 			{
-				return _contentTemplate;
-			}
-			set
-			{
-				_contentTemplate = value;
+				if(_headerParts == null)
+					_headerParts = new ViewPartCollection(this);
+
+				return _headerParts;
 			}
 		}
 
-		[BrowsableAttribute(false)]
-		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
-		[TemplateContainerAttribute(typeof(CardView))]
-		public ITemplate ContentHeaderTemplate
+		[MergableProperty(false)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		public ViewPartCollection FooterParts
 		{
 			get
 			{
-				return _contentHeaderTemplate;
-			}
-			set
-			{
-				_contentHeaderTemplate = value;
-			}
-		}
+				if(_footerParts == null)
+					_footerParts = new ViewPartCollection(this);
 
-		[BrowsableAttribute(false)]
-		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
-		[TemplateContainerAttribute(typeof(CardView))]
-		public ITemplate ContentFooterTemplate
-		{
-			get
-			{
-				return _contentFooterTemplate;
-			}
-			set
-			{
-				_contentFooterTemplate = value;
+				return _footerParts;
 			}
 		}
 		#endregion
@@ -120,38 +102,45 @@ namespace Zongsoft.Web.Controls
 
 		protected override void CreateBodyContent(Control container)
 		{
-			var content = new Literal("div", "content");
-			this.CreateContentHeader(content);
-			this.CreateContent(content);
-			container.Controls.Add(content);
-
-			var extra = new Literal("div", "extra content");
-			this.CreateContentFooter(extra);
-			container.Controls.Add(extra);
-		}
-		#endregion
-
-		#region 虚拟方法
-		protected virtual void CreateContent(Control container)
-		{
-			if(_contentTemplate != null)
-				_contentTemplate.InstantiateIn(container);
-			else
-				container.Controls.Add(new Literal("div", "description", this.Description));
-		}
-
-		protected virtual void CreateContentHeader(Control container)
-		{
-			if(_contentHeaderTemplate != null)
-				_contentHeaderTemplate.InstantiateIn(container);
-			else
+			if(string.IsNullOrWhiteSpace(this.NavigateUrl))
 				container.Controls.Add(new Literal("h3", "header", this.Title));
+			else
+				container.Controls.Add(new Literal("a", "header", this.Title, new KeyValuePair<string, string>("href", this.ResolveUrl(this.NavigateUrl))));
+
+			if(_headerParts != null && _headerParts.Count > 0)
+			{
+				var meta = new Literal("div", "meta");
+				container.Controls.Add(meta);
+				Utility.GenerateParts(meta, _headerParts);
+			}
+
+			container.Controls.Add(new Literal("div", "description", this.Description));
 		}
 
-		protected virtual void CreateContentFooter(Control container)
+		protected override void CreateFooterContent(Control container)
 		{
-			if(_contentFooterTemplate != null)
-				_contentFooterTemplate.InstantiateIn(container);
+			if(_footerParts != null && _footerParts.Count > 0)
+			{
+				var extra = new Literal("div", "extra content");
+				container.Controls.Add(extra);
+				Utility.GenerateParts(extra, _footerParts);
+			}
+		}
+
+		protected override void CreateFooter(Control container)
+		{
+			if(this.FooterTemplate != null)
+				this.CreateFooterContent(container);
+
+			base.CreateFooter(container);
+		}
+
+		protected override bool FooterContainerRequired
+		{
+			get
+			{
+				return base.FooterContainerRequired && (this.FooterTemplate != null || (_footerParts != null && _footerParts.Count > 0));
+			}
 		}
 		#endregion
 	}
