@@ -99,7 +99,7 @@ namespace Zongsoft.Web.Controls
 				if(binding.Index > 0)
 					text += bindingText.Substring(position, binding.Index - position);
 
-				memberValue = GetMemberValue(bindingSource, binding.BindingPath, true);
+				memberValue = GetMemberValue(bindingSource, binding.BindingPath, false);
 
 				if(memberValue != null)
 				{
@@ -153,7 +153,7 @@ namespace Zongsoft.Web.Controls
 				{
 					if(match.Success)
 					{
-						object value = GetMemberValue(bindingSource, match.Groups["path"].Value, true);
+						object value = GetMemberValue(bindingSource, match.Groups["path"].Value, false);
 
 						if(format == null)
 							return (value == null ? string.Empty : value.ToString());
@@ -231,6 +231,8 @@ namespace Zongsoft.Web.Controls
 			if(matches == null || matches.Count < 1)
 				return null;
 
+			var target = bindingSource;
+
 			foreach(Match match in matches)
 			{
 				if(!match.Success)
@@ -239,18 +241,24 @@ namespace Zongsoft.Web.Controls
 				var name = match.Groups["name"].Value;
 				var key = match.Groups["index"].Value;
 
-				PropertyDescriptor property = TypeDescriptor.GetProperties(bindingSource).Find(name, true);
+				PropertyDescriptor property = TypeDescriptor.GetProperties(target).Find(name, true);
+
 				if(property == null)
 				{
 					if(throwExceptionOnMemberNotFound)
-						throw new ArgumentException(string.Format("This '{0}@{1}' property in type name is '{2}' of component is not exists.", name, memberPath, bindingSource.GetType().FullName));
+					{
+						if(target == null)
+							throw new ArgumentException(string.Format("This '{0}@{1}' property in type name is '{2}' of component is not exists.", name, memberPath, bindingSource.GetType().FullName));
+						else
+							throw new ArgumentException(string.Format("This '{0}@{1}' property in type name is '{2}' of component is not exists.", name, memberPath, target.GetType().FullName));
+					}
 					else
 						return null;
 				}
 
 				if(string.IsNullOrWhiteSpace(key))
 				{
-					bindingSource = property.GetValue(bindingSource);
+					target = property.GetValue(target);
 				}
 				else
 				{
@@ -261,22 +269,22 @@ namespace Zongsoft.Web.Controls
 					if(foundType == null)
 						return null;
 
-					object propertyValue = property.GetValue(bindingSource);
+					object propertyValue = property.GetValue(target);
 
 					if(baseType == baseTypes[0] || baseType == baseTypes[1])
 					{
 						if(foundType.GetGenericArguments()[0] == typeof(string))
-							bindingSource = propertyValue.GetType().GetProperty("Item", (BindingFlags.Instance | BindingFlags.Public)).GetValue(propertyValue, new object[] { key });
+							target = propertyValue.GetType().GetProperty("Item", (BindingFlags.Instance | BindingFlags.Public)).GetValue(propertyValue, new object[] { key });
 						else if(foundType.GetGenericArguments()[0] == typeof(int))
 						{
 							int index;
 							if(int.TryParse(key, out index))
-								bindingSource = propertyValue.GetType().GetProperty("Item", (BindingFlags.Instance | BindingFlags.Public)).GetValue(propertyValue, new object[] { index });
+								target = propertyValue.GetType().GetProperty("Item", (BindingFlags.Instance | BindingFlags.Public)).GetValue(propertyValue, new object[] { index });
 						}
 					}
 					else if(baseType == baseTypes[2])
 					{
-						bindingSource = ((IDictionary)propertyValue)[key];
+						target = ((IDictionary)propertyValue)[key];
 					}
 					else if(baseType == baseTypes[3])
 					{
@@ -284,11 +292,11 @@ namespace Zongsoft.Web.Controls
 						if(!int.TryParse(key, out index))
 							throw new ArgumentException(string.Format("The value of member is '{0}'.", match.Value));
 
-						bindingSource = ((IList)propertyValue)[index];
+						target = ((IList)propertyValue)[index];
 					}
 					else if(baseType == baseTypes[4])
 					{
-						bindingSource = ((System.Collections.Specialized.NameValueCollection)propertyValue)[key];
+						target = ((System.Collections.Specialized.NameValueCollection)propertyValue)[key];
 					}
 					else
 					{
@@ -297,7 +305,7 @@ namespace Zongsoft.Web.Controls
 				}
 			}
 
-			return bindingSource;
+			return target;
 		}
 
 		private static Type FindType(Type type, IEnumerable<Type> baseTypes, out Type matchedType)
