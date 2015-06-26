@@ -44,6 +44,8 @@ namespace Zongsoft.Web.Mvc
 			if(context.ActionParameters == null || context.ActionParameters.Count < 1)
 				return;
 
+			var dictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
 			foreach(var entry in context.ActionParameters)
 			{
 				if(entry.Value == null)
@@ -51,7 +53,7 @@ namespace Zongsoft.Web.Mvc
 
 				if(entry.Value.GetType() == typeof(string))
 				{
-					context.ActionParameters[entry.Key] = ValidateInputUtility.Detoxify((string)entry.Value);
+					dictionary[entry.Key] = ValidateInputUtility.Detoxify((string)entry.Value);
 				}
 				else if(entry.Value.GetType().IsClass)
 				{
@@ -62,6 +64,14 @@ namespace Zongsoft.Web.Mvc
 						if(property.PropertyType == typeof(string))
 							property.SetValue(entry.Value, ValidateInputUtility.Detoxify((string)property.GetValue(entry.Value)));
 					}
+				}
+			}
+
+			if(dictionary != null && dictionary.Count > 0)
+			{
+				foreach(var entry in dictionary)
+				{
+					context.ActionParameters[entry.Key] = entry.Value;
 				}
 			}
 		}
