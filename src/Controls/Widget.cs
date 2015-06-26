@@ -80,7 +80,7 @@ namespace Zongsoft.Web.Controls
 		public Widget()
 		{
 			this.CssClass = "widget";
-			_settings = new WidgetSettings();
+			_settings = new WidgetSettings("div", "widget-header ui top attached message", "div", "widget-body ui attached segment", "", "ui bottom attached segment");
 		}
 		#endregion
 
@@ -233,7 +233,7 @@ namespace Zongsoft.Web.Controls
 			get
 			{
 				if(_headerContainer == null && this.HeaderContainerRequired)
-					_headerContainer = _settings.CreateFooterContainer();
+					_headerContainer = _settings.CreateHeaderContainer();
 
 				return _headerContainer;
 			}
@@ -427,14 +427,6 @@ namespace Zongsoft.Web.Controls
 			#region 构造函数
 			public WidgetSettings()
 			{
-				_headerContainerTagName = "div";
-				_headerContainerCssClass = "widget-header ui top attached message";
-
-				_bodyContainerTagName = "div";
-				_bodyContainerCssClass = "widget-body ui attached segment";
-
-				_footerContainerTagName = null;
-				_footerContainerCssClass = "ui bottom attached segment";
 			}
 
 			public WidgetSettings(string headerContainerTagName, string headerContainerCssClass,
