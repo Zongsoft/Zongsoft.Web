@@ -62,9 +62,6 @@ namespace Zongsoft.Web.Controls
 			if(string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException("name");
 
-			if(string.IsNullOrWhiteSpace(text))
-				throw new ArgumentNullException("text");
-
 			if(name.Contains("/"))
 			{
 				if(name.Length == 1)
@@ -74,7 +71,7 @@ namespace Zongsoft.Web.Controls
 			}
 
 			_name = name.Trim();
-			_text = text;
+			_text = text ?? string.Empty;
 			_url = url ?? string.Empty;
 			_toolTip = string.Empty;
 			_description = string.Empty;
