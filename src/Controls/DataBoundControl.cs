@@ -200,7 +200,7 @@ namespace Zongsoft.Web.Controls
 
 		protected virtual void AddAttributes(HtmlTextWriter writer, params string[] ignoreProperties)
 		{
-			if(!string.IsNullOrWhiteSpace(this.ID) && !Zongsoft.Common.StringExtension.In(this.ID, ignoreProperties, StringComparison.OrdinalIgnoreCase))
+			if(!string.IsNullOrWhiteSpace(this.ID) && !Zongsoft.Common.StringExtension.In("ID", ignoreProperties, StringComparison.OrdinalIgnoreCase))
 				writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
 
 			foreach(var property in _properties.Values)
