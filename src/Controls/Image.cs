@@ -189,13 +189,13 @@ namespace Zongsoft.Web.Controls
 			if(string.IsNullOrWhiteSpace(ImageUrl))
 			{
 				if(!string.IsNullOrWhiteSpace(this.Icon))
+				{
 					this.CssClass = ":icon " + this.Icon.Trim();
 
-				writer.Write("<i");
-
-				this.WriteAttribute(writer, "class", this.CssClass);
-
-				writer.WriteLine("></i>");
+					writer.Write("<i");
+					this.WriteAttribute(writer, "class", this.CssClass);
+					writer.Write("></i>");
+				}
 			}
 			else
 			{
@@ -211,24 +211,27 @@ namespace Zongsoft.Web.Controls
 				if(!Unit.IsEmpty(this.Height))
 					this.WriteAttribute(writer, "height", this.Height.ToString());
 
-				writer.WriteLine(" />");
+				writer.Write(" />");
 			}
 
 			if(!string.IsNullOrWhiteSpace(this.NavigateUrl))
-				writer.WriteLine("</a>");
+				writer.Write("</a>");
 		}
 
 		public virtual Control ToHtmlControl()
 		{
-			Literal control;
+			Literal control = null;
 
 			if(this.Dimension != Dimension.None)
 				this.CssClass = ":" + this.Dimension.ToString();
 
 			if(string.IsNullOrWhiteSpace(this.ImageUrl))
 			{
-				var css = Utility.ResolveCssClass(":" + this.Icon, () => this.CssClass);
-				control = new Literal("i", "icon" + (string.IsNullOrWhiteSpace(css) ? "" : " " + css));
+				if(!string.IsNullOrWhiteSpace(this.Icon))
+				{
+					var css = Utility.ResolveCssClass(":" + this.Icon, () => this.CssClass);
+					control = new Literal("i", "icon" + (string.IsNullOrWhiteSpace(css) ? "" : " " + css));
+				}
 			}
 			else
 			{
@@ -244,6 +247,9 @@ namespace Zongsoft.Web.Controls
 				if(!Unit.IsEmpty(this.Height))
 					control.SetAttributeValue("height", this.Height.ToString());
 			}
+
+			if(control == null)
+				return new Literal();
 
 			if(!string.IsNullOrWhiteSpace(this.CssClass))
 				control.CssClass = this.CssClass;
