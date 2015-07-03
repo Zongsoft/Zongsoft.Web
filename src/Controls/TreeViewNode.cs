@@ -53,6 +53,10 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 构造函数
+		public TreeViewNode()
+		{
+		}
+
 		public TreeViewNode(string name, string text) : this(name, text, string.Empty)
 		{
 		}
@@ -101,6 +105,13 @@ namespace Zongsoft.Web.Controls
 			get
 			{
 				return _name;
+			}
+			set
+			{
+				if(string.IsNullOrWhiteSpace(value))
+					throw new ArgumentNullException();
+
+				_name = value.Trim();
 			}
 		}
 
