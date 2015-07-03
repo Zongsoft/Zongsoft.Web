@@ -44,6 +44,7 @@ namespace Zongsoft.Web.Controls
 
 		#region 重写属性
 		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[DefaultValue(InputBoxType.Text)]
 		public override InputBoxType InputType
 		{
@@ -68,6 +69,11 @@ namespace Zongsoft.Web.Controls
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Textarea);
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
+			writer.WriteEncodedText(this.Value);
 		}
 		#endregion
 	}
