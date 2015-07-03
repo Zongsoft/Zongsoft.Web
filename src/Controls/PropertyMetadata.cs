@@ -127,7 +127,11 @@ namespace Zongsoft.Web.Controls
 			{
 				if(_flags[EVALUATE_VALUE])
 				{
-					_value = BindingUtility.GetBindingValue(_valueString, BindingUtility.GetBindingSource(_control), this.PropertyType);
+					if(this.PropertyType == typeof(string))
+						_value = BindingUtility.FormatBindingValue(_valueString, BindingUtility.GetBindingSource(_control));
+					else
+						_value = BindingUtility.GetBindingValue(_valueString, BindingUtility.GetBindingSource(_control), this.PropertyType);
+
 					_flags[EVALUATE_VALUE] = false;
 				}
 
