@@ -102,6 +102,17 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		protected object BindingSource
+		{
+			get
+			{
+				if(_treeView == null)
+					return null;
+
+				return _treeView.GetBindingSource();
+			}
+		}
+
 		public string Name
 		{
 			get
@@ -121,7 +132,7 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return _text;
+				return BindingUtility.FormatBindingValue(_text, this.BindingSource);
 			}
 			set
 			{
@@ -148,7 +159,7 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return _navigateUrl;
+				return BindingUtility.FormatBindingValue(_navigateUrl, this.BindingSource);
 			}
 			set
 			{
@@ -202,7 +213,7 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return _toolTip;
+				return BindingUtility.FormatBindingValue(_toolTip, this.BindingSource);
 			}
 			set
 			{
@@ -214,7 +225,7 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return _description;
+				return BindingUtility.FormatBindingValue(_description, this.BindingSource);
 			}
 			set
 			{
