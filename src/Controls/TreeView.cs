@@ -381,10 +381,19 @@ namespace Zongsoft.Web.Controls
 			if(node.Image != null)
 				node.Image.ToHtmlString(writer);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Href, string.IsNullOrWhiteSpace(node.Url) ? Utility.EmptyLink : node.Url);
-			writer.RenderBeginTag(HtmlTextWriterTag.A);
+			if(!string.IsNullOrWhiteSpace(node.NavigateUrl))
+			{
+				if(!string.IsNullOrWhiteSpace(node.NavigateCssClass))
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, node.NavigateCssClass);
+
+				writer.AddAttribute(HtmlTextWriterAttribute.Href, node.NavigateUrl == "#" ? Utility.EmptyLink : node.NavigateUrl);
+				writer.RenderBeginTag(HtmlTextWriterTag.A);
+			}
+
 			writer.WriteEncodedText(node.Text);
-			writer.RenderEndTag();
+
+			if(!string.IsNullOrWhiteSpace(node.NavigateUrl))
+				writer.RenderEndTag();
 
 			if(node.Nodes.Count > 0)
 			{
@@ -408,7 +417,7 @@ namespace Zongsoft.Web.Controls
 				writer.RenderEndTag();
 			}
 
-			if(!string.IsNullOrWhiteSpace(this.LoadingPath) && string.Equals(this.SelectedPath, node.FullPath, StringComparison.OrdinalIgnoreCase))
+			if(!string.IsNullOrWhiteSpace(this.LoadingPath) && string.Equals(this.LoadingPath, node.FullPath, StringComparison.OrdinalIgnoreCase))
 				this.RenderDataNodes(writer, this.DataSource as IEnumerable, depth, index, true);
 
 			writer.RenderEndTag();
