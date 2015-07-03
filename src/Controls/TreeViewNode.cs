@@ -37,7 +37,8 @@ namespace Zongsoft.Web.Controls
 		#region 成员变量
 		private string _name;
 		private string _text;
-		private string _url;
+		private string _navigateUrl;
+		private string _navigateCssClass;
 		private string _toolTip;
 		private string _description;
 		private string _fullPath;
@@ -55,6 +56,7 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public TreeViewNode()
 		{
+			_visible = true;
 		}
 
 		public TreeViewNode(string name, string text) : this(name, text, string.Empty)
@@ -76,7 +78,7 @@ namespace Zongsoft.Web.Controls
 
 			_name = name.Trim();
 			_text = text ?? string.Empty;
-			_url = url ?? string.Empty;
+			_navigateUrl = url ?? string.Empty;
 			_toolTip = string.Empty;
 			_description = string.Empty;
 			_fullPath = string.Empty;
@@ -127,15 +129,45 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Please use the 'NavigateUrl' property.")]
 		public string Url
 		{
 			get
 			{
-				return _url;
+				return this.NavigateUrl;
 			}
 			set
 			{
-				_url = value ?? string.Empty;
+				this.NavigateUrl = value;
+			}
+		}
+
+		public string NavigateUrl
+		{
+			get
+			{
+				return _navigateUrl;
+			}
+			set
+			{
+				if(value != null)
+					_navigateUrl = value.Trim();
+				else
+					_navigateUrl = string.Empty;
+			}
+		}
+
+		public string NavigateCssClass
+		{
+			get
+			{
+				return _navigateCssClass;
+			}
+			set
+			{
+				_navigateCssClass = value;
 			}
 		}
 
