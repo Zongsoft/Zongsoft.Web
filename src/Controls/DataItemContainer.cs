@@ -72,6 +72,16 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
+		#region 重写属性
+		public override Control Parent
+		{
+			get
+			{
+				return base.Parent ?? _owner.Parent;
+			}
+		}
+		#endregion
+
 		#region 显式实现
 		int IDataItemContainer.DataItemIndex
 		{
