@@ -68,6 +68,8 @@ namespace Zongsoft.Web.Controls
 			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
 
+			this.AddAttributes(writer, "CssClass");
+
 			writer.RenderBeginTag(HtmlTextWriterTag.Textarea);
 		}
 
