@@ -215,6 +215,18 @@ namespace Zongsoft.Web.Controls
 
 		protected override void Render(HtmlTextWriter writer)
 		{
+			if(this.InputType == InputBoxType.Hidden)
+			{
+				if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
+					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
+
+				this.AddAttributes(writer, "CssClass");
+
+				writer.RenderBeginTag(HtmlTextWriterTag.Input);
+				writer.RenderEndTag();
+				return;
+			}
+
 			if(this.IsRenderFieldTag)
 			{
 				//生成最外层的Div布局元素，即<div class="field">
