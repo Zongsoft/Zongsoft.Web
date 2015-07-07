@@ -192,7 +192,7 @@ namespace Zongsoft.Web.Controls
 				}
 				else
 				{
-					int index = 1;
+					int index = 0;
 
 					foreach(var dataItem in dataItems)
 					{
