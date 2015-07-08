@@ -212,7 +212,7 @@ namespace Zongsoft.Web.Controls
 			if(_headerTemplate != null)
 			{
 				var container = new HtmlGenericControl("thead");
-				_footerTemplate.InstantiateIn(container);
+				_headerTemplate.InstantiateIn(container);
 				container.RenderControl(writer);
 				return;
 			}
