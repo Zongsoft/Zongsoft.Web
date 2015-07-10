@@ -26,10 +26,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Web;
+using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class ViewPart : Zongsoft.ComponentModel.NotifyObject
+	public class ViewPart : Zongsoft.ComponentModel.NotifyObject, IDataBoundControlPart
 	{
 		#region 成员字段
 		private DataBoundControl _owner;
@@ -39,6 +42,8 @@ namespace Zongsoft.Web.Controls
 		private string _cssClass;
 		private HorizontalAlignment _iconAlignment;
 		private HorizontalAlignment _alignment;
+		private string _style;
+		private PropertyCollection _properties;
 		#endregion
 
 		#region 公共属性
@@ -121,6 +126,18 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		public string Style
+		{
+			get
+			{
+				return _style;
+			}
+			set
+			{
+				_style = value;
+			}
+		}
+
 		public HorizontalAlignment IconAlignment
 		{
 			get
@@ -142,6 +159,38 @@ namespace Zongsoft.Web.Controls
 			set
 			{
 				this.SetPropertyValue(() => this.Alignment, ref _alignment, value);
+			}
+		}
+
+		[MergableProperty(false)]
+		[PersistenceMode(PersistenceMode.InnerProperty)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		public PropertyCollection Properties
+		{
+			get
+			{
+				if(_properties == null)
+					System.Threading.Interlocked.CompareExchange(ref _properties, new PropertyCollection(this), null);
+
+				return _properties;
+			}
+		}
+		#endregion
+
+		#region 显式实现
+		DataBoundControl IDataBoundControlPart.Control
+		{
+			get
+			{
+				return _owner;
+			}
+		}
+
+		object IDataBoundControlPart.BindingSource
+		{
+			get
+			{
+				return this.BindingSource;
 			}
 		}
 		#endregion

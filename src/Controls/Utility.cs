@@ -244,6 +244,17 @@ namespace Zongsoft.Web.Controls
 					wrapper.SetAttributeValue("href", part.NavigateUrl);
 				}
 
+				if(!string.IsNullOrWhiteSpace(part.Style))
+					wrapper.SetAttributeValue("style", part.Style);
+
+				if(part.Properties.Count > 0)
+				{
+					foreach(var property in part.Properties)
+					{
+						wrapper.SetAttributeValue(property.Name, property.Value);
+					}
+				}
+
 				container.Controls.Add(wrapper);
 
 				if(part.IconAlignment == HorizontalAlignment.Left)

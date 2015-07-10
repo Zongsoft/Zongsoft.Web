@@ -87,6 +87,7 @@
     <Compile Include="Controls\DataItemContainer.cs" />
     <Compile Include="Controls\FormExtension.cs" />
     <Compile Include="Controls\HeaderView.cs" />
+    <Compile Include="Controls\IDataBoundControlPart.cs" />
     <Compile Include="Controls\Image.cs" />
     <Compile Include="Controls\Dimension.cs" />
     <Compile Include="Controls\InputGroup.cs" />
@@ -126,6 +127,8 @@
     <Compile Include="Controls\Picker.cs" />
     <Compile Include="Controls\PickerColumn.cs" />
     <Compile Include="Controls\PickerColumnCollection.cs" />
+    <Compile Include="Controls\Property.cs" />
+    <Compile Include="Controls\PropertyCollection.cs" />
     <Compile Include="Controls\PropertyMetadata.cs" />
     <Compile Include="Controls\PropertyMetadataAttribute.cs" />
     <Compile Include="Controls\PropertyRenders.cs" />
