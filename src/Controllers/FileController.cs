@@ -45,7 +45,7 @@ namespace Zongsoft.Web.Controllers
 	public class FileController : ApiController
 	{
 		#region 常量定义
-		private const string HTTP_EXTENDED_HEADER_PREFIX = "x-zfs-";
+		private const string EXTENDED_PROPERTY_PREFIX = "x-zfs-";
 		#endregion
 
 		#region 成员字段
@@ -123,6 +123,20 @@ namespace Zongsoft.Web.Controllers
 		}
 
 		/// <summary>
+		/// 获取指定文件的外部访问路径。
+		/// </summary>
+		/// <param name="path">指定的文件相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
+		/// <returns>返回指定文件的外部访问路径。</returns>
+		[HttpGet]
+		public string Path(string path)
+		{
+			if(string.IsNullOrWhiteSpace(path))
+				throw new ArgumentNullException("path");
+
+			return FileSystem.GetUrl(this.GetFilePath(path));
+		}
+
+		/// <summary>
 		/// 获取指定路径的文件描述信息。
 		/// </summary>
 		/// <param name="path">指定要获取的文件的相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
@@ -137,17 +151,37 @@ namespace Zongsoft.Web.Controllers
 		}
 
 		/// <summary>
-		/// 获取指定文件的存储路径。
+		/// 修改指定路径的文件描述信息。
 		/// </summary>
-		/// <param name="path">指定的文件相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
-		/// <returns>返回指定文件的存储路径。</returns>
-		[HttpGet]
-		public string Path(string path)
+		/// <param name="path">指定要修改的文件相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
+		public async Task<bool> Put(string path)
 		{
 			if(string.IsNullOrWhiteSpace(path))
 				throw new ArgumentNullException("path");
 
-			return FileSystem.GetUrl(this.GetFilePath(path));
+			var properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+			foreach(var header in this.Request.Headers)
+			{
+				if(header.Key.Length > EXTENDED_PROPERTY_PREFIX.Length && header.Key.StartsWith(EXTENDED_PROPERTY_PREFIX, StringComparison.OrdinalIgnoreCase))
+					properties[header.Key.Substring(EXTENDED_PROPERTY_PREFIX.Length)] = string.Join("", header.Value);
+			}
+
+			if(this.Request.Content.IsFormData())
+			{
+				var form = await this.Request.Content.ReadAsFormDataAsync();
+
+				foreach(string fieldName in form)
+				{
+					if(fieldName.Length > EXTENDED_PROPERTY_PREFIX.Length && fieldName.StartsWith(EXTENDED_PROPERTY_PREFIX, StringComparison.OrdinalIgnoreCase))
+						properties[fieldName.Substring(EXTENDED_PROPERTY_PREFIX.Length)] = form[fieldName];
+				}
+			}
+
+			if(properties.Count > 0)
+				return await FileSystem.File.SetInfoAsync(this.GetFilePath(path), properties);
+
+			return false;
 		}
 
 		/// <summary>
@@ -160,40 +194,6 @@ namespace Zongsoft.Web.Controllers
 				throw new ArgumentNullException("path");
 
 			return await FileSystem.File.DeleteAsync(this.GetFilePath(path));
-		}
-
-		/// <summary>
-		/// 修改指定相对路径的文件描述信息。
-		/// </summary>
-		/// <param name="path">指定要修改的文件相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
-		public async Task<bool> Put(string path)
-		{
-			if(string.IsNullOrWhiteSpace(path))
-				throw new ArgumentNullException("path");
-
-			var properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-			foreach(var header in this.Request.Headers)
-			{
-				if(header.Key.Length > HTTP_EXTENDED_HEADER_PREFIX.Length && header.Key.StartsWith(HTTP_EXTENDED_HEADER_PREFIX, StringComparison.OrdinalIgnoreCase))
-					properties[header.Key.Substring(HTTP_EXTENDED_HEADER_PREFIX.Length)] = string.Join("", header.Value);
-			}
-
-			if(this.Request.Content.IsFormData())
-			{
-				var form = await this.Request.Content.ReadAsFormDataAsync();
-
-				foreach(string fieldName in form)
-				{
-					if(fieldName.Length > HTTP_EXTENDED_HEADER_PREFIX.Length && fieldName.StartsWith(HTTP_EXTENDED_HEADER_PREFIX, StringComparison.OrdinalIgnoreCase))
-						properties[fieldName.Substring(HTTP_EXTENDED_HEADER_PREFIX.Length)] = form[fieldName];
-				}
-			}
-
-			if(properties.Count > 0)
-				return await FileSystem.File.SetInfoAsync(this.GetFilePath(path), properties);
-
-			return false;
 		}
 
 		/// <summary>
@@ -215,8 +215,8 @@ namespace Zongsoft.Web.Controllers
 			//构建自定义头的字典内容
 			foreach(var header in this.Request.Headers)
 			{
-				if(header.Key.Length > HTTP_EXTENDED_HEADER_PREFIX.Length && header.Key.StartsWith(HTTP_EXTENDED_HEADER_PREFIX, StringComparison.OrdinalIgnoreCase))
-					headers[header.Key.Substring(HTTP_EXTENDED_HEADER_PREFIX.Length)] = string.Join("", header.Value);
+				if(header.Key.Length > EXTENDED_PROPERTY_PREFIX.Length && header.Key.StartsWith(EXTENDED_PROPERTY_PREFIX, StringComparison.OrdinalIgnoreCase))
+					headers[header.Key.Substring(EXTENDED_PROPERTY_PREFIX.Length)] = string.Join("", header.Value);
 			}
 
 			//创建多段表单信息的文件流操作的供应程序
@@ -229,7 +229,7 @@ namespace Zongsoft.Web.Controllers
 			{
 				foreach(var fileEntry in result.FileData)
 				{
-					var prefix = HTTP_EXTENDED_HEADER_PREFIX + fileEntry.Key + "-";
+					var prefix = EXTENDED_PROPERTY_PREFIX + fileEntry.Key + "-";
 					var updateRequires = false;
 
 					foreach(var formEntry in result.FormData)
@@ -276,6 +276,7 @@ namespace Zongsoft.Web.Controllers
 		}
 		#endregion
 
+		#region 嵌套子类
 		internal class MultipartStorageFileStreamProvider : MultipartStreamProvider
 		{
 			#region 成员字段
@@ -421,5 +422,6 @@ namespace Zongsoft.Web.Controllers
 			}
 			#endregion
 		}
+		#endregion
 	}
 }
