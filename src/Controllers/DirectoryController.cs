@@ -37,12 +37,89 @@ using System.Web.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 
-using Zongsoft.IO;
-using Zongsoft.Common;
-
 namespace Zongsoft.Web.Controllers
 {
 	public class DirectoryController : ApiController
 	{
+		#region 成员字段
+		private string _basePath;
+		#endregion
+
+		#region 构造函数
+		public DirectoryController()
+		{
+		}
+		#endregion
+
+		#region 公共属性
+		public string BasePath
+		{
+			get
+			{
+				return _basePath;
+			}
+			set
+			{
+				if(string.IsNullOrWhiteSpace(value))
+					throw new ArgumentNullException();
+
+				var text = value.Trim();
+
+				_basePath = text + (text.EndsWith("/") ? string.Empty : "/");
+			}
+		}
+		#endregion
+
+		#region 公共方法
+		public async Task<IEnumerable<Zongsoft.IO.PathInfo>> Get(string path, string pattern = null)
+		{
+			if(string.IsNullOrWhiteSpace(path))
+				throw new ArgumentNullException("path");
+
+			return await Zongsoft.IO.FileSystem.Directory.GetChildrenAsync(this.GetDirectoryPath(path), GetPattern(pattern));
+		}
+
+		[HttpGet]
+		public async Task<IEnumerable<Zongsoft.IO.FileInfo>> Files(string path, string pattern = null)
+		{
+			if(string.IsNullOrWhiteSpace(path))
+				throw new ArgumentNullException("path");
+
+			return await Zongsoft.IO.FileSystem.Directory.GetFilesAsync(this.GetDirectoryPath(path), GetPattern(pattern));
+		}
+		#endregion
+
+		#region 私有方法
+		private string GetDirectoryPath(string path)
+		{
+			var basePath = this.BasePath;
+
+			if(string.IsNullOrWhiteSpace(basePath))
+				throw new InvalidOperationException("Missing the base-path of file system.");
+
+			var schema = Zongsoft.IO.Path.GetSchema(basePath);
+
+			if(string.IsNullOrWhiteSpace(schema))
+				throw new InvalidOperationException(string.Format("Invalid format of the '{0}' base-path.", basePath));
+
+			if(string.IsNullOrWhiteSpace(path))
+				return basePath;
+
+			path = Uri.UnescapeDataString(path).Trim();
+
+			if(path.StartsWith("/"))
+				return schema + ":" + path + (path.EndsWith("/") ? string.Empty : "/");
+			else
+				return Zongsoft.IO.Path.Combine(basePath, path) + (path.EndsWith("/") ? string.Empty : "/");
+		}
+
+		private string GetPattern(string pattern)
+		{
+			if(string.IsNullOrWhiteSpace(pattern))
+				return null;
+
+			return pattern.Trim();
+		}
+		#endregion
 	}
 }
