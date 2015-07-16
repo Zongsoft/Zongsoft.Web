@@ -94,7 +94,7 @@ namespace Zongsoft.Web.Mvc
 			if(authorization == null)
 				this.Failed(filterContext, "没有可用的授权验证程序，拒绝访问。");
 
-			if(!authorization.IsAuthorized(principal.Identity.CertificationId, schemaId, actionId))
+			if(!authorization.IsAuthorized(principal.Identity.Certification.User.UserId, schemaId, actionId))
 				this.Failed(filterContext, "权限不够，访问被拒绝。");
 		}
 		#endregion
