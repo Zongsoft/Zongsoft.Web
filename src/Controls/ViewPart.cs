@@ -165,7 +165,7 @@ namespace Zongsoft.Web.Controls
 		[MergableProperty(false)]
 		[PersistenceMode(PersistenceMode.InnerProperty)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		public PropertyCollection Properties
+		public new PropertyCollection Properties
 		{
 			get
 			{
