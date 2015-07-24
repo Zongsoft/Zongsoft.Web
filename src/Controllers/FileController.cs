@@ -82,7 +82,7 @@ namespace Zongsoft.Web.Controllers
 		/// 下载指定路径的文件。
 		/// </summary>
 		/// <param name="path">指定要下载的文件的相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
-		public async Task<HttpResponseMessage> Get(string path)
+		public HttpResponseMessage Get(string path)
 		{
 			if(string.IsNullOrWhiteSpace(path))
 				throw new ArgumentNullException("path");
