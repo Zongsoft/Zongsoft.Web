@@ -39,19 +39,20 @@ namespace Zongsoft.Web.Controls
 	/// </summary>
 	/// <remarks>
 	///		<para>该控件生成的HTML文档结构如下：</para>
-	///		<code><![CDATA[
-	//		<div class="tabStrip">
-	//			<dl>
-	//				<dt class="active"><a href="#tab-1" title="ToolTip">第一页</a></dt>
-	//				<dt><a href="#tab-2">第二页</a></dt>
-	//			</dl>
-	//			<div id="tab-1" class="active">
-	//				<p>我是第一页的内容</p>
-	//			</div>
-	//			<div id="tab-2">
-	//				<p>我是第二页的内容</p>
-	//			</div>
-	//		</div>
+	///		<code>
+	///		<![CDATA[
+	///		<div class="tabStrip">
+	///			<dl>
+	///				<dt class="active"><a href="#tab-1" title="ToolTip">第一页</a></dt>
+	///				<dt><a href="#tab-2">第二页</a></dt>
+	///			</dl>
+	///			<div id="tab-1" class="active">
+	///				<p>我是第一页的内容</p>
+	///			</div>
+	///			<div id="tab-2">
+	///				<p>我是第二页的内容</p>
+	///			</div>
+	///		</div>
 	///		]]>
 	///		</code>
 	/// </remarks>
