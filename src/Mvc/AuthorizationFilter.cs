@@ -38,7 +38,8 @@ namespace Zongsoft.Web.Mvc
 	public class AuthorizationFilter : System.Web.Mvc.IAuthorizationFilter
 	{
 		#region 成员字段
-		private Zongsoft.Security.Membership.IAuthorization _authorization;
+		private IAuthorization _authorization;
+		private ICertificationProvider _certificationProvider;
 		#endregion
 
 		#region 公共属性
@@ -54,6 +55,21 @@ namespace Zongsoft.Web.Mvc
 					throw new ArgumentNullException();
 
 				_authorization = value;
+			}
+		}
+
+		public ICertificationProvider CertificationProvider
+		{
+			get
+			{
+				return _certificationProvider;
+			}
+			set
+			{
+				if(value == null)
+					throw new ArgumentNullException();
+
+				_certificationProvider = value;
 			}
 		}
 		#endregion
@@ -72,8 +88,10 @@ namespace Zongsoft.Web.Mvc
 					return;
 				case AuthorizationMode.Licensee: //身份验证(即需要验证当前操作者是否为非匿名用户)
 
-					//如果当前操作为匿名操作（即操作者没有登录验证），则返回验证失败的响应
-					if(!this.IsAuthenticated(filterContext))
+					//如果当前操作为匿名操作（即操作者没有登录验证），则返回验证失败的响应否则进行凭证验证
+					if(this.IsAuthenticated(filterContext))
+						this.ValidateCertification(filterContext);
+					else
 						filterContext.Result = new HttpUnauthorizedResult();
 
 					return;
@@ -84,6 +102,9 @@ namespace Zongsoft.Web.Mvc
 
 			if(authorization == null)
 				throw new MissingMemberException(this.GetType().FullName, "Authorization");
+
+			//进行凭证验证(确保凭证是未过期并且可用的)
+			this.ValidateCertification(filterContext);
 
 			//执行授权验证操作，如果验证失败则返回验证失败的响应
 			if(!authorization.IsAuthorized(((CertificationPrincipal)filterContext.HttpContext.User).Identity.Certification.User.UserId, schemaId, actionId))
@@ -104,6 +125,21 @@ namespace Zongsoft.Web.Mvc
 		#endregion
 
 		#region 私有方法
+		private void ValidateCertification(AuthorizationContext filterContext)
+		{
+			//获取凭证提供者服务
+			var certificationProvider = this.CertificationProvider;
+
+			if(certificationProvider == null)
+				throw new MissingMemberException(this.GetType().FullName, "CertificationProvider");
+
+			//获取当前的安全主体
+			var principal = filterContext.HttpContext.User as CertificationPrincipal;
+
+			if(principal != null && principal.Identity != null)
+				certificationProvider.Validate(principal.Identity.CertificationId);
+		}
+
 		private AuthorizationMode GetAuthorizationMode(AuthorizationContext filterContext, out string schemaId, out string actionId)
 		{
 			schemaId = null;
