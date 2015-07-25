@@ -38,7 +38,7 @@ namespace Zongsoft.Web.Mvc
 		private static readonly Regex _iframeRegex = new Regex(@"<iframe[^>]+src=[""']?(?'src'[^""']+)[""']?", (RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Singleline), TimeSpan.FromSeconds(5));
 		#endregion
 
-		#region 私有方法
+		#region 公共方法
 		public static string Detoxify(string text)
 		{
 			if(string.IsNullOrWhiteSpace(text))
@@ -64,7 +64,9 @@ namespace Zongsoft.Web.Mvc
 
 			return text;
 		}
+		#endregion
 
+		#region 私有方法
 		private static string EncodeHtmlTag(string tag)
 		{
 			if(string.IsNullOrWhiteSpace(tag))

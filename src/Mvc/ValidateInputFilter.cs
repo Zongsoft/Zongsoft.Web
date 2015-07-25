@@ -33,12 +33,7 @@ namespace Zongsoft.Web.Mvc
 {
 	public class ValidateInputFilter : IActionFilter
 	{
-		#region 显式实现
-		void IActionFilter.OnActionExecuted(ActionExecutedContext context)
-		{
-		}
-		#endregion
-
+		#region 输入检测
 		public void OnActionExecuting(ActionExecutingContext context)
 		{
 			if(context.ActionParameters == null || context.ActionParameters.Count < 1)
@@ -75,5 +70,12 @@ namespace Zongsoft.Web.Mvc
 				}
 			}
 		}
+		#endregion
+
+		#region 显式实现
+		void IActionFilter.OnActionExecuted(ActionExecutedContext context)
+		{
+		}
+		#endregion
 	}
 }
