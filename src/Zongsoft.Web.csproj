@@ -166,7 +166,6 @@
     <Compile Include="Controls\ViewPart.cs" />
     <Compile Include="Controls\ViewPartCollection.cs" />
     <Compile Include="Controls\Widget.cs" />
-    <Compile Include="Mvc\AuthorizationFilter.cs" />
     <Compile Include="Mvc\ValidateInputFilter.cs" />
     <Compile Include="Mvc\ValidateInputUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
