@@ -29,9 +29,9 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Web.Mvc;
 
-namespace Zongsoft.Web.Mvc
+namespace Zongsoft.Web
 {
-	public class ValidateInputFilter : IActionFilter
+	public class InputValidationFilter : IActionFilter
 	{
 		#region 输入检测
 		public void OnActionExecuting(ActionExecutingContext context)
@@ -48,7 +48,7 @@ namespace Zongsoft.Web.Mvc
 
 				if(entry.Value.GetType() == typeof(string))
 				{
-					dictionary[entry.Key] = ValidateInputUtility.Detoxify((string)entry.Value);
+					dictionary[entry.Key] = InputValidationUtility.Detoxify((string)entry.Value);
 				}
 				else if(entry.Value.GetType().IsClass)
 				{
@@ -57,7 +57,7 @@ namespace Zongsoft.Web.Mvc
 					foreach(PropertyDescriptor property in properties)
 					{
 						if(property.PropertyType == typeof(string))
-							property.SetValue(entry.Value, ValidateInputUtility.Detoxify((string)property.GetValue(entry.Value)));
+							property.SetValue(entry.Value, InputValidationUtility.Detoxify((string)property.GetValue(entry.Value)));
 					}
 				}
 			}

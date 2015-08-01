@@ -29,9 +29,9 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Text.RegularExpressions;
 
-namespace Zongsoft.Web.Mvc
+namespace Zongsoft.Web
 {
-	public static class ValidateInputUtility
+	public static class InputValidationUtility
 	{
 		#region 常量定义
 		private static readonly Regex _regex = new Regex(@"(?'start'<\s*(?'tag'script|form|frameset)[^>]*?>)(?'content'.*?)(?'end'<\s*/\s*\k'tag'\s*>)", (RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Singleline), TimeSpan.FromSeconds(5));
