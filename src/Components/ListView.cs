@@ -37,6 +37,7 @@ using System.Web.UI.HtmlControls;
 namespace Zongsoft.Web.Controls
 {
 	[ParseChildren(true)]
+	[PersistChildren(false)]
 	public class ListView : CompositeDataBoundControl, INamingContainer
 	{
 		#region 成员字段
@@ -159,6 +160,80 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
+		protected override void RenderBeginTag(HtmlTextWriter writer)
+		{
+			var tagName = string.Empty;
+
+			switch(this.RenderMode)
+			{
+				case ListRenderMode.List:
+					tagName = "dl";
+					break;
+				case ListRenderMode.BulletList:
+					tagName = "ul";
+					break;
+				case ListRenderMode.OrderedList:
+					tagName = "ol";
+					break;
+			}
+
+			if(!string.IsNullOrWhiteSpace(tagName))
+			{
+				if(!string.IsNullOrWhiteSpace(this.ID))
+					writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
+
+				if(!string.IsNullOrWhiteSpace(this.CssClass))
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, this.CssClass);
+
+				writer.RenderBeginTag(tagName);
+			}
+
+			if(_headerTemplate != null)
+				_headerTemplate.InstantiateIn(this);
+		}
+
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			if(_footerTemplate != null)
+				_footerTemplate.InstantiateIn(this);
+
+			if(this.RenderMode != ListRenderMode.None)
+				writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
+			if(this.DataSource == null)
+			{
+				if(_emptyTemplate != null)
+					_emptyTemplate.InstantiateIn(this);
+
+				return;
+			}
+
+			IEnumerable dataItems = this.DataSource as IEnumerable;
+
+			if(dataItems == null || dataItems.GetType() == typeof(string))
+			{
+				var item = new DataItemContainer<ListView>(this, this.DataSource, 0);
+				this.RenderItem(writer, item);
+			}
+			else
+			{
+				int index = 0;
+
+				foreach(var dataItem in dataItems)
+				{
+					FormExtension.PushDataItem(this.Page, dataItem);
+
+					var item = new DataItemContainer<ListView>(this, dataItem, index++);
+					this.RenderItem(writer, item);
+
+					FormExtension.PopDataItem(this.Page);
+				}
+			}
+		}
+
 		protected override void Render(HtmlTextWriter writer)
 		{
 			if(this.DataSource == null && this.EmptyTemplateScope == EmptyTemplateScope.Control)
@@ -172,91 +247,13 @@ namespace Zongsoft.Web.Controls
 				return;
 			}
 
-			//生成头部内容
-			var header = this.CreateHeader() ?? this;
-
-			if(this.DataSource == null)
-			{
-				if(_emptyTemplate != null)
-					_emptyTemplate.InstantiateIn(this);
-			}
-			else
-			{
-				IEnumerable dataItems = this.DataSource as IEnumerable;
-
-				if(dataItems == null || dataItems.GetType() == typeof(string))
-				{
-					var item = new DataItemContainer<ListView>(this, this.DataSource, 0);
-					this.CreateItem(item);
-					header.Controls.Add(item);
-				}
-				else
-				{
-					int index = 0;
-
-					foreach(var dataItem in dataItems)
-					{
-						FormExtension.PushDataItem(this.Page, dataItem);
-
-						var item = new DataItemContainer<ListView>(this, dataItem, index++);
-						this.CreateItem(item);
-						header.Controls.Add(item);
-
-						FormExtension.PopDataItem(this.Page);
-					}
-				}
-			}
-
-			//生成脚部内容
-			this.CreateFooter();
-
 			//调用基类同名方法
 			base.Render(writer);
 		}
 		#endregion
 
 		#region 虚拟方法
-		protected virtual Control CreateHeader()
-		{
-			Control container = null;
-
-			switch(this.RenderMode)
-			{
-				case ListRenderMode.List:
-					container = new Literal("dl", this.CssClass);
-					break;
-				case ListRenderMode.BulletList:
-					container = new Literal("ul", this.CssClass);
-					break;
-				case ListRenderMode.OrderedList:
-					container = new Literal("ol", this.CssClass);
-					break;
-			}
-
-			if(container != null)
-			{
-				container.ID = this.ID;
-				this.Controls.Add(container);
-			}
-
-			if(_headerTemplate != null)
-			{
-				if(container == null)
-					container = this;
-
-				_headerTemplate.InstantiateIn(container);
-			}
-
-			return container;
-		}
-
-		protected virtual void CreateFooter()
-		{
-			if(_footerTemplate != null)
-				_footerTemplate.InstantiateIn(this);
-		}
-
-		protected virtual void CreateItem(DataItemContainer<ListView> item)
+		protected virtual void RenderItem(HtmlTextWriter writer, DataItemContainer<ListView> item)
 		{
 			switch(this.RenderMode)
 			{
@@ -271,6 +268,8 @@ namespace Zongsoft.Web.Controls
 
 			if(_itemTemplate != null)
 				_itemTemplate.InstantiateIn(item);
+
+			item.RenderControl(writer);
 		}
 		#endregion
 	}
