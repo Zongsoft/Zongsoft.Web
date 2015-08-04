@@ -61,8 +61,8 @@ namespace Zongsoft.Web.Controls
 	///	]]>
 	/// </remarks>
 	[DefaultProperty("Title")]
-	[PersistChildren(true)]
 	[ParseChildren(true)]
+	[PersistChildren(true)]
 	public class Widget : DataBoundControl, INamingContainer
 	{
 		#region 成员字段
@@ -262,6 +262,29 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
+		#region 重写方法
+		protected override void RenderBeginTag(HtmlTextWriter writer)
+		{
+			this.AddAttributes(writer);
+			writer.RenderBeginTag(HtmlTextWriterTag.Div);
+		}
+
+		protected override void RenderEndTag(HtmlTextWriter writer)
+		{
+			writer.RenderEndTag();
+		}
+
+		protected override void RenderContent(HtmlTextWriter writer)
+		{
+			this.CreateHeader(this);
+			this.CreateBody(this);
+			this.CreateFooter(this);
+
+			//调用基类同名方法
+			base.RenderContent(writer);
+		}
+		#endregion
+
 		#region 虚拟方法
 		protected virtual void CreateHeader(Control container)
 		{
@@ -385,29 +408,6 @@ namespace Zongsoft.Web.Controls
 			{
 				return _settings != null && !string.IsNullOrWhiteSpace(_settings.FooterContainerTagName);
 			}
-		}
-		#endregion
-
-		#region 重写方法
-		protected override void RenderBeginTag(HtmlTextWriter writer)
-		{
-			this.AddAttributes(writer);
-			writer.RenderBeginTag(HtmlTextWriterTag.Div);
-		}
-
-		protected override void RenderEndTag(HtmlTextWriter writer)
-		{
-			writer.RenderEndTag();
-		}
-
-		protected override void RenderContent(HtmlTextWriter writer)
-		{
-			this.CreateHeader(this);
-			this.CreateBody(this);
-			this.CreateFooter(this);
-
-			//调用基类同名方法
-			base.RenderContent(writer);
 		}
 		#endregion
 
