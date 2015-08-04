@@ -189,13 +189,25 @@ namespace Zongsoft.Web.Controls
 			}
 
 			if(_headerTemplate != null)
-				_headerTemplate.InstantiateIn(this);
+			{
+				using(var literal = new Literal())
+				{
+					_headerTemplate.InstantiateIn(literal);
+					literal.RenderControl(writer);
+				}
+			}
 		}
 
 		protected override void RenderEndTag(HtmlTextWriter writer)
 		{
 			if(_footerTemplate != null)
-				_footerTemplate.InstantiateIn(this);
+			{
+				using(var literal = new Literal())
+				{
+					_footerTemplate.InstantiateIn(literal);
+					literal.RenderControl(writer);
+				}
+			}
 
 			if(this.RenderMode != ListRenderMode.None)
 				writer.RenderEndTag();
@@ -206,7 +218,13 @@ namespace Zongsoft.Web.Controls
 			if(this.DataSource == null)
 			{
 				if(_emptyTemplate != null)
-					_emptyTemplate.InstantiateIn(this);
+				{
+					using(var literal = new Literal())
+					{
+						_emptyTemplate.InstantiateIn(literal);
+						literal.RenderControl(writer);
+					}
+				}
 
 				return;
 			}

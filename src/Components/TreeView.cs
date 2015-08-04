@@ -307,9 +307,15 @@ namespace Zongsoft.Web.Controls
 			if((_nodes == null || _nodes.Count < 1) && this.DataSource == null)
 			{
 				if(_emptyTemplate != null)
+				{
 					_emptyTemplate.InstantiateIn(this);
+					this.RenderChildren(writer);
+				}
+
+				return;
 			}
 
+			//调用基类同名方法
 			base.Render(writer);
 		}
 
