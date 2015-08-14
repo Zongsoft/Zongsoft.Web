@@ -169,6 +169,10 @@
     <Compile Include="InputValidationFilter.cs" />
     <Compile Include="InputValidationUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\AuthenticationUtility.cs" />
+    <Compile Include="Security\Configuration\AuthenticationElement.cs" />
+    <Compile Include="Security\Configuration\AuthenticationSceneElement.cs" />
+    <Compile Include="Security\Configuration\AuthenticationSceneElementCollection.cs" />
     <Compile Include="Themes\ComponentElement.cs" />
     <Compile Include="Themes\ComponentElementCollection.cs" />
     <Compile Include="Themes\DependencyElement.cs" />
