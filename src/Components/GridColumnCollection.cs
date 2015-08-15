@@ -74,6 +74,11 @@ namespace Zongsoft.Web.Controls
 		}
 		#endregion
 
+		#region 公共方法
+		/// <summary>
+		/// 获取所有列的总权重。
+		/// </summary>
+		/// <returns></returns>
 		public double GetTotalWeight()
 		{
 			double totalWeight = 0;
@@ -86,5 +91,6 @@ namespace Zongsoft.Web.Controls
 
 			return totalWeight;
 		}
+		#endregion
 	}
 }

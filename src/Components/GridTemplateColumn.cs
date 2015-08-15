@@ -74,23 +74,16 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 嵌套子类
-		internal class GridTemplateColumnControl : Control, IDataItemContainer
+		internal class GridTemplateColumnControl : DataItemContainer<Grid>
 		{
 			#region 成员字段
 			private GridTemplateColumn _column;
-			private object _dataItem;
-			private int _index;
 			#endregion
 
 			#region 构造函数
-			public GridTemplateColumnControl(GridTemplateColumn column, object dataItem, int index)
+			public GridTemplateColumnControl(GridTemplateColumn column, object dataItem, int index) : base(column.Grid, dataItem, index)
 			{
-				if(column == null)
-					throw new ArgumentNullException("column");
-
 				_column = column;
-				_dataItem = dataItem;
-				_index = index;
 			}
 			#endregion
 
@@ -100,38 +93,6 @@ namespace Zongsoft.Web.Controls
 				get
 				{
 					return _column;
-				}
-			}
-
-			public object DataItem
-			{
-				get
-				{
-					return _dataItem;
-				}
-			}
-
-			public int Index
-			{
-				get
-				{
-					return _index;
-				}
-			}
-
-			public int DisplayIndex
-			{
-				get
-				{
-					return _index;
-				}
-			}
-
-			int IDataItemContainer.DataItemIndex
-			{
-				get
-				{
-					return _index;
 				}
 			}
 			#endregion
