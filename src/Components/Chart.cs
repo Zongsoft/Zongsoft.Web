@@ -33,7 +33,6 @@ using System.Collections.ObjectModel;
 using System.Text;
 using System.Web;
 using System.Web.UI;
-using System.Runtime.Serialization.Json;
 
 namespace Zongsoft.Web.Controls
 {
@@ -165,27 +164,17 @@ namespace Zongsoft.Web.Controls
 			writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID + "_data");
 			writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
 
-			using(MemoryStream stream = new MemoryStream())
+			switch(this.Type)
 			{
-				DataContractJsonSerializer serializer = null;
-
-				switch(this.Type)
-				{
-					case ChartType.Pie:
-						serializer = new DataContractJsonSerializer(typeof(ChartPointCollection), new Type[] { typeof(ChartPoint) });
-						serializer.WriteObject(stream, this.Points);
-						break;
-					case ChartType.Lines:
-						serializer = new DataContractJsonSerializer(typeof(ChartLineCollection), new Type[] { typeof(ChartLine) });
-						serializer.WriteObject(stream, this.Lines);
-						break;
-					case ChartType.Columns:
-						serializer = new DataContractJsonSerializer(typeof(ChartLineCollection), new Type[] { typeof(ChartLine) });
-						serializer.WriteObject(stream, this.Lines);
-						break;
-				}
-
-				writer.AddAttribute(HtmlTextWriterAttribute.Value, Encoding.UTF8.GetString(stream.ToArray()));
+				case ChartType.Pie:
+					var valueText1 = Zongsoft.Runtime.Serialization.Serializer.Json.Serialize(this.Points);
+					writer.AddAttribute(HtmlTextWriterAttribute.Value, valueText1);
+					break;
+				case ChartType.Lines:
+				case ChartType.Columns:
+					var valueText2 = Zongsoft.Runtime.Serialization.Serializer.Json.Serialize(this.Lines);
+					writer.AddAttribute(HtmlTextWriterAttribute.Value, valueText2);
+					break;
 			}
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Input);
@@ -197,12 +186,8 @@ namespace Zongsoft.Web.Controls
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID + "_series");
 				writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
 
-				using(MemoryStream stream = new MemoryStream())
-				{
-					DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ChartSerieCollection), new Type[] { typeof(ChartSerie) });
-					serializer.WriteObject(stream, this.Series);
-					writer.AddAttribute(HtmlTextWriterAttribute.Value, Encoding.UTF8.GetString(stream.ToArray()));
-				}
+				var seriesText = Zongsoft.Runtime.Serialization.Serializer.Json.Serialize(this.Series);
+				writer.AddAttribute(HtmlTextWriterAttribute.Value, seriesText);
 
 				writer.RenderBeginTag(HtmlTextWriterTag.Input);
 				writer.RenderEndTag();

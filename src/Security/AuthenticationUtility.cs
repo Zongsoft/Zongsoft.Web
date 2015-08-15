@@ -200,9 +200,165 @@ namespace Zongsoft.Web.Security
 
 			HttpContext.Current.Response.Cookies.Set(ticket);
 		}
+
+		public static string Decrypt(byte[] data)
+		{
+			if(data == null || data.Length < 1)
+				return null;
+
+			var secretIV = HttpContext.Current.Application[SECRET_IV] as byte[];
+			var secretKey = HttpContext.Current.Application[SECRET_KEY] as byte[];
+
+			if(secretIV == null || secretKey == null)
+				return null;
+
+			using(var cryptography = RijndaelManaged.Create())
+			{
+				cryptography.IV = secretIV;
+				cryptography.Key = secretKey;
+
+				using(var decryptor = cryptography.CreateDecryptor())
+				{
+					using(var ms = new System.IO.MemoryStream(data))
+					{
+						using(var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+						{
+							using(var reader = new System.IO.StreamReader(cs, System.Text.Encoding.UTF8))
+							{
+								return reader.ReadToEnd();
+							}
+						}
+					}
+				}
+			}
+		}
+
+		public static string Encrypt(string text)
+		{
+			var secretIV = HttpContext.Current.Application[SECRET_IV] as byte[];
+			var secretKey = HttpContext.Current.Application[SECRET_KEY] as byte[];
+
+			using(var cryptography = RijndaelManaged.Create())
+			{
+				if(secretIV == null || secretIV.Length == 0)
+				{
+					cryptography.GenerateIV();
+					HttpContext.Current.Application[SECRET_IV] = secretIV = cryptography.IV;
+				}
+				else
+				{
+					cryptography.IV = secretIV;
+				}
+
+				if(secretKey == null || secretKey.Length == 0)
+				{
+					cryptography.GenerateKey();
+					HttpContext.Current.Application[SECRET_KEY] = secretKey = cryptography.Key;
+				}
+				else
+				{
+					cryptography.Key = secretKey;
+				}
+
+				using(var encryptor = cryptography.CreateEncryptor())
+				{
+					using(var ms = new System.IO.MemoryStream())
+					{
+						using(var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+						{
+							var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+							cs.Write(bytes, 0, bytes.Length);
+						}
+
+						return System.Convert.ToBase64String(ms.ToArray());
+					}
+				}
+			}
+		}
+		#endregion
+
+		#region 内部方法
+		internal static AuthorizationAttribute GetAuthorizationAttribute(ActionDescriptor actionDescriptor)
+		{
+			//查找位于Action方法的授权标记
+			var attribute = (AuthorizationAttribute)actionDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
+
+			if(attribute == null)
+			{
+				//查找位于Controller类的授权标记
+				attribute = (AuthorizationAttribute)actionDescriptor.ControllerDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
+			}
+
+			return attribute;
+		}
+
+		internal static AuthorizationMode GetAuthorizationMode(ActionDescriptor actionDescriptor)
+		{
+			var attribute = GetAuthorizationAttribute(actionDescriptor);
+
+			if(attribute == null)
+				return AuthorizationMode.Disabled;
+
+			return attribute.Mode;
+		}
+
+		internal static AuthorizationMode GetAuthorizationMode(ActionDescriptor actionDescriptor, System.Web.Routing.RequestContext requestContext, out string schemaId, out string actionId)
+		{
+			schemaId = null;
+			actionId = null;
+
+			//查找位于Action方法的授权标记
+			var attribute = (AuthorizationAttribute)actionDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
+
+			if(attribute == null)
+			{
+				//查找位于Controller类的授权标记
+				attribute = (AuthorizationAttribute)actionDescriptor.ControllerDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
+
+				if(attribute == null)
+					return AuthorizationMode.Disabled;
+
+				if(attribute.Mode == AuthorizationMode.Required)
+				{
+					schemaId = string.IsNullOrWhiteSpace(attribute.SchemaId) ? GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string) : attribute.SchemaId;
+					actionId = actionDescriptor.ActionName;
+				}
+
+				return attribute.Mode;
+			}
+
+			if(attribute.Mode != AuthorizationMode.Required)
+				return attribute.Mode;
+
+			schemaId = attribute.SchemaId;
+			actionId = string.IsNullOrWhiteSpace(attribute.ActionId) ? actionDescriptor.ActionName : attribute.ActionId;
+
+			if(string.IsNullOrWhiteSpace(schemaId))
+			{
+				var controllerAttribute = (AuthorizationAttribute)Attribute.GetCustomAttribute(actionDescriptor.ControllerDescriptor.ControllerType, typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true);
+
+				if(controllerAttribute == null || string.IsNullOrWhiteSpace(controllerAttribute.SchemaId))
+					schemaId = GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string);
+				else
+					schemaId = controllerAttribute.SchemaId;
+			}
+
+			return attribute.Mode;
+		}
 		#endregion
 
 		#region 私有方法
+		private static string GetSchemaId(string name, string areaName)
+		{
+			if(name != null && name.Length > 10 && name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase))
+				name = name.Substring(0, name.Length - 10);
+
+			if(string.IsNullOrWhiteSpace(areaName))
+				return name;
+
+			return areaName.Replace('/', '-') + "-" + name;
+		}
+
 		private static Configuration.AuthenticationElement GetAuthenticationElement()
 		{
 			var applicationContext = Zongsoft.ComponentModel.ApplicationContextBase.Current;
