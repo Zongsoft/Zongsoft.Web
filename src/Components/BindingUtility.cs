@@ -40,7 +40,7 @@ namespace Zongsoft.Web.Controls
 	public static class BindingUtility
 	{
 		#region 静态变量
-		private static readonly Regex BindingExpressionRegex = new Regex(@"(?<binding>\$\{(?<path>[\w\[\]\s'"".-]+)(:(?<format>.+))?\})", (RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled));
+		private static readonly Regex BindingExpressionRegex = new Regex(@"(?<binding>\$\{(?<path>[\w\[\]\s'"".-]+)(:(?<format>[^\{\}]+))?\})", (RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled));
 		private static readonly Regex BindingPartsRegex = new Regex(@"(?<name>\w+)(\[(?<quote>['""]?)(?<index>[^'""]+)\k<quote>\])?", (RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled));
 		#endregion
 
