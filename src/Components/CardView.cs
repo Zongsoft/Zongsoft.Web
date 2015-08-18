@@ -109,9 +109,12 @@ namespace Zongsoft.Web.Controls
 
 			if(_headerParts != null && _headerParts.Count > 0)
 			{
-				var meta = new Literal("div", "meta");
-				container.Controls.Add(meta);
-				Utility.GenerateParts(meta, _headerParts);
+				//var meta = new Literal("div", "meta");
+				//container.Controls.Add(meta);
+				//Utility.GenerateParts(meta, _headerParts);
+
+				var metas = Utility.GenerateParts(_headerParts, part => new Literal("div", "meta"));
+				Utility.AddRange(container, metas);
 			}
 
 			container.Controls.Add(new Literal("div", "description", this.Description));
@@ -121,9 +124,12 @@ namespace Zongsoft.Web.Controls
 		{
 			if(_footerParts != null && _footerParts.Count > 0)
 			{
-				var extra = new Literal("div", "extra content");
-				container.Controls.Add(extra);
-				Utility.GenerateParts(extra, _footerParts);
+				//var extra = new Literal("div", "extra content");
+				//container.Controls.Add(extra);
+				//Utility.GenerateParts(extra, _footerParts);
+
+				var extras = Utility.GenerateParts(_footerParts, part => new Literal("div", "extra content"));
+				Utility.AddRange(container, extras);
 			}
 		}
 

@@ -101,6 +101,20 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[DefaultValue(true)]
+		[PropertyMetadata(false)]
+		public bool TextEncoded
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.TextEncoded);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.TextEncoded, value);
+			}
+		}
+
 		[Bindable(true)]
 		[DefaultValue("")]
 		[Localizable(true)]
@@ -321,6 +335,7 @@ namespace Zongsoft.Web.Controls
 				var control = new Literal("a", "widget-header-title")
 				{
 					Text = this.Title,
+					TextEncoded = this.TextEncoded,
 				};
 
 				if(!string.IsNullOrWhiteSpace(this.NavigateUrl))
@@ -334,6 +349,7 @@ namespace Zongsoft.Web.Controls
 				var control = new Literal("p", "widget-header-description sub header")
 				{
 					Text = this.Description,
+					TextEncoded = this.TextEncoded,
 				};
 
 				content.Controls.Add(control);

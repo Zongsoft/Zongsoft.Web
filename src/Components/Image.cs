@@ -246,13 +246,13 @@ namespace Zongsoft.Web.Controls
 
 				if(!Unit.IsEmpty(this.Height))
 					control.SetAttributeValue("height", this.Height.ToString());
+
+				if(!string.IsNullOrWhiteSpace(this.CssClass))
+					control.CssClass = this.CssClass;
 			}
 
 			if(control == null)
 				return new Literal();
-
-			if(!string.IsNullOrWhiteSpace(this.CssClass))
-				control.CssClass = this.CssClass;
 
 			if(string.IsNullOrWhiteSpace(this.NavigateUrl))
 				return control;

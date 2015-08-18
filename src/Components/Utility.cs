@@ -218,21 +218,46 @@ namespace Zongsoft.Web.Controls
 			return b.Length >= 2;
 		}
 
-		public static bool IsEmpty(IEnumerable enumerable)
+		public static int AddRange(this Control owner, IEnumerable<Control> children)
 		{
-			if(enumerable == null)
-				throw new ArgumentNullException("enumerable");
+			if(owner == null || children == null)
+				return 0;
 
-			return !enumerable.GetEnumerator().MoveNext();
+			int count = 0;
+
+			foreach(var child in children)
+			{
+				if(child != null)
+				{
+					owner.Controls.Add(child);
+					count++;
+				}
+			}
+
+			return count;
 		}
 
-		public static void GenerateParts(Control container, ICollection<ViewPart> parts)
+		public static ICollection<Control> GenerateParts(ICollection<ViewPart> parts, Func<ViewPart, Control> containerThunk)
 		{
+			if(containerThunk == null)
+				throw new ArgumentNullException();
+
 			if(parts == null || parts.Count < 1)
-				return;
+				return null;
+
+			var containers = new List<Control>();
+			Control container = null;
 
 			foreach(var part in parts)
 			{
+				if(containers.Count == 0 || (string.IsNullOrWhiteSpace(part.Text) && string.IsNullOrWhiteSpace(part.Icon)))
+				{
+					container = containerThunk(part);
+
+					if(container != null)
+						containers.Add(container);
+				}
+
 				Literal wrapper = null;
 				var css = Utility.ResolveCssClass(part.Alignment == HorizontalAlignment.Right ? ":right floated" : string.Empty, () => part.CssClass);
 
@@ -278,6 +303,8 @@ namespace Zongsoft.Web.Controls
 						(wrapper ?? container).Controls.Add(new Literal("i", part.Icon + " icon"));
 				}
 			}
+
+			return containers;
 		}
 	}
 }

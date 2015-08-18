@@ -113,13 +113,13 @@ namespace Zongsoft.Web.Controls
 
 		protected override void CreateHeaderContent(Control container)
 		{
-			if(this.Image != null && !string.IsNullOrWhiteSpace(this.Image.ImageUrl))
+			if(this.Image != null)
 			{
 				if(string.IsNullOrWhiteSpace(this.Image.NavigateUrl))
 				{
-					var imageCss = "top aligned image";
+					var imageCss = "ui top aligned image";
 
-					if(this.Image.Dimension != Dimension.None)
+					if(this.Image.Dimension != Dimension.None && !string.IsNullOrWhiteSpace(this.Image.ImageUrl))
 						imageCss = "ui top aligned " + this.Image.Dimension.ToString() + " image";
 
 					var literal = new Literal("div", imageCss);
@@ -140,19 +140,28 @@ namespace Zongsoft.Web.Controls
 
 			if(_headerParts != null && _headerParts.Count > 0)
 			{
-				var meta = new Literal("div", "meta");
-				container.Controls.Add(meta);
-				Utility.GenerateParts(meta, _headerParts);
+				//var meta = new Literal("div", "meta");
+				//container.Controls.Add(meta);
+				//Utility.GenerateParts(meta, _headerParts);
+
+				var metas = Utility.GenerateParts(_headerParts, part => new Literal("div", "meta"));
+				Utility.AddRange(container, metas);
 			}
 
-			container.Controls.Add(new Literal("div", "description", this.Description));
+			container.Controls.Add(new Literal("div", "description", this.Description)
+			{
+				TextEncoded = this.TextEncoded,
+			});
 		}
 
 		protected override void CreateFooterContent(Control container)
 		{
 			if(_footerParts != null && _footerParts.Count > 0)
 			{
-				Utility.GenerateParts(container, _footerParts);
+				//Utility.GenerateParts(container, _footerParts);
+
+				var extras = Utility.GenerateParts(_footerParts, part => new Literal("div", "extra"));
+				Utility.AddRange(container, extras);
 			}
 		}
 
