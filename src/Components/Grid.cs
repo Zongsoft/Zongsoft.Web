@@ -307,10 +307,10 @@ namespace Zongsoft.Web.Controls
 				}
 				else
 				{
-					int index = 1;
+					int index = 0;
 					foreach(var dataItem in dataSource)
 					{
-						FormExtension.PushDataItem(this.Page, dataItem);
+						FormExtension.PushDataItem(this.Page, dataItem, index);
 						this.GenerateRow(writer, dataItem, index++);
 						FormExtension.PopDataItem(this.Page);
 					}

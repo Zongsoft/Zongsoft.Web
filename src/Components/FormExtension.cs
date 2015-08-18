@@ -11,7 +11,7 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 扩展方法
-		public static object GetDataContext(this TemplateControl container)
+		public static object GetDataIndex(this TemplateControl container)
 		{
 			if(container == null)
 				throw new ArgumentNullException("container");
@@ -20,23 +20,42 @@ namespace Zongsoft.Web.Controls
 			var stack = GetDataContainer(page);
 
 			if(stack != null && stack.Count > 0)
-				return stack.Peek();
+				return stack.Peek().Index;
+
+			return -1;
+		}
+
+		public static object GetDataItem(this TemplateControl container)
+		{
+			if(container == null)
+				throw new ArgumentNullException("container");
+
+			var page = (container as Page) ?? container.Page;
+			var stack = GetDataContainer(page);
+
+			if(stack != null && stack.Count > 0)
+				return stack.Peek().Data;
 
 			return null;
 		}
+
+		public static object GetDataContext(this TemplateControl container)
+		{
+			return GetDataItem(container);
+		}
 		#endregion
 
-		#region 公共方法
-		public static void PushDataItem(Page page, object dataItem)
+		#region 内部方法
+		internal static void PushDataItem(Page page, object dataItem, int index)
 		{
 			if(dataItem == null)
 				return;
 
 			var stack = GetDataContainer(page);
-			stack.Push(dataItem);
+			stack.Push(new DataContext(dataItem, index));
 		}
 
-		public static object PopDataItem(Page page)
+		internal static DataContext PopDataItem(Page page)
 		{
 			var stack = GetDataContainer(page);
 
@@ -48,12 +67,26 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 私有方法
-		private static Stack<object> GetDataContainer(Page page)
+		private static Stack<DataContext> GetDataContainer(Page page)
 		{
 			if(!page.Items.Contains(DATACONTEXT_KEY))
-				page.Items[DATACONTEXT_KEY] = new Stack<object>();
+				page.Items[DATACONTEXT_KEY] = new Stack<DataContext>();
 
-			return page.Items[DATACONTEXT_KEY] as Stack<object>;
+			return page.Items[DATACONTEXT_KEY] as Stack<DataContext>;
+		}
+		#endregion
+
+		#region 嵌套子类
+		internal class DataContext
+		{
+			public object Data;
+			public int Index;
+
+			internal DataContext(object data, int index)
+			{
+				this.Data = data;
+				this.Index = index;
+			}
 		}
 		#endregion
 	}

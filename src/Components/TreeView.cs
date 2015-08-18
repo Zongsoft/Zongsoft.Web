@@ -457,7 +457,7 @@ namespace Zongsoft.Web.Controls
 
 			foreach(var dataItem in dataItems)
 			{
-				FormExtension.PushDataItem(this.Page, dataItem);
+				FormExtension.PushDataItem(this.Page, dataItem, index);
 
 				this.RenderNodeTemplate(writer, new TreeViewNodeContainer(this, dataItem, index++, this.GetItemTagName(), this.ItemCssClass)
 				{
