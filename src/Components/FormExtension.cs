@@ -11,8 +11,12 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 扩展方法
-		public static object GetDataContext(this Page page)
+		public static object GetDataContext(this TemplateControl container)
 		{
+			if(container == null)
+				throw new ArgumentNullException("container");
+
+			var page = (container as Page) ?? container.Page;
 			var stack = GetDataContainer(page);
 
 			if(stack != null && stack.Count > 0)
