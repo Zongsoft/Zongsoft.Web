@@ -119,11 +119,38 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.IsRenderFieldTag);
+				return !string.IsNullOrWhiteSpace(this.FieldTagName);
+			}
+		}
+
+		[DefaultValue("div")]
+		[PropertyMetadata(false)]
+		public string FieldTagName
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.FieldTagName);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.IsRenderFieldTag, value);
+				this.SetPropertyValue(() => this.FieldTagName, value);
+			}
+		}
+
+		[DefaultValue("field")]
+		[PropertyMetadata(false)]
+		public string FieldCssClass
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.FieldCssClass);
+			}
+			set
+			{
+				if(value != null && value.Length > 0)
+					value = Utility.ResolveCssClass(value, () => this.FieldCssClass);
+
+				this.SetPropertyValue(() => this.FieldCssClass, value);
 			}
 		}
 
@@ -205,8 +232,8 @@ namespace Zongsoft.Web.Controls
 			if(this.IsRenderFieldTag)
 			{
 				//生成最外层的Div布局元素，即<div class="field">
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "field");
-				writer.RenderBeginTag(HtmlTextWriterTag.Div);
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, this.FieldCssClass);
+				writer.RenderBeginTag(this.FieldTagName);
 			}
 
 			//生成Label标签
