@@ -119,6 +119,19 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[PropertyMetadata(false)]
+		public string FieldStyle
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.FieldStyle);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.FieldStyle, value);
+			}
+		}
+
 		[DefaultValue(InputBoxType.Text)]
 		[PropertyMetadata("type")]
 		public virtual InputBoxType InputType
@@ -227,10 +240,15 @@ namespace Zongsoft.Web.Controls
 				return;
 			}
 
+			//生成最外层的Div布局元素，即<div class="field">
 			if(this.IsRenderFieldTag)
 			{
-				//生成最外层的Div布局元素，即<div class="field">
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, this.FieldCssClass);
+				if(!string.IsNullOrWhiteSpace(this.FieldCssClass))
+					writer.AddAttribute(HtmlTextWriterAttribute.Class, this.FieldCssClass);
+
+				if(!string.IsNullOrWhiteSpace(this.FieldStyle))
+					writer.AddAttribute(HtmlTextWriterAttribute.Style, this.FieldStyle);
+
 				writer.RenderBeginTag(this.FieldTagName);
 			}
 
