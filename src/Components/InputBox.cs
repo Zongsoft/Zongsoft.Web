@@ -56,7 +56,12 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.Name);
+				var name = this.GetPropertyValue(() => this.Name);
+
+				if(string.IsNullOrWhiteSpace(name))
+					return this.ID;
+
+				return name;
 			}
 			set
 			{
