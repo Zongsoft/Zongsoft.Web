@@ -42,6 +42,7 @@ namespace Zongsoft.Web.Controls
 	public class ComboBox : CompositeDataBoundControl, INamingContainer
 	{
 		#region 成员变量
+		private ComboBoxItem _selectedItem;
 		private ITemplate _itemTemplate;
 		private ComboBoxBinding _binding;
 		private ComboBoxItemCollection _items;
@@ -61,7 +62,12 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.Name);
+				var name = this.GetPropertyValue(() => this.Name);
+
+				if(string.IsNullOrWhiteSpace(name))
+					return this.ID;
+
+				return name;
 			}
 			set
 			{
@@ -294,24 +300,8 @@ namespace Zongsoft.Web.Controls
 			}
 			else
 			{
-				this.AddAttributes(writer, "ID", "Name");
+				this.AddAttributes(writer, "Name");
 				writer.RenderBeginTag(HtmlTextWriterTag.Div);
-
-				if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
-					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
-
-				this.AddAttributes(writer, "CssClass");
-
-				if(this.AutoSubmit)
-					writer.AddAttribute(HtmlTextWriterAttribute.Onchange, @"javascript:var current = this.parentNode;while(current != null && current.tagName.toLowerCase() != 'form'){current = current.parentNode;}if(current != null && current.tagName.toLowerCase() == 'form')current.submit();", false);
-
-				writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
-				writer.RenderBeginTag(HtmlTextWriterTag.Input);
-				writer.RenderEndTag();
-
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "default text");
-				writer.RenderBeginTag(HtmlTextWriterTag.Span);
-				writer.RenderEndTag();
 
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "dropdown icon");
 				writer.RenderBeginTag(HtmlTextWriterTag.I);
@@ -327,7 +317,26 @@ namespace Zongsoft.Web.Controls
 			writer.RenderEndTag();
 
 			if(this.RenderMode == ComboBoxRenderMode.Custom)
+			{
+				if(!string.IsNullOrWhiteSpace(this.Name))
+					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
+				if(_selectedItem != null || this.SelectedValue != null)
+					writer.AddAttribute(HtmlTextWriterAttribute.Value, _selectedItem == null ? this.SelectedValue : _selectedItem.Value);
+				writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
+				this.AddAttributes(writer, "ID", "CssClass");
+				if(this.AutoSubmit)
+					writer.AddAttribute(HtmlTextWriterAttribute.Onchange, @"javascript:var current = this.parentNode;while(current != null && current.tagName.toLowerCase() != 'form'){current = current.parentNode;}if(current != null && current.tagName.toLowerCase() == 'form')current.submit();", false);
+				writer.RenderBeginTag(HtmlTextWriterTag.Input);
 				writer.RenderEndTag();
+
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "default text");
+				writer.RenderBeginTag(HtmlTextWriterTag.Span);
+				if(_selectedItem != null)
+					writer.WriteEncodedText(_selectedItem.Text);
+				writer.RenderEndTag();
+
+				writer.RenderEndTag();
+			}
 		}
 
 		protected override void RenderContent(HtmlTextWriter writer)
@@ -345,6 +354,9 @@ namespace Zongsoft.Web.Controls
 			foreach(var item in _items)
 			{
 				var isSelected = this.SelectedIndex < 0 ? string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase) : this.SelectedIndex == index;
+
+				if(isSelected)
+					_selectedItem = item;
 
 				//if(_itemTemplate == null)
 					item.ToHtmlString(writer, this.RenderMode, isSelected);
@@ -376,6 +388,9 @@ namespace Zongsoft.Web.Controls
 
 				var isSelected = this.SelectedIndex < 0 ? string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase) : this.SelectedIndex == index;
 
+				if(isSelected)
+					_selectedItem = item;
+
 				if(_itemTemplate == null)
 					item.ToHtmlString(writer, this.RenderMode, isSelected);
 				else
@@ -394,6 +409,9 @@ namespace Zongsoft.Web.Controls
 					};
 
 					var isSelected = this.SelectedIndex < 0 ? string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase) : this.SelectedIndex == index;
+
+					if(isSelected)
+						_selectedItem = item;
 
 					if(_itemTemplate == null)
 						item.ToHtmlString(writer, this.RenderMode, isSelected);
