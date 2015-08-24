@@ -52,6 +52,7 @@ namespace Zongsoft.Web.Controls
 		#region 公共属性
 		[Bindable(true)]
 		[DefaultValue("")]
+		[PropertyMetadata(false)]
 		public string Name
 		{
 			get
@@ -218,10 +219,10 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
-			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
+			if(!string.IsNullOrWhiteSpace(this.Name))
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
 
-			this.AddAttributes(writer, "CssClass");
+			this.AddAttributes(writer, "Name", "CssClass");
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Input);
 		}
