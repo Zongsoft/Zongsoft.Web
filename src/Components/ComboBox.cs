@@ -58,6 +58,7 @@ namespace Zongsoft.Web.Controls
 
 		#region 公共属性
 		[Bindable(true)]
+		[PropertyMetadata(false)]
 		public string Name
 		{
 			get
@@ -286,8 +287,8 @@ namespace Zongsoft.Web.Controls
 		{
 			if(this.RenderMode == ComboBoxRenderMode.Classic)
 			{
-				if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
-					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
+				if(!string.IsNullOrWhiteSpace(this.Name))
+					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
 
 				this.AddAttributes(writer);
 
@@ -300,7 +301,7 @@ namespace Zongsoft.Web.Controls
 			}
 			else
 			{
-				this.AddAttributes(writer, "Name");
+				this.AddAttributes(writer);
 				writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "dropdown icon");

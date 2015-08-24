@@ -220,7 +220,7 @@ namespace Zongsoft.Web.Controls
 		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
 			if(!string.IsNullOrWhiteSpace(this.Name))
-				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
+				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
 
 			this.AddAttributes(writer, "Name", "CssClass");
 
