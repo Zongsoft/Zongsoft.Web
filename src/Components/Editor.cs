@@ -65,8 +65,8 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
-			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
-				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
+			if(!string.IsNullOrWhiteSpace(this.Name))
+				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
 
 			this.AddAttributes(writer, "CssClass");
 

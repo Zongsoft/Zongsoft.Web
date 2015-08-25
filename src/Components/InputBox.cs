@@ -222,7 +222,7 @@ namespace Zongsoft.Web.Controls
 			if(!string.IsNullOrWhiteSpace(this.Name))
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
 
-			this.AddAttributes(writer, "Name", "CssClass");
+			this.AddAttributes(writer, "CssClass");
 
 			writer.RenderBeginTag(HtmlTextWriterTag.Input);
 		}
@@ -236,8 +236,8 @@ namespace Zongsoft.Web.Controls
 		{
 			if(this.InputType == InputBoxType.Hidden)
 			{
-				if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
-					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
+				if(!string.IsNullOrWhiteSpace(this.Name))
+					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
 
 				this.AddAttributes(writer, "CssClass");
 
