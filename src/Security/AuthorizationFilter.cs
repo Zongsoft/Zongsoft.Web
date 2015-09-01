@@ -78,42 +78,43 @@ namespace Zongsoft.Web.Security
 		public void OnAuthorization(AuthorizationContext filterContext)
 		{
 			string schemaId, actionId;
+			ICertificationValidator validator;
 
 			//获取授权验证的方式
-			var mode = AuthenticationUtility.GetAuthorizationMode(filterContext.ActionDescriptor, filterContext.RequestContext, out schemaId, out actionId);
+			var mode = AuthenticationUtility.GetAuthorizationMode(filterContext.ActionDescriptor, filterContext.RequestContext, out schemaId, out actionId, out validator);
 
-			switch(mode)
+			//忽略授权验证
+			if(mode == AuthorizationMode.Disabled)
+				return;
+
+			//如果连身份验证都未通过则返回身份验证失败并退出
+			if(!AuthenticationUtility.IsAuthenticated)
 			{
-				case AuthorizationMode.Disabled: //忽略授权验证
-					return;
-				case AuthorizationMode.Identity: //身份验证(即需要验证当前操作者是否为非匿名用户)
-
-					//如果当前用户已经验证通过，则校验其凭证是否有效；否则返回验证失败的响应否则进行凭证验证
-					if(AuthenticationUtility.IsAuthenticated)
-						this.ValidateCertification(filterContext);
-					else
-						filterContext.Result = new HttpUnauthorizedResult();
-
-					return;
+				filterContext.Result = new HttpUnauthorizedResult();
+				return;
 			}
 
-			//进行凭证验证(确保凭证是未过期并且可用的)
-			this.ValidateCertification(filterContext);
+			//进行凭证验证(确保凭证是未过期并且可用的)，凭证验证失败则退出
+			if(!this.ValidateCertification(filterContext, validator))
+				return;
 
-			//获取授权验证服务
-			var authorization = this.Authorization;
+			if(mode == AuthorizationMode.Required)
+			{
+				//获取授权验证服务
+				var authorization = this.Authorization;
 
-			if(authorization == null)
-				throw new MissingMemberException(this.GetType().FullName, "Authorization");
+				if(authorization == null)
+					throw new MissingMemberException(this.GetType().FullName, "Authorization");
 
-			//执行授权验证操作，如果验证失败则返回验证失败的响应
-			if(!authorization.IsAuthorized(((CertificationPrincipal)filterContext.HttpContext.User).Identity.Certification.User.UserId, schemaId, actionId))
-				filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+				//执行授权验证操作，如果验证失败则返回验证失败的响应
+				if(!authorization.Authorize(((CertificationPrincipal)filterContext.HttpContext.User).Identity.Certification.User.UserId, schemaId, actionId))
+					filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+			}
 		}
 		#endregion
 
 		#region 私有方法
-		private void ValidateCertification(AuthorizationContext filterContext)
+		private bool ValidateCertification(AuthorizationContext filterContext, ICertificationValidator validator)
 		{
 			//获取凭证提供者服务
 			var certificationProvider = this.CertificationProvider;
@@ -124,8 +125,19 @@ namespace Zongsoft.Web.Security
 			//获取当前的安全主体
 			var principal = filterContext.HttpContext.User as CertificationPrincipal;
 
-			if(principal != null && principal.Identity != null)
-				certificationProvider.Validate(principal.Identity.CertificationId);
+			if(principal == null || principal.Identity == null || !certificationProvider.Validate(principal.Identity.CertificationId))
+			{
+				filterContext.Result = new HttpUnauthorizedResult();
+				return false;
+			}
+
+			if(validator != null && !validator.Validate(principal.Identity.Certification))
+			{
+				filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+				return false;
+			}
+
+			return true;
 		}
 		#endregion
 	}

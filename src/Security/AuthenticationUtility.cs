@@ -153,6 +153,12 @@ namespace Zongsoft.Web.Security
 			//将注册成功的用户凭证保存到Cookie中
 			AuthenticationUtility.SetCertificationCookie(certification, isRemember ? TimeSpan.FromDays(7) : TimeSpan.Zero);
 
+			object redirectUrl = null;
+
+			//如果验证事件中显式指定了返回的URL，则使用它所指定的值
+			if(result.HasExtendedProperties && result.ExtendedProperties.TryGetValue("RedirectUrl", out redirectUrl) && redirectUrl != null)
+				return redirectUrl.ToString();
+
 			//返回重定向的路径中
 			return AuthenticationUtility.GetRedirectUrl(certification.Scene);
 		}
@@ -302,10 +308,11 @@ namespace Zongsoft.Web.Security
 			return attribute.Mode;
 		}
 
-		internal static AuthorizationMode GetAuthorizationMode(ActionDescriptor actionDescriptor, System.Web.Routing.RequestContext requestContext, out string schemaId, out string actionId)
+		internal static AuthorizationMode GetAuthorizationMode(ActionDescriptor actionDescriptor, System.Web.Routing.RequestContext requestContext, out string schemaId, out string actionId, out ICertificationValidator validator)
 		{
 			schemaId = null;
 			actionId = null;
+			validator = null;
 
 			//查找位于Action方法的授权标记
 			var attribute = (AuthorizationAttribute)actionDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
@@ -318,6 +325,8 @@ namespace Zongsoft.Web.Security
 				if(attribute == null)
 					return AuthorizationMode.Disabled;
 
+				validator = attribute.Validator;
+
 				if(attribute.Mode == AuthorizationMode.Required)
 				{
 					schemaId = string.IsNullOrWhiteSpace(attribute.SchemaId) ? GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string) : attribute.SchemaId;
@@ -326,6 +335,8 @@ namespace Zongsoft.Web.Security
 
 				return attribute.Mode;
 			}
+
+			validator = attribute.Validator;
 
 			if(attribute.Mode != AuthorizationMode.Required)
 				return attribute.Mode;
