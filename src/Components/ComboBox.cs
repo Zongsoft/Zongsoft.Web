@@ -301,7 +301,7 @@ namespace Zongsoft.Web.Controls
 			}
 			else
 			{
-				this.AddAttributes(writer);
+				this.AddAttributes(writer, "ID");
 				writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "dropdown icon");
@@ -319,6 +319,8 @@ namespace Zongsoft.Web.Controls
 
 			if(this.RenderMode == ComboBoxRenderMode.Custom)
 			{
+				if(!string.IsNullOrWhiteSpace(this.ID))
+					writer.AddAttribute(HtmlTextWriterAttribute.Id, this.ID);
 				if(!string.IsNullOrWhiteSpace(this.Name))
 					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
 				if(_selectedItem != null || this.SelectedValue != null)
