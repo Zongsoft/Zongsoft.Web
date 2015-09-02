@@ -123,7 +123,16 @@ namespace Zongsoft.Web.Controls
 
 			if(_button != null)
 			{
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "ui icon button");
+				if(!string.IsNullOrWhiteSpace(_button.Id))
+					writer.AddAttribute(HtmlTextWriterAttribute.Id, _button.Id);
+				if(!string.IsNullOrWhiteSpace(_button.Url))
+					writer.AddAttribute(HtmlTextWriterAttribute.Href, _button.Url);
+
+				var cssClass = "ui icon basic button";
+				if(!string.IsNullOrWhiteSpace(_button.CssClass ))
+					cssClass = Utility.ResolveCssClass(_button.CssClass, () => cssClass);
+
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, cssClass);
 				writer.RenderBeginTag(HtmlTextWriterTag.A);
 
 				if(!string.IsNullOrWhiteSpace(_button.Icon))
@@ -145,6 +154,12 @@ namespace Zongsoft.Web.Controls
 		[Serializable]
 		public class TextBoxButton
 		{
+			public string Id
+			{
+				get;
+				set;
+			}
+
 			public string Icon
 			{
 				get;
@@ -152,6 +167,18 @@ namespace Zongsoft.Web.Controls
 			}
 
 			public string Text
+			{
+				get;
+				set;
+			}
+
+			public string Url
+			{
+				get;
+				set;
+			}
+
+			public string CssClass
 			{
 				get;
 				set;
