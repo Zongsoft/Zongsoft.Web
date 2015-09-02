@@ -43,7 +43,6 @@ namespace Zongsoft.Web.Controls
 		public Button()
 		{
 			_buttonType = Web.Controls.ButtonType.Normal;
-			this.CssClass = "ui basic button btn";
 		}
 		#endregion
 
@@ -155,6 +154,9 @@ namespace Zongsoft.Web.Controls
 		{
 			if(string.IsNullOrWhiteSpace(this.Name) && (!string.IsNullOrWhiteSpace(this.ID)))
 				writer.AddAttribute(HtmlTextWriterAttribute.Name, this.ID);
+
+			if(string.IsNullOrWhiteSpace(this.CssClass))
+				this.CssClass = "ui basic " + (string.IsNullOrWhiteSpace(this.Icon) ? "" : "icon labeled") + " button";
 
 			this.AddAttributes(writer);
 
