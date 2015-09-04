@@ -143,7 +143,9 @@ namespace Zongsoft.Web.Controls
 		{
 			if(string.IsNullOrWhiteSpace(bindingText))
 				return bindingText;
-				//return bindingSource != null ? bindingSource.ToString() : string.Empty;
+
+			if(bindingText == ".")
+				return bindingSource != null ? bindingSource.ToString() : string.Empty;
 
 			var matched = BindingExpressionRegex.IsMatch(bindingText);
 
