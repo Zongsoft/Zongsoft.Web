@@ -378,7 +378,7 @@ namespace Zongsoft.Web.Controls
 
 		protected virtual void CreateFooter(Control container)
 		{
-			var footer = this.FooterContainer;
+			var footer = this.FooterContainer ?? new Literal();
 
 			if(footer != null)
 			{
