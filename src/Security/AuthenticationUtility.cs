@@ -53,7 +53,7 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 公共字段
-		public static readonly string CertificationKey = ".Zongsoft.Credential";
+		public static readonly string CredentialsKey = "__Zongsoft.Credential__";
 		#endregion
 
 		#region 公共方法
@@ -69,7 +69,7 @@ namespace Zongsoft.Web.Security
 		{
 			get
 			{
-				var cookie = HttpContext.Current.Request.Cookies[CertificationKey];
+				var cookie = HttpContext.Current.Request.Cookies[CredentialsKey];
 
 				if(cookie == null)
 					return null;
@@ -136,19 +136,19 @@ namespace Zongsoft.Web.Security
 			return string.IsNullOrWhiteSpace(config.DefaultUrl) ? DEFAULT_URL : config.DefaultUrl;
 		}
 
-		public static string Login(IAuthentication authentication, ICertificationProvider certificationProvider, string identity, string password, string @namespace, bool isRemember)
+		public static string Login(IAuthentication authentication, ICredentialProvider credentialsProvider, string identity, string password, string @namespace, bool isRemember)
 		{
 			if(authentication == null)
 				throw new ArgumentNullException("authentication");
 
-			if(certificationProvider == null)
-				throw new ArgumentNullException("certificationProvider");
+			if(credentialsProvider == null)
+				throw new ArgumentNullException("credentialsProvider");
 
 			//进行身份验证(即验证身份标识和密码是否匹配)
 			var result = authentication.Authenticate(identity, password, @namespace);
 
 			//注册用户凭证
-			var certification = certificationProvider.Register(result.User, AuthenticationUtility.GetScene(), (result.HasExtendedProperties ? result.ExtendedProperties : null));
+			var certification = credentialsProvider.Register(result.User, AuthenticationUtility.GetScene(), (result.HasExtendedProperties ? result.ExtendedProperties : null));
 
 			//将注册成功的用户凭证保存到Cookie中
 			AuthenticationUtility.SetCertificationCookie(certification, isRemember ? TimeSpan.FromDays(7) : TimeSpan.Zero);
@@ -163,9 +163,9 @@ namespace Zongsoft.Web.Security
 			return AuthenticationUtility.GetRedirectUrl(certification.Scene);
 		}
 
-		public static void Logout(Zongsoft.Security.ICertificationProvider certificationProvider)
+		public static void Logout(Zongsoft.Security.ICredentialProvider credentialsProvider)
 		{
-			if(certificationProvider == null)
+			if(credentialsProvider == null)
 			{
 				var applicationContext = Zongsoft.ComponentModel.ApplicationContextBase.Current;
 
@@ -174,32 +174,32 @@ namespace Zongsoft.Web.Security
 					var serviceProvider = applicationContext.ServiceFactory.GetProvider("Security");
 
 					if(serviceProvider != null)
-						certificationProvider = serviceProvider.Resolve<ICertificationProvider>();
+						credentialsProvider = serviceProvider.Resolve<ICredentialProvider>();
 				}
 			}
 
-			if(certificationProvider != null)
+			if(credentialsProvider != null)
 			{
 				var certificationId = CertificationId;
 
 				if(!string.IsNullOrWhiteSpace(certificationId))
-					certificationProvider.Unregister(certificationId);
+					credentialsProvider.Unregister(certificationId);
 			}
 
-			HttpContext.Current.Response.Cookies.Remove(CertificationKey);
+			HttpContext.Current.Response.Cookies.Remove(CredentialsKey);
 		}
 
-		public static void SetCertificationCookie(Certification certification)
+		public static void SetCertificationCookie(Credential credential)
 		{
-			SetCertificationCookie(certification, TimeSpan.Zero);
+			SetCertificationCookie(credential, TimeSpan.Zero);
 		}
 
-		public static void SetCertificationCookie(Certification certification, TimeSpan duration)
+		public static void SetCertificationCookie(Credential credential, TimeSpan duration)
 		{
-			if(certification == null)
+			if(credential == null)
 				return;
 
-			var ticket = new System.Web.HttpCookie(CertificationKey, certification.CertificationId);
+			var ticket = new System.Web.HttpCookie(CredentialsKey, credential.CredentialId);
 
 			if(duration > TimeSpan.Zero)
 				ticket.Expires = DateTime.Now + duration;
@@ -308,7 +308,7 @@ namespace Zongsoft.Web.Security
 			return attribute.Mode;
 		}
 
-		internal static AuthorizationMode GetAuthorizationMode(ActionDescriptor actionDescriptor, System.Web.Routing.RequestContext requestContext, out string schemaId, out string actionId, out ICertificationValidator validator)
+		internal static AuthorizationMode GetAuthorizationMode(ActionDescriptor actionDescriptor, System.Web.Routing.RequestContext requestContext, out string schemaId, out string actionId, out ICredentialValidator validator)
 		{
 			schemaId = null;
 			actionId = null;

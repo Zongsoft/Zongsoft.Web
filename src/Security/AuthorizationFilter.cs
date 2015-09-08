@@ -39,7 +39,7 @@ namespace Zongsoft.Web.Security
 	{
 		#region 成员字段
 		private IAuthorization _authorization;
-		private ICertificationProvider _certificationProvider;
+		private ICredentialProvider _credentialProvider;
 		#endregion
 
 		#region 公共属性
@@ -58,18 +58,18 @@ namespace Zongsoft.Web.Security
 			}
 		}
 
-		public ICertificationProvider CertificationProvider
+		public ICredentialProvider CredentialProvider
 		{
 			get
 			{
-				return _certificationProvider;
+				return _credentialProvider;
 			}
 			set
 			{
 				if(value == null)
 					throw new ArgumentNullException();
 
-				_certificationProvider = value;
+				_credentialProvider = value;
 			}
 		}
 		#endregion
@@ -78,7 +78,7 @@ namespace Zongsoft.Web.Security
 		public void OnAuthorization(AuthorizationContext filterContext)
 		{
 			string schemaId, actionId;
-			ICertificationValidator validator;
+			ICredentialValidator validator;
 
 			//获取授权验证的方式
 			var mode = AuthenticationUtility.GetAuthorizationMode(filterContext.ActionDescriptor, filterContext.RequestContext, out schemaId, out actionId, out validator);
@@ -95,7 +95,7 @@ namespace Zongsoft.Web.Security
 			}
 
 			//进行凭证验证(确保凭证是未过期并且可用的)，凭证验证失败则退出
-			if(!this.ValidateCertification(filterContext, validator))
+			if(!this.ValidateCredential(filterContext, validator))
 				return;
 
 			if(mode == AuthorizationMode.Required)
@@ -107,34 +107,36 @@ namespace Zongsoft.Web.Security
 					throw new MissingMemberException(this.GetType().FullName, "Authorization");
 
 				//执行授权验证操作，如果验证失败则返回验证失败的响应
-				if(!authorization.Authorize(((CertificationPrincipal)filterContext.HttpContext.User).Identity.Certification.User.UserId, schemaId, actionId))
-					filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+				if(!authorization.Authorize(((CredentialPrincipal)filterContext.HttpContext.User).Identity.Credential.User.UserId, schemaId, actionId))
+					throw new AuthorizationException();
+					//filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
 			}
 		}
 		#endregion
 
 		#region 私有方法
-		private bool ValidateCertification(AuthorizationContext filterContext, ICertificationValidator validator)
+		private bool ValidateCredential(AuthorizationContext filterContext, ICredentialValidator validator)
 		{
 			//获取凭证提供者服务
-			var certificationProvider = this.CertificationProvider;
+			var credentialProvider = this.CredentialProvider;
 
-			if(certificationProvider == null)
-				throw new MissingMemberException(this.GetType().FullName, "CertificationProvider");
+			if(credentialProvider == null)
+				throw new MissingMemberException(this.GetType().FullName, "CredentialProvider");
 
 			//获取当前的安全主体
-			var principal = filterContext.HttpContext.User as CertificationPrincipal;
+			var principal = filterContext.HttpContext.User as CredentialPrincipal;
 
-			if(principal == null || principal.Identity == null || !certificationProvider.Validate(principal.Identity.CertificationId))
+			if(principal == null || principal.Identity == null || !credentialProvider.Validate(principal.Identity.CredentialId))
 			{
 				filterContext.Result = new HttpUnauthorizedResult();
 				return false;
 			}
 
-			if(validator != null && !validator.Validate(principal.Identity.Certification))
+			if(validator != null && !validator.Validate(principal.Identity.Credential))
 			{
-				filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
-				return false;
+				throw new CredentialException();
+				//filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+				//return false;
 			}
 
 			return true;

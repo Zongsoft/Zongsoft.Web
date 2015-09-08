@@ -39,22 +39,22 @@ namespace Zongsoft.Web.Security
 	public class AuthenticationFilter : System.Web.Mvc.Filters.IAuthenticationFilter
 	{
 		#region 成员字段
-		private ICertificationProvider _certificationProvider;
+		private ICredentialProvider _credentialProvider;
 		#endregion
 
 		#region 公共属性
-		public ICertificationProvider CertificationProvider
+		public ICredentialProvider CredentialProvider
 		{
 			get
 			{
-				return _certificationProvider;
+				return _credentialProvider;
 			}
 			set
 			{
 				if(value == null)
 					throw new ArgumentNullException();
 
-				_certificationProvider = value;
+				_credentialProvider = value;
 			}
 		}
 		#endregion
@@ -62,12 +62,12 @@ namespace Zongsoft.Web.Security
 		#region 验证实现
 		public void OnAuthentication(AuthenticationContext filterContext)
 		{
-			var certificationId = AuthenticationUtility.CertificationId;
+			var credentialId = AuthenticationUtility.CertificationId;
 
-			if(string.IsNullOrWhiteSpace(certificationId))
-				filterContext.Principal = CertificationPrincipal.Empty;
+			if(string.IsNullOrWhiteSpace(credentialId))
+				filterContext.Principal = CredentialPrincipal.Empty;
 			else
-				filterContext.Principal = new CertificationPrincipal(new CertificationIdentity(certificationId, this.CertificationProvider));
+				filterContext.Principal = new CredentialPrincipal(new CredentialIdentity(credentialId, this.CredentialProvider));
 		}
 
 		public void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
