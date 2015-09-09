@@ -62,7 +62,7 @@ namespace Zongsoft.Web.Security
 		#region 验证实现
 		public void OnAuthentication(AuthenticationContext filterContext)
 		{
-			var credentialId = AuthenticationUtility.CertificationId;
+			var credentialId = AuthenticationUtility.CredentialId;
 
 			if(string.IsNullOrWhiteSpace(credentialId))
 				filterContext.Principal = CredentialPrincipal.Empty;

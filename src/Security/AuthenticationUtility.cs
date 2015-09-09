@@ -65,7 +65,7 @@ namespace Zongsoft.Web.Security
 			}
 		}
 
-		public static string CertificationId
+		public static string CredentialId
 		{
 			get
 			{
@@ -136,22 +136,22 @@ namespace Zongsoft.Web.Security
 			return string.IsNullOrWhiteSpace(config.DefaultUrl) ? DEFAULT_URL : config.DefaultUrl;
 		}
 
-		public static string Login(IAuthentication authentication, ICredentialProvider credentialsProvider, string identity, string password, string @namespace, bool isRemember)
+		public static string Login(IAuthentication authentication, ICredentialProvider credentialProvider, string identity, string password, string @namespace, bool isRemember)
 		{
 			if(authentication == null)
 				throw new ArgumentNullException("authentication");
 
-			if(credentialsProvider == null)
-				throw new ArgumentNullException("credentialsProvider");
+			if(credentialProvider == null)
+				throw new ArgumentNullException("credentialProvider");
 
 			//进行身份验证(即验证身份标识和密码是否匹配)
 			var result = authentication.Authenticate(identity, password, @namespace);
 
 			//注册用户凭证
-			var certification = credentialsProvider.Register(result.User, AuthenticationUtility.GetScene(), (result.HasExtendedProperties ? result.ExtendedProperties : null));
+			var credential = credentialProvider.Register(result.User, AuthenticationUtility.GetScene(), (result.HasExtendedProperties ? result.ExtendedProperties : null));
 
 			//将注册成功的用户凭证保存到Cookie中
-			AuthenticationUtility.SetCertificationCookie(certification, isRemember ? TimeSpan.FromDays(7) : TimeSpan.Zero);
+			AuthenticationUtility.SetCredentialCookie(credential, isRemember ? TimeSpan.FromDays(7) : TimeSpan.Zero);
 
 			object redirectUrl = null;
 
@@ -160,12 +160,12 @@ namespace Zongsoft.Web.Security
 				return redirectUrl.ToString();
 
 			//返回重定向的路径中
-			return AuthenticationUtility.GetRedirectUrl(certification.Scene);
+			return AuthenticationUtility.GetRedirectUrl(credential.Scene);
 		}
 
-		public static void Logout(Zongsoft.Security.ICredentialProvider credentialsProvider)
+		public static void Logout(Zongsoft.Security.ICredentialProvider credentialProvider)
 		{
-			if(credentialsProvider == null)
+			if(credentialProvider == null)
 			{
 				var applicationContext = Zongsoft.ComponentModel.ApplicationContextBase.Current;
 
@@ -174,27 +174,27 @@ namespace Zongsoft.Web.Security
 					var serviceProvider = applicationContext.ServiceFactory.GetProvider("Security");
 
 					if(serviceProvider != null)
-						credentialsProvider = serviceProvider.Resolve<ICredentialProvider>();
+						credentialProvider = serviceProvider.Resolve<ICredentialProvider>();
 				}
 			}
 
-			if(credentialsProvider != null)
+			if(credentialProvider != null)
 			{
-				var certificationId = CertificationId;
+				var credentialId = CredentialId;
 
-				if(!string.IsNullOrWhiteSpace(certificationId))
-					credentialsProvider.Unregister(certificationId);
+				if(!string.IsNullOrWhiteSpace(credentialId))
+					credentialProvider.Unregister(credentialId);
 			}
 
 			HttpContext.Current.Response.Cookies.Remove(CredentialsKey);
 		}
 
-		public static void SetCertificationCookie(Credential credential)
+		public static void SetCredentialCookie(Credential credential)
 		{
-			SetCertificationCookie(credential, TimeSpan.Zero);
+			SetCredentialCookie(credential, TimeSpan.Zero);
 		}
 
-		public static void SetCertificationCookie(Credential credential, TimeSpan duration)
+		public static void SetCredentialCookie(Credential credential, TimeSpan duration)
 		{
 			if(credential == null)
 				return;
