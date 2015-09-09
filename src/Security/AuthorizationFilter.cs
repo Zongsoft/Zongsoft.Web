@@ -28,6 +28,7 @@ using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 
 using Zongsoft.Security;
@@ -94,8 +95,11 @@ namespace Zongsoft.Web.Security
 				return;
 			}
 
-			//进行凭证验证(确保凭证是未过期并且可用的)，凭证验证失败则退出
-			if(!this.ValidateCredential(filterContext, validator))
+			//进行凭证验证(确保凭证是未过期并且可用的)
+			filterContext.Result = this.ValidateCredential(filterContext.HttpContext, filterContext.HttpContext.User as CredentialPrincipal, validator);
+
+			//如果返回的结果不为空则退出
+			if(filterContext.Result != null)
 				return;
 
 			if(mode == AuthorizationMode.Required)
@@ -108,14 +112,13 @@ namespace Zongsoft.Web.Security
 
 				//执行授权验证操作，如果验证失败则返回验证失败的响应
 				if(!authorization.Authorize(((CredentialPrincipal)filterContext.HttpContext.User).Identity.Credential.User.UserId, schemaId, actionId))
-					throw new AuthorizationException();
-					//filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+					filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
 			}
 		}
 		#endregion
 
 		#region 私有方法
-		private bool ValidateCredential(AuthorizationContext filterContext, ICredentialValidator validator)
+		private ActionResult ValidateCredential(HttpContextBase httpContext, CredentialPrincipal principal, ICredentialValidator validator)
 		{
 			//获取凭证提供者服务
 			var credentialProvider = this.CredentialProvider;
@@ -123,23 +126,22 @@ namespace Zongsoft.Web.Security
 			if(credentialProvider == null)
 				throw new MissingMemberException(this.GetType().FullName, "CredentialProvider");
 
-			//获取当前的安全主体
-			var principal = filterContext.HttpContext.User as CredentialPrincipal;
-
+			//如果指定的主体为空，或对应的凭证编号不存在，或对应的凭证已过期则返回未验证结果
 			if(principal == null || principal.Identity == null || !credentialProvider.Validate(principal.Identity.CredentialId))
-			{
-				filterContext.Result = new HttpUnauthorizedResult();
-				return false;
-			}
+				return new HttpUnauthorizedResult();
 
+			//使用凭证验证器对指定的凭证进行验证，如果验证失败
 			if(validator != null && !validator.Validate(principal.Identity.Credential))
 			{
-				throw new CredentialException();
-				//filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
-				//return false;
+				//如果当前请求的路径是主页，并且是从登录页面跳转而来的返回特定的结果
+				if(httpContext.Request.Path == "/" && httpContext.Request.UrlReferrer != null && string.Equals(httpContext.Request.UrlReferrer.LocalPath, AuthenticationUtility.GetLoginUrl(), StringComparison.OrdinalIgnoreCase))
+					return new HttpStatusCodeResult(444, "Invalid Credential");
+
+				return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
 			}
 
-			return true;
+			//返回空，表示成功
+			return null;
 		}
 		#endregion
 	}
