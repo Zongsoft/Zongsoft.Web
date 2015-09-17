@@ -97,6 +97,20 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[DefaultValue(EmptyTemplateScope.Item)]
+		[PropertyMetadata(false)]
+		public EmptyTemplateScope EmptyTemplateScope
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.EmptyTemplateScope);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.EmptyTemplateScope, value);
+			}
+		}
+
 		[BrowsableAttribute(false)]
 		[PersistenceModeAttribute(PersistenceMode.InnerProperty)]
 		[TemplateContainerAttribute(typeof(Grid))]
@@ -180,6 +194,23 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成控件
+		protected override void Render(HtmlTextWriter writer)
+		{
+			if(this.DataSource == null && this.EmptyTemplateScope == EmptyTemplateScope.Control)
+			{
+				if(_emptyTemplate != null)
+				{
+					_emptyTemplate.InstantiateIn(this);
+					this.RenderChildren(writer);
+				}
+
+				return;
+			}
+
+			//调用基类同名方法
+			base.Render(writer);
+		}
+
 		protected override void RenderBeginTag(HtmlTextWriter writer)
 		{
 			//生成标准的属性集
