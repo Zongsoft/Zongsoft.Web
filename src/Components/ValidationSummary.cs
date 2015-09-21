@@ -56,7 +56,11 @@ namespace Zongsoft.Web.Controls
 		protected override void Render(HtmlTextWriter writer)
 		{
 			if(this.Page == null || this.Page.ModelState.IsValid)
+			{
+				this.RenderScript(writer, "var validation_info = null;");
+
 				return;
+			}
 
 			int fieldCount = 0;
 
