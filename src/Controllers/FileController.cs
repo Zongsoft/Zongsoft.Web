@@ -355,7 +355,7 @@ namespace Zongsoft.Web.Controllers
 				if(!string.IsNullOrWhiteSpace(dispositionName))
 				{
 					if(_headers.TryGetValue(dispositionName + ".name", out fileName))
-						fileName = Zongsoft.Text.TemplateEvaluatorManager.Default.Evaluate<string>(fileName, null);
+						fileName = Zongsoft.Text.TemplateEvaluatorManager.Default.Evaluate<string>(fileName, null).ToLowerInvariant() + System.IO.Path.GetExtension(headers.ContentDisposition.FileName.Trim('"'));
 				}
 
 				if(string.IsNullOrWhiteSpace(fileName))
