@@ -349,13 +349,22 @@ namespace Zongsoft.Web.Controllers
 
 				_isFormData.Add(false);
 
-				var fileName = string.Format("{0:yyyyMMdd-HHmmss}-{1}{2}", DateTime.Now, (uint)Zongsoft.Common.RandomGenerator.GenerateInt32(), System.IO.Path.GetExtension(headers.ContentDisposition.FileName.Trim('"')));
+				string fileName = null;
+				var dispositionName = this.UnquoteToken(headers.ContentDisposition.Name);
+
+				if(!string.IsNullOrWhiteSpace(dispositionName))
+				{
+					if(_headers.TryGetValue(dispositionName + ".name", out fileName))
+						fileName = Zongsoft.Text.TemplateEvaluatorManager.Default.Evaluate<string>(fileName, null);
+				}
+
+				if(string.IsNullOrWhiteSpace(fileName))
+					fileName = string.Format("{0:yyyyMMdd-HHmmss}-{1}{2}", DateTime.Now, (uint)Zongsoft.Common.RandomGenerator.GenerateInt32(), System.IO.Path.GetExtension(headers.ContentDisposition.FileName.Trim('"')));
+
 				var filePath = Zongsoft.IO.Path.Combine(_directoryPath, fileName);
 
 				Zongsoft.IO.FileInfo fileInfo = new Zongsoft.IO.FileInfo(filePath, (headers.ContentDisposition.Size.HasValue ? headers.ContentDisposition.Size.Value : -1), DateTime.Now, null, FileSystem.GetUrl(filePath));
 				fileInfo.Properties.Add("FileName", Uri.UnescapeDataString(headers.ContentDisposition.FileName.Trim('"')));
-
-				var dispositionName = this.UnquoteToken(headers.ContentDisposition.Name);
 
 				if(_headers != null && _headers.Count > 0 && !string.IsNullOrWhiteSpace(dispositionName))
 				{
