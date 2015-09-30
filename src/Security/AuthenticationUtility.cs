@@ -136,7 +136,13 @@ namespace Zongsoft.Web.Security
 			return string.IsNullOrWhiteSpace(config.DefaultUrl) ? DEFAULT_URL : config.DefaultUrl;
 		}
 
-		public static string Login(IAuthentication authentication, ICredentialProvider credentialProvider, string identity, string password, string @namespace, bool isRemember)
+		public static Credential Login(IAuthentication authentication, ICredentialProvider credentialProvider, string identity, string password, string @namespace, bool isRemember)
+		{
+			string redirectUrl;
+			return Login(authentication, credentialProvider, identity, password, @namespace, isRemember, out redirectUrl);
+		}
+
+		public static Credential Login(IAuthentication authentication, ICredentialProvider credentialProvider, string identity, string password, string @namespace, bool isRemember, out string redirectUrl)
 		{
 			if(authentication == null)
 				throw new ArgumentNullException("authentication");
@@ -153,14 +159,15 @@ namespace Zongsoft.Web.Security
 			//将注册成功的用户凭证保存到Cookie中
 			AuthenticationUtility.SetCredentialCookie(credential, isRemember ? TimeSpan.FromDays(7) : TimeSpan.Zero);
 
-			object redirectUrl = null;
+			object redirectObject = null;
 
 			//如果验证事件中显式指定了返回的URL，则使用它所指定的值
-			if(result.HasExtendedProperties && result.ExtendedProperties.TryGetValue("RedirectUrl", out redirectUrl) && redirectUrl != null)
-				return redirectUrl.ToString();
+			if(result.HasExtendedProperties && result.ExtendedProperties.TryGetValue("RedirectUrl", out redirectObject) && redirectObject != null)
+				redirectUrl = redirectObject.ToString();
+			else //返回重定向的路径中
+				redirectUrl = AuthenticationUtility.GetRedirectUrl(credential.Scene);
 
-			//返回重定向的路径中
-			return AuthenticationUtility.GetRedirectUrl(credential.Scene);
+			return credential;
 		}
 
 		public static void Logout(Zongsoft.Security.ICredentialProvider credentialProvider)
