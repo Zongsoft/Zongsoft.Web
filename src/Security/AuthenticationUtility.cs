@@ -53,7 +53,7 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 公共字段
-		public static readonly string CredentialsKey = "__Zongsoft.Credential__";
+		public static readonly string CredentialKey = "__Zongsoft.Credential__";
 		#endregion
 
 		#region 公共方法
@@ -69,7 +69,7 @@ namespace Zongsoft.Web.Security
 		{
 			get
 			{
-				var cookie = HttpContext.Current.Request.Cookies[CredentialsKey];
+				var cookie = HttpContext.Current.Request.Cookies[CredentialKey];
 
 				if(cookie == null)
 					return null;
@@ -186,7 +186,7 @@ namespace Zongsoft.Web.Security
 					credentialProvider.Unregister(credentialId);
 			}
 
-			HttpContext.Current.Response.Cookies.Remove(CredentialsKey);
+			HttpContext.Current.Response.Cookies.Remove(CredentialKey);
 		}
 
 		public static void SetCredentialCookie(Credential credential)
@@ -199,7 +199,7 @@ namespace Zongsoft.Web.Security
 			if(credential == null)
 				return;
 
-			var ticket = new System.Web.HttpCookie(CredentialsKey, credential.CredentialId);
+			var ticket = new System.Web.HttpCookie(CredentialKey, credential.CredentialId);
 
 			if(duration > TimeSpan.Zero)
 				ticket.Expires = DateTime.Now + duration;
