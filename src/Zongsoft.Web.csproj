@@ -194,6 +194,7 @@
     <Compile Include="Themes\ThemeException.cs" />
     <Compile Include="Themes\ThemeResolver.cs" />
     <Compile Include="Themes\ThemeUtility.cs" />
+    <Compile Include="WebFileSystem.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
