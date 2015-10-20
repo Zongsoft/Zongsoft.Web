@@ -373,6 +373,9 @@ namespace Zongsoft.Web.Controls
 
 			string cssClass = node.CssClass ?? this.ItemCssClass;
 
+			if(!string.IsNullOrWhiteSpace(node.Name))
+				writer.AddAttribute(HtmlTextWriterAttribute.Id, node.Name);
+
 			if(node.Selected)
 				cssClass = Utility.ResolveCssClass(":selected", () => cssClass);
 
@@ -384,9 +387,6 @@ namespace Zongsoft.Web.Controls
 
 			writer.RenderBeginTag(this.GetItemTagName());
 
-			if(node.Image != null)
-				node.Image.ToHtmlString(writer);
-
 			if(!string.IsNullOrWhiteSpace(node.NavigateUrl))
 			{
 				if(!string.IsNullOrWhiteSpace(node.NavigateCssClass))
@@ -395,6 +395,9 @@ namespace Zongsoft.Web.Controls
 				writer.AddAttribute(HtmlTextWriterAttribute.Href, node.NavigateUrl == "#" ? Utility.EmptyLink : node.NavigateUrl);
 				writer.RenderBeginTag(HtmlTextWriterTag.A);
 			}
+
+			if(node.Image != null)
+				node.Image.ToHtmlString(writer);
 
 			writer.WriteEncodedText(node.Text);
 
