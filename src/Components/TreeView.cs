@@ -421,6 +421,11 @@ namespace Zongsoft.Web.Controls
 				}
 
 				writer.RenderEndTag();
+
+				//添加下拉箭头图标
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "icon dropdown");
+				writer.RenderBeginTag(HtmlTextWriterTag.I);
+				writer.RenderEndTag();
 			}
 
 			if(!string.IsNullOrWhiteSpace(this.LoadingPath) && string.Equals(this.LoadingPath, node.FullPath, StringComparison.OrdinalIgnoreCase))
