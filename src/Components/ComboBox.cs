@@ -189,6 +189,23 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		[DefaultValue("label")]
+		[PropertyMetadata(false)]
+		public string LabelCssClass
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.LabelCssClass);
+			}
+			set
+			{
+				if(value != null && value.Length > 0)
+					value = Utility.ResolveCssClass(value, () => this.LabelCssClass);
+
+				this.SetPropertyValue(() => this.LabelCssClass, value);
+			}
+		}
+
 		[Bindable(true)]
 		[DefaultValue(-1)]
 		[PropertyMetadata(false)]
@@ -262,16 +279,7 @@ namespace Zongsoft.Web.Controls
 			}
 
 			//生成Label标签
-			if(!string.IsNullOrWhiteSpace(this.Label))
-			{
-				if(!string.IsNullOrWhiteSpace(this.ID))
-					writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
-
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "label");
-				writer.RenderBeginTag(HtmlTextWriterTag.Label);
-				writer.WriteEncodedText(this.Label);
-				writer.RenderEndTag();
-			}
+			this.RenderLabel(writer);
 
 			//调用基类同名方法(生成下拉框元素及其内容)
 			base.Render(writer);
@@ -352,6 +360,20 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 私有方法
+		private void RenderLabel(HtmlTextWriter writer)
+		{
+			if(string.IsNullOrWhiteSpace(this.Label))
+				return;
+
+			if(!string.IsNullOrWhiteSpace(this.ID))
+				writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
+
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, this.LabelCssClass);
+			writer.RenderBeginTag(HtmlTextWriterTag.Label);
+			writer.WriteEncodedText(this.Label);
+			writer.RenderEndTag();
+		}
+
 		private int RenderItems(HtmlTextWriter writer, int index)
 		{
 			foreach(var item in _items)

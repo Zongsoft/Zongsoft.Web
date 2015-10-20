@@ -40,7 +40,7 @@ namespace Zongsoft.Web.Controls
 		#region 构造函数
 		public InputBox()
 		{
-			this.CssClass = "ui input";
+			this.CssClass = "ui labeled input";
 		}
 
 		public InputBox(InputBoxType inputType)
@@ -174,13 +174,13 @@ namespace Zongsoft.Web.Controls
 						this.CssClass = ":ui radio checkbox";
 						break;
 					case InputBoxType.Text:
-						this.CssClass = ":ui input";
+						this.CssClass = ":ui labeled input";
 						break;
 					case InputBoxType.Password:
-						this.CssClass = ":ui input input-password";
+						this.CssClass = ":ui labeled input input-password";
 						break;
 					default:
-						this.CssClass = ":ui input " + value.ToString().ToLowerInvariant();
+						this.CssClass = ":ui labeled input " + value.ToString().ToLowerInvariant();
 						break;
 				}
 			}
@@ -198,6 +198,20 @@ namespace Zongsoft.Web.Controls
 			set
 			{
 				this.SetPropertyValue(() => this.Label, value);
+			}
+		}
+
+		[DefaultValue(LabelOrientation.Vertical)]
+		[PropertyMetadata(false)]
+		public LabelOrientation LabelOrientation
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.LabelOrientation);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.LabelOrientation, value);
 			}
 		}
 
@@ -276,13 +290,18 @@ namespace Zongsoft.Web.Controls
 			else
 			{
 				//在input元素前面先生成Label标签
-				this.RenderLabel(writer);
+				if(this.LabelOrientation == LabelOrientation.Vertical)
+					this.RenderLabel(writer);
 
 				//生成输入框的外层元素，即<div class="ui input">
 				if(!string.IsNullOrWhiteSpace(this.CssClass))
 				{
 					writer.AddAttribute(HtmlTextWriterAttribute.Class, this.GetCssClass());
 					writer.RenderBeginTag(HtmlTextWriterTag.Div);
+
+					//在input元素内部先生成Label标签
+					if(this.LabelOrientation == LabelOrientation.Horizontal)
+						this.RenderLabel(writer);
 				}
 
 				//调用基类同名方法(生成input元素及其内容)
@@ -313,7 +332,11 @@ namespace Zongsoft.Web.Controls
 			if(!string.IsNullOrWhiteSpace(this.ID))
 				writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "label");
+			if(this.LabelOrientation == LabelOrientation.Vertical)
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "label");
+			else if(this.LabelOrientation == LabelOrientation.Horizontal)
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "ui basic label");
+
 			writer.RenderBeginTag(HtmlTextWriterTag.Label);
 			writer.WriteEncodedText(this.Label);
 			writer.RenderEndTag();
