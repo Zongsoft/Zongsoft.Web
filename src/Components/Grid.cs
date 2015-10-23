@@ -254,7 +254,7 @@ namespace Zongsoft.Web.Controls
 			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
 			//生成选择列
-			this.GenerateSelection(writer, null);
+			this.GenerateSelection(writer, true, null);
 
 			//表头列(开始)
 			foreach(GridColumnBase column in _columns)
@@ -352,13 +352,13 @@ namespace Zongsoft.Web.Controls
 			writer.RenderEndTag();
 		}
 
-		private void GenerateSelection(HtmlTextWriter writer, object dataItem)
+		private void GenerateSelection(HtmlTextWriter writer, bool isHeader, object dataItem)
 		{
 			if(this.SelectionMode == Web.Controls.SelectionMode.None)
 				return;
 
 			writer.AddAttribute(HtmlTextWriterAttribute.Class, "selection");
-			writer.RenderBeginTag(HtmlTextWriterTag.Td);
+			writer.RenderBeginTag(isHeader ? HtmlTextWriterTag.Th : HtmlTextWriterTag.Td);
 
 			switch(this.SelectionMode)
 			{
@@ -397,7 +397,7 @@ namespace Zongsoft.Web.Controls
 			writer.RenderBeginTag(HtmlTextWriterTag.Tr);
 
 			//生成选择列
-			this.GenerateSelection(writer, dataItem);
+			this.GenerateSelection(writer, false, dataItem);
 
 			foreach(var column in _columns)
 			{

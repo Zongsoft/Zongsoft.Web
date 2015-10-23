@@ -140,7 +140,7 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return string.IsNullOrWhiteSpace(_nullText) ? "<无数据>" : _nullText;
+				return string.IsNullOrWhiteSpace(_nullText) ? "<无>" : _nullText;
 			}
 			set
 			{
