@@ -69,10 +69,15 @@ namespace Zongsoft.Web.Controls
 			set
 			{
 				if(value != null && value.Length > 0)
-					value = Utility.ResolveCssClass(value, () => this.CssClass);
+					value = Utility.ResolveCssClass(value, () => this.GetDefaultCssClass());
 
 				this.SetPropertyValue(() => this.CssClass, value);
 			}
+		}
+
+		protected virtual string GetDefaultCssClass()
+		{
+			return this.GetPropertyValue(() => this.CssClass);
 		}
 		#endregion
 

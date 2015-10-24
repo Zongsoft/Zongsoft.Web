@@ -108,6 +108,24 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 重写方法
+		protected override string GetDefaultCssClass()
+		{
+			switch(this.LayoutMode)
+			{
+				case Web.Controls.LayoutMode.Fluid:
+					if(this.LayoutColumnCount > 0)
+						return "ui " + Utility.GetNumberString(this.LayoutColumnCount) + " column grid layout layout-fluid";
+					else
+						return "ui grid layout layout-fluid";
+				case Web.Controls.LayoutMode.Table:
+					return "layout layout-table";
+				case Web.Controls.LayoutMode.Responsive:
+					return "layout layout-responsive";
+			}
+
+			return base.GetDefaultCssClass();
+		}
+
 		protected override void Render(HtmlTextWriter writer)
 		{
 			IList<Control> controls = Utility.GetVisibleChildren(this);
@@ -139,11 +157,6 @@ namespace Zongsoft.Web.Controls
 			//生成其他自定义属性
 			this.AddAttributes(writer);
 
-			if(this.LayoutColumnCount > 0)
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "ui " + Utility.GetNumberString(this.LayoutColumnCount) + " column grid layout layout-fluid");
-			else
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "ui grid layout layout-fluid");
-
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
 			foreach(Control control in controls)
@@ -169,7 +182,6 @@ namespace Zongsoft.Web.Controls
 			//生成其他自定义属性
 			this.AddAttributes(writer);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout layout-responsive");
 			writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
 			for(int i = 0; i < controls.Count; i++)
@@ -197,7 +209,6 @@ namespace Zongsoft.Web.Controls
 			//生成其他自定义属性
 			this.AddAttributes(writer);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, "layout layout-table");
 			writer.RenderBeginTag(HtmlTextWriterTag.Table);
 
 			int columnIndex = 0;
