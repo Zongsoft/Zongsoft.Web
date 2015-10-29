@@ -39,6 +39,15 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		public object Model
+		{
+			get
+			{
+				var page = this.Page as System.Web.Mvc.ViewPage;
+				return page == null ? null : page.Model;
+			}
+		}
+
 		public object DataSource
 		{
 			get
@@ -78,6 +87,21 @@ namespace Zongsoft.Web.Controls
 			get
 			{
 				return base.Parent ?? _owner.Parent;
+			}
+		}
+
+		public override Page Page
+		{
+			get
+			{
+				if(base.Page != null)
+					return base.Page;
+
+				return this.Parent == null ? _owner.Page : this.Parent.Page;
+			}
+			set
+			{
+				base.Page = value;
 			}
 		}
 		#endregion
