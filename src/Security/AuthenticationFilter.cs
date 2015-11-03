@@ -75,7 +75,8 @@ namespace Zongsoft.Web.Security
 			if(AuthenticationUtility.IsAuthenticated || AuthenticationUtility.GetAuthorizationMode(filterContext.ActionDescriptor) == AuthorizationMode.Disabled)
 				return;
 
-			filterContext.Result = new RedirectResult(Zongsoft.Web.Security.AuthenticationUtility.GetLoginUrl() + "?ReturnUrl=" + Uri.EscapeDataString(filterContext.HttpContext.Request.RawUrl));
+			var url = Utility.RepairQueryString(Zongsoft.Web.Security.AuthenticationUtility.GetLoginUrl(), "?ReturnUrl=" + Uri.EscapeDataString(filterContext.HttpContext.Request.RawUrl));
+			filterContext.Result = new RedirectResult(url);
 		}
 		#endregion
 	}

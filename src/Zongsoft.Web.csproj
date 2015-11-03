@@ -195,6 +195,7 @@
     <Compile Include="Themes\ThemeException.cs" />
     <Compile Include="Themes\ThemeResolver.cs" />
     <Compile Include="Themes\ThemeUtility.cs" />
+    <Compile Include="Utility.cs" />
     <Compile Include="WebFileSystem.cs" />
   </ItemGroup>
   <ItemGroup>
