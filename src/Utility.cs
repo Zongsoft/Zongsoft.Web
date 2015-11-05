@@ -20,7 +20,7 @@ namespace Zongsoft.Web
 			if(index > 0)
 				return path + "&" + queryString;
 			else
-				return path + "?" + (string.IsNullOrWhiteSpace(queryString) ? string.Empty : "?" + queryString);
+				return path + "?" + queryString;
 		}
 	}
 }
