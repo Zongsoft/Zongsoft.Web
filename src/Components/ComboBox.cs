@@ -312,10 +312,6 @@ namespace Zongsoft.Web.Controls
 				this.AddAttributes(writer, "ID");
 				writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
-				writer.AddAttribute(HtmlTextWriterAttribute.Class, "dropdown icon");
-				writer.RenderBeginTag(HtmlTextWriterTag.I);
-				writer.RenderEndTag();
-
 				writer.AddAttribute(HtmlTextWriterAttribute.Class, "menu");
 				writer.RenderBeginTag(HtmlTextWriterTag.Dl);
 			}
@@ -344,6 +340,10 @@ namespace Zongsoft.Web.Controls
 				writer.RenderBeginTag(HtmlTextWriterTag.Span);
 				if(_selectedItem != null)
 					writer.WriteEncodedText(_selectedItem.Text);
+				writer.RenderEndTag();
+
+				writer.AddAttribute(HtmlTextWriterAttribute.Class, "dropdown icon");
+				writer.RenderBeginTag(HtmlTextWriterTag.I);
 				writer.RenderEndTag();
 
 				writer.RenderEndTag();

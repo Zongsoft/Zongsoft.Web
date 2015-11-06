@@ -304,7 +304,7 @@ namespace Zongsoft.Web.Controls
 		#region 重写方法
 		protected override void Render(HtmlTextWriter writer)
 		{
-			if((_nodes == null || _nodes.Count < 1) && this.DataSource == null)
+			if((_nodes == null || _nodes.Count < 1) && this.IsEmptyDataSource)
 			{
 				if(_emptyTemplate != null)
 				{
@@ -517,6 +517,20 @@ namespace Zongsoft.Web.Controls
 			}
 
 			return "div";
+		}
+
+		private bool IsEmptyDataSource
+		{
+			get
+			{
+				var dataSource = this.DataSource;
+
+				if(dataSource == null)
+					return true;
+
+				var collection = dataSource as ICollection;
+				return collection == null || collection.Count < 1;
+			}
 		}
 		#endregion
 
