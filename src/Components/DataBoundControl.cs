@@ -79,6 +79,26 @@ namespace Zongsoft.Web.Controls
 		{
 			return this.GetPropertyValue(() => this.CssClass);
 		}
+
+		[Bindable(true)]
+		[DefaultValue(true)]
+		[PropertyMetadata(false)]
+		public override bool Visible
+		{
+			get
+			{
+				PropertyMetadata visible;
+
+				if(_properties.TryGetValue("Visible", out visible))
+					return (bool)visible.Value;
+
+				return base.Visible;
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.Visible, value);
+			}
+		}
 		#endregion
 
 		#region 保护属性
@@ -183,6 +203,12 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 生成方法
+		public override void RenderControl(HtmlTextWriter writer)
+		{
+			if(this.Visible)
+				base.RenderControl(writer);
+		}
+
 		protected override void Render(HtmlTextWriter writer)
 		{
 			this.RenderBeginTag(writer);
@@ -225,22 +251,6 @@ namespace Zongsoft.Web.Controls
 
 			if(!string.IsNullOrEmpty(property.AttributeValue))
 				writer.AddAttribute(property.AttributeName, property.AttributeValue);
-		}
-		#endregion
-
-		#region 初始方法
-		protected override void OnInit(EventArgs e)
-		{
-			PropertyMetadata visible;
-
-			if(_properties.TryGetValue("Visible", out visible))
-			{
-				this.Visible = (bool)BindingUtility.GetBindingValue(visible.ValueString, this.GetBindingSource(), typeof(bool));
-				_properties.Remove("Visible");
-			}
-
-			//调用基类同名方法
-			base.OnInit(e);
 		}
 		#endregion
 
