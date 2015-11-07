@@ -39,6 +39,20 @@ namespace Zongsoft.Web.Controls
 			}
 		}
 
+		/// <summary>
+		/// 获取当前数据容器所属的视图(用户控件或页面)。
+		/// </summary>
+		public TemplateControl View
+		{
+			get
+			{
+				if(_owner == null)
+					return null;
+
+				return _owner.TemplateControl;
+			}
+		}
+
 		public object Model
 		{
 			get
