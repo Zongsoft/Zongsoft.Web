@@ -224,7 +224,7 @@ namespace Zongsoft.Web.Controls
 		[Bindable(true)]
 		[DefaultValue("")]
 		[PropertyMetadata(false)]
-		public string SelectedValue
+		public object SelectedValue
 		{
 			get
 			{
@@ -328,7 +328,7 @@ namespace Zongsoft.Web.Controls
 				if(!string.IsNullOrWhiteSpace(this.Name))
 					writer.AddAttribute(HtmlTextWriterAttribute.Name, this.Name);
 				if(_selectedItem != null || this.SelectedValue != null)
-					writer.AddAttribute(HtmlTextWriterAttribute.Value, _selectedItem == null ? this.SelectedValue : _selectedItem.Value);
+					writer.AddAttribute(HtmlTextWriterAttribute.Value, _selectedItem == null ? this.SelectedValue.ToString() : _selectedItem.Value);
 				writer.AddAttribute(HtmlTextWriterAttribute.Type, "hidden");
 				this.AddAttributes(writer, "ID", "CssClass");
 				if(this.AutoSubmit)
@@ -378,7 +378,7 @@ namespace Zongsoft.Web.Controls
 		{
 			foreach(var item in _items)
 			{
-				var isSelected = this.SelectedIndex < 0 ? string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase) : this.SelectedIndex == index;
+				var isSelected = this.IsSelected(index, item.Value);
 
 				if(isSelected)
 					_selectedItem = item;
@@ -411,7 +411,7 @@ namespace Zongsoft.Web.Controls
 					Icon = BindingUtility.FormatBindingValue(_binding != null ? _binding.IconMember : string.Empty, this.DataSource, true),
 				};
 
-				var isSelected = this.SelectedIndex < 0 ? string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase) : this.SelectedIndex == index;
+				var isSelected = this.IsSelected(index, item.Value);
 
 				if(isSelected)
 					_selectedItem = item;
@@ -433,7 +433,7 @@ namespace Zongsoft.Web.Controls
 						Icon = BindingUtility.FormatBindingValue(_binding != null ? _binding.IconMember : string.Empty, dataItem, true),
 					};
 
-					var isSelected = this.SelectedIndex < 0 ? string.Equals(this.SelectedValue, item.Value, StringComparison.OrdinalIgnoreCase) : this.SelectedIndex == index;
+					var isSelected = this.IsSelected(index, item.Value);
 
 					if(isSelected)
 						_selectedItem = item;
@@ -474,6 +474,27 @@ namespace Zongsoft.Web.Controls
 
 			_itemTemplate.InstantiateIn(container);
 			container.RenderControl(writer);
+		}
+
+		private bool IsSelected(int index, string value)
+		{
+			if(this.SelectedIndex >= 0)
+				return this.SelectedIndex == index;
+
+			var selectedValue = this.SelectedValue;
+
+			if(selectedValue == null)
+				return string.IsNullOrWhiteSpace(value);
+
+			if(selectedValue.GetType().IsEnum)
+			{
+				object result;
+
+				if(value != null && Zongsoft.Common.Convert.TryConvertValue(value, selectedValue.GetType(), out result))
+					return selectedValue == result;
+			}
+
+			return string.Equals(selectedValue.ToString(), value, StringComparison.OrdinalIgnoreCase);
 		}
 		#endregion
 
