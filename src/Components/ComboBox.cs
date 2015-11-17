@@ -491,7 +491,7 @@ namespace Zongsoft.Web.Controls
 				object result;
 
 				if(value != null && Zongsoft.Common.Convert.TryConvertValue(value, selectedValue.GetType(), out result))
-					return selectedValue == result;
+					return object.Equals(selectedValue, result);
 			}
 
 			return string.Equals(selectedValue.ToString(), value, StringComparison.OrdinalIgnoreCase);
