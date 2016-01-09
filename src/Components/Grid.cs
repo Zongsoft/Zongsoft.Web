@@ -196,7 +196,7 @@ namespace Zongsoft.Web.Controls
 		#region 生成控件
 		protected override void Render(HtmlTextWriter writer)
 		{
-			if(this.DataSource == null && this.EmptyTemplateScope == EmptyTemplateScope.Control)
+			if(Utility.IsEmptyCollection(this.DataSource) && this.EmptyTemplateScope == EmptyTemplateScope.Control)
 			{
 				if(_emptyTemplate != null)
 				{
@@ -313,7 +313,7 @@ namespace Zongsoft.Web.Controls
 			//生成表体标记(开始)
 			writer.RenderBeginTag(HtmlTextWriterTag.Tbody);
 
-			if(this.DataSource == null || (this.DataSource.GetType() == typeof(string) && ((string)this.DataSource).Length == 0))
+			if(Utility.IsEmptyCollection(this.DataSource))
 			{
 				if(_emptyTemplate != null)
 				{

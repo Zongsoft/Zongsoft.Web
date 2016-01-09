@@ -326,7 +326,7 @@ namespace Zongsoft.Web.Controls
 
 		protected virtual void RenderLabel(HtmlTextWriter writer)
 		{
-			if(string.IsNullOrWhiteSpace(this.Label))
+			if(string.IsNullOrEmpty(this.Label))
 				return;
 
 			if(!string.IsNullOrWhiteSpace(this.ID))

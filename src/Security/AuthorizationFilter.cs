@@ -76,7 +76,7 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 验证方法
-		public void OnAuthorization(AuthorizationContext filterContext)
+		public void OnAuthorization(System.Web.Mvc.AuthorizationContext filterContext)
 		{
 			string schemaId, actionId;
 			ICredentialValidator validator;

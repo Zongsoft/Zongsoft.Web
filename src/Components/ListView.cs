@@ -215,7 +215,7 @@ namespace Zongsoft.Web.Controls
 
 		protected override void RenderContent(HtmlTextWriter writer)
 		{
-			if(this.DataSource == null)
+			if(Utility.IsEmptyCollection(this.DataSource))
 			{
 				if(_emptyTemplate != null)
 				{
@@ -254,7 +254,7 @@ namespace Zongsoft.Web.Controls
 
 		protected override void Render(HtmlTextWriter writer)
 		{
-			if(this.DataSource == null && this.EmptyTemplateScope == EmptyTemplateScope.Control)
+			if(Utility.IsEmptyCollection(this.DataSource) && this.EmptyTemplateScope == EmptyTemplateScope.Control)
 			{
 				if(_emptyTemplate != null)
 				{

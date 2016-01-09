@@ -306,5 +306,18 @@ namespace Zongsoft.Web.Controls
 
 			return containers;
 		}
+
+		public static bool IsEmptyCollection(object data)
+		{
+			if(data == null)
+				return true;
+
+			var collection = data as ICollection;
+
+			if(collection != null && collection.Count > 0)
+				return false;
+
+			return false;
+		}
 	}
 }
