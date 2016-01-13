@@ -317,7 +317,7 @@ namespace Zongsoft.Web.Controls
 			if(collection != null && collection.Count > 0)
 				return false;
 
-			return true;
+			return !(data is IEnumerable);
 		}
 	}
 }
