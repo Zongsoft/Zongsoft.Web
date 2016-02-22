@@ -133,7 +133,6 @@
     <Compile Include="Components\CompositeDataBoundControl.cs" />
     <Compile Include="Components\Literal.cs" />
     <Compile Include="Components\NumericBox.cs" />
-    <Compile Include="Components\PagingBar.cs" />
     <Compile Include="Components\Picker.cs" />
     <Compile Include="Components\PickerColumn.cs" />
     <Compile Include="Components\PickerColumnCollection.cs" />
@@ -226,10 +225,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Components\Readme.md" />
-    <Content Include="Themes\Theme.xml">
+    <None Include="Components\Readme.md" />
+    <None Include="Themes\Theme.xml">
       <SubType>Designer</SubType>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md">
