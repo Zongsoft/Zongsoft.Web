@@ -168,6 +168,7 @@
     <Compile Include="Components\ViewPart.cs" />
     <Compile Include="Components\ViewPartCollection.cs" />
     <Compile Include="Components\Widget.cs" />
+    <Compile Include="Http\HttpPagingAttribute.cs" />
     <Compile Include="InputValidationFilter.cs" />
     <Compile Include="InputValidationUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
