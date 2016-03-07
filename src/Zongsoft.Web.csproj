@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="Components\LabelOrientation.cs" />
     <Compile Include="Components\ValidationSummary.cs" />
+    <Compile Include="ControllerBase.cs" />
     <Compile Include="Controllers\DirectoryController.cs" />
     <Compile Include="Controllers\FileController.cs" />
     <Compile Include="Components\BindingUtility.cs" />
@@ -168,6 +169,7 @@
     <Compile Include="Components\ViewPart.cs" />
     <Compile Include="Components\ViewPartCollection.cs" />
     <Compile Include="Components\Widget.cs" />
+    <Compile Include="Http\HttpControllerBase.cs" />
     <Compile Include="Http\HttpPagingAttribute.cs" />
     <Compile Include="InputValidationFilter.cs" />
     <Compile Include="InputValidationUtility.cs" />
