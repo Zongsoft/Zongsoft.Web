@@ -259,7 +259,7 @@ namespace Zongsoft.Web.Controllers
 			if(string.IsNullOrWhiteSpace(basePath))
 				throw new InvalidOperationException("Missing the base-path of file system.");
 
-			var schema = Zongsoft.IO.Path.GetSchema(basePath);
+			var schema = Zongsoft.IO.Path.GetScheme(basePath);
 
 			if(string.IsNullOrWhiteSpace(schema))
 				throw new InvalidOperationException(string.Format("Invalid format of the '{0}' base-path.", basePath));
@@ -336,17 +336,23 @@ namespace Zongsoft.Web.Controllers
 				if(headers == null)
 					throw new ArgumentNullException("headers");
 
+				//判断当前内容项是否为普通表单域，如果是则返回一个内存流
 				if(headers.ContentDisposition == null || string.IsNullOrEmpty(headers.ContentDisposition.FileName))
 				{
+					//在表单数据标记列表中按顺序将当前内容标记为普通表单域
 					_isFormData.Add(true);
+
+					//返回一个新的内存流
 					return new MemoryStream();
 				}
 
+				//获取当前内容项的内容类型
 				var contentType = headers.ContentType == null ? string.Empty : headers.ContentType.MediaType;
 
 				if(string.IsNullOrWhiteSpace(contentType))
 					contentType = System.Web.MimeMapping.GetMimeMapping(headers.ContentDisposition.FileName);
 
+				//在表单数据标记列表中按顺序将当前内容标记为非普通表单域（即二进制文件域）
 				_isFormData.Add(false);
 
 				string fileName = null;
@@ -354,16 +360,22 @@ namespace Zongsoft.Web.Controllers
 
 				if(!string.IsNullOrWhiteSpace(dispositionName))
 				{
+					//获取请求头中显式指定的文件名（注意：该文件名支持模板格式）
 					if(_headers.TryGetValue(dispositionName + ".name", out fileName))
 						fileName = Zongsoft.Text.TemplateEvaluatorManager.Default.Evaluate<string>(fileName, null).ToLowerInvariant() + System.IO.Path.GetExtension(headers.ContentDisposition.FileName.Trim('"'));
 				}
 
+				//如果文件名为空，则生成一个以“当前日期-时间-随机数.ext”的默认文件名
 				if(string.IsNullOrWhiteSpace(fileName))
 					fileName = string.Format("{0:yyyyMMdd-HHmmss}-{1}{2}", DateTime.Now, (uint)Zongsoft.Common.RandomGenerator.GenerateInt32(), System.IO.Path.GetExtension(headers.ContentDisposition.FileName.Trim('"')));
 
+				//生成文件的完整路径
 				var filePath = Zongsoft.IO.Path.Combine(_directoryPath, fileName);
 
+				//生成文件信息的描述实体
 				Zongsoft.IO.FileInfo fileInfo = new Zongsoft.IO.FileInfo(filePath, (headers.ContentDisposition.Size.HasValue ? headers.ContentDisposition.Size.Value : -1), DateTime.Now, null, FileSystem.GetUrl(filePath));
+
+				//将上传的原始文件名加入到文件描述实体的扩展属性中
 				fileInfo.Properties.Add("FileName", Uri.UnescapeDataString(headers.ContentDisposition.FileName.Trim('"')));
 
 				if(_headers != null && _headers.Count > 0 && !string.IsNullOrWhiteSpace(dispositionName))
@@ -383,6 +395,7 @@ namespace Zongsoft.Web.Controllers
 
 				try
 				{
+					//调用文件系统根据完整文件路径去创建一个新建文件流
 					return FileSystem.File.Open(filePath, FileMode.CreateNew, FileAccess.Write, (fileInfo.HasProperties ? fileInfo.Properties : null));
 				}
 				catch

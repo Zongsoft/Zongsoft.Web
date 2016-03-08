@@ -97,7 +97,7 @@ namespace Zongsoft.Web.Controllers
 			if(string.IsNullOrWhiteSpace(basePath))
 				throw new InvalidOperationException("Missing the base-path of file system.");
 
-			var schema = Zongsoft.IO.Path.GetSchema(basePath);
+			var schema = Zongsoft.IO.Path.GetScheme(basePath);
 
 			if(string.IsNullOrWhiteSpace(schema))
 				throw new InvalidOperationException(string.Format("Invalid format of the '{0}' base-path.", basePath));

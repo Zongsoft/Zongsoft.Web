@@ -48,13 +48,13 @@ namespace Zongsoft.Web
 
 		#region 公共属性
 		/// <summary>
-		/// 获取Web文件目录系统的模式，始终返回“web”。
+		/// 获取Web文件目录系统的方案，始终返回“zfs.web”。
 		/// </summary>
-		public string Schema
+		public string Scheme
 		{
 			get
 			{
-				return "web";
+				return "zfs.web";
 			}
 		}
 
@@ -78,7 +78,8 @@ namespace Zongsoft.Web
 		#region 公共方法
 		public string GetUrl(string path)
 		{
-			return path;
+			var url = HttpContext.Current.Request.Url;
+			return url.Scheme + "://" + url.Authority + path;
 		}
 
 		public static string GetPhysicalPath(string virtualPath)
