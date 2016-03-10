@@ -14,10 +14,11 @@ using Zongsoft.Services;
 
 namespace Zongsoft.Web.Http
 {
-	public class HttpControllerBase<TEntity> : System.Web.Http.ApiController where TEntity : class
+	public class HttpControllerBase<TModel, TService> : System.Web.Http.ApiController where TModel : class
+																					  where TService : class, IDataService<TModel>
 	{
 		#region 成员字段
-		private IDataService<TEntity> _dataService;
+		private TService _dataService;
 		private Zongsoft.Services.IServiceProvider _serviceProvider;
 		#endregion
 
@@ -32,13 +33,11 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 属性定义
-		protected virtual IDataService<TEntity> DataService
+		[Zongsoft.Services.ServiceDependency]
+		protected TService DataService
 		{
 			get
 			{
-				if(_dataService == null)
-					_dataService = _serviceProvider.EnsureResolve<IDataService<TEntity>>();
-
 				return _dataService;
 			}
 			set
@@ -115,7 +114,7 @@ namespace Zongsoft.Web.Http
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 
-		public virtual void Put(TEntity model)
+		public virtual void Put(TModel model)
 		{
 			if(model == null)
 				throw new ArgumentNullException("model");
@@ -124,7 +123,7 @@ namespace Zongsoft.Web.Http
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 
-		public virtual TEntity Post(TEntity model)
+		public virtual TModel Post(TModel model)
 		{
 			if(model == null)
 				throw new ArgumentNullException("model");

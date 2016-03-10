@@ -11,10 +11,11 @@ using Zongsoft.Security;
 
 namespace Zongsoft.Web
 {
-	public class ControllerBase<TEntity> : System.Web.Mvc.Controller where TEntity : class
+	public class ControllerBase<TModel, TService> : System.Web.Mvc.Controller where TModel : class
+																			  where TService : class, IDataService<TModel>
 	{
 		#region 成员字段
-		private IDataService<TEntity> _dataService;
+		private TService _dataService;
 		private Zongsoft.Services.IServiceProvider _serviceProvider;
 		#endregion
 
@@ -29,13 +30,11 @@ namespace Zongsoft.Web
 		#endregion
 
 		#region 属性定义
-		protected virtual IDataService<TEntity> DataService
+		[Zongsoft.Services.ServiceDependency]
+		protected TService DataService
 		{
 			get
 			{
-				if(_dataService == null)
-					_dataService = _serviceProvider.Resolve<IDataService<TEntity>>();
-
 				return _dataService;
 			}
 			set
@@ -100,7 +99,7 @@ namespace Zongsoft.Web
 		}
 
 		[HttpPut, HttpPost]
-		public virtual ActionResult Edit(string id, TEntity model, string redirectUrl = null)
+		public virtual ActionResult Edit(string id, TModel model, string redirectUrl = null)
 		{
 			if(string.IsNullOrWhiteSpace(id))
 				return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
@@ -131,11 +130,11 @@ namespace Zongsoft.Web
 		[HttpGet]
 		public virtual ActionResult Create()
 		{
-			return this.View(Activator.CreateInstance<TEntity>());
+			return this.View(Activator.CreateInstance<TModel>());
 		}
 
 		[HttpPost]
-		public virtual ActionResult Create(TEntity model, string redirectUrl = null)
+		public virtual ActionResult Create(TModel model, string redirectUrl = null)
 		{
 			if(model == null)
 				return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
