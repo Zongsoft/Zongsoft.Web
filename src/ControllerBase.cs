@@ -85,8 +85,14 @@ namespace Zongsoft.Web
 			//将分页信息传递给视图
 			this.ViewData["Paging"] = paging;
 
-			//返回视图
-			return this.View(this.GetModel(id, paging));
+			//获取当前请求对应的模型数据
+			var model = this.GetModel(id, paging);
+
+			//如果模型数据为集合类型，则返回“Index”默认视图；否则返回“Details”详细视图
+			if(model != null && (model is System.Collections.IEnumerable || Zongsoft.Common.TypeExtension.IsAssignableFrom(typeof(IEnumerable<>), model.GetType())))
+				return this.View(model);
+			else
+				return this.View("Details", model);
 		}
 
 		[HttpGet]
