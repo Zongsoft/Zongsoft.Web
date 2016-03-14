@@ -11,8 +11,10 @@ using Zongsoft.Security;
 
 namespace Zongsoft.Web
 {
-	public class ControllerBase<TModel, TService> : System.Web.Mvc.Controller where TModel : class
-																			  where TService : class, IDataService<TModel>
+	public class ControllerBase<TModel, TConditional, TService> : System.Web.Mvc.Controller
+																  where TModel : class
+																  where TConditional : class, IConditional
+																  where TService : class, IDataService<TModel>
 	{
 		#region 成员字段
 		private TService _dataService;
@@ -93,6 +95,20 @@ namespace Zongsoft.Web
 				return this.View(model);
 			else
 				return this.View("Details", model);
+		}
+
+		[HttpPost]
+		public virtual ActionResult Index(TConditional conditional, Paging paging = null)
+		{
+			if(conditional == null)
+				return this.Index(string.Empty, paging);
+
+			//将分页信息传递给视图
+			this.ViewData["Paging"] = paging;
+			//将查询条件传递给视图
+			this.ViewData["Conditional"] = conditional;
+
+			return this.View(this.DataService.Select(conditional, paging));
 		}
 
 		[HttpGet]
