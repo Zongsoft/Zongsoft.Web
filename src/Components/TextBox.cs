@@ -126,7 +126,7 @@ namespace Zongsoft.Web.Controls
 				if(!string.IsNullOrWhiteSpace(_button.Id))
 					writer.AddAttribute(HtmlTextWriterAttribute.Id, _button.Id);
 				if(!string.IsNullOrWhiteSpace(_button.Url))
-					writer.AddAttribute(HtmlTextWriterAttribute.Href, _button.Url);
+					writer.AddAttribute(HtmlTextWriterAttribute.Href, BindingUtility.FormatBindingValue(_button.Url, this.GetBindingSource()));
 
 				var cssClass = "ui icon basic button";
 				if(!string.IsNullOrWhiteSpace(_button.CssClass ))
