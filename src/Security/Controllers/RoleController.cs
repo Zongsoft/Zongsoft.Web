@@ -27,13 +27,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 using System.Web.Http;
 
+using Zongsoft.Data;
+using Zongsoft.Services;
 using Zongsoft.Security;
 using Zongsoft.Security.Membership;
 
@@ -42,50 +42,74 @@ namespace Zongsoft.Web.Security.Controllers
 	public class RoleController : ApiController
 	{
 		#region 成员字段
-		private IRoleProvider _provider;
+		private IRoleProvider _roleProvider;
 		#endregion
 
 		#region 公共属性
-		public IRoleProvider Provider
+		[ServiceDependency]
+		public IRoleProvider RoleProvider
 		{
 			get
 			{
-				return _provider;
+				return _roleProvider;
 			}
 			set
 			{
 				if(value == null)
 					throw new ArgumentNullException();
 
-				_provider = value;
+				_roleProvider = value;
 			}
 		}
 		#endregion
 
 		#region 公共方法
-		public Role Get(int id)
+		[Zongsoft.Web.Http.HttpPaging]
+		public virtual object Get(string id = null, [FromUri]Paging paging = null)
 		{
-			var provider = this.EnsureProvider();
-			return provider.GetRole(id);
+			if(string.IsNullOrWhiteSpace(id))
+				return this.RoleProvider.GetAllRoles(null, paging);
+
+			int roleId;
+
+			if(int.TryParse(id, out roleId))
+				return this.RoleProvider.GetRole(roleId);
+			else
+				return this.RoleProvider.GetAllRoles(id);
 		}
 
-		[HttpGet]
-		public IEnumerable<Role> List(string @namespace = null, int pageIndex = 1)
+		public virtual int Delete(string id)
 		{
-			var provider = this.EnsureProvider();
-			return provider.GetAllRoles(@namespace, new Data.Paging(pageIndex));
+			if(string.IsNullOrWhiteSpace(id))
+				return 0;
+
+			int temp;
+			var parts = id.Split(',').Where(p => p.Length > 0 && int.TryParse(p, out temp)).Select(p => int.Parse(p)).ToArray();
+
+			if(parts.Length > 0)
+				return this.RoleProvider.DeleteRoles(parts);
+
+			return 0;
 		}
-		#endregion
 
-		#region 私有方法
-		private IRoleProvider EnsureProvider()
+		public virtual void Put(Role model)
 		{
-			var provider = this.Provider;
+			if(model == null)
+				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 
-			if(provider == null)
-				throw new MissingMemberException(this.GetType().FullName, "Provider");
+			if(this.RoleProvider.UpdateRoles(model) < 1)
+				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+		}
 
-			return provider;
+		public virtual Role Post(Role model)
+		{
+			if(model == null)
+				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+
+			if(this.RoleProvider.CreateRoles(model) > 0)
+				return model;
+
+			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
 		}
 		#endregion
 	}

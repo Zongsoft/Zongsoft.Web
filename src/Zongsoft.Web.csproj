@@ -180,6 +180,7 @@
     <Compile Include="Security\Configuration\AuthenticationElement.cs" />
     <Compile Include="Security\Configuration\AuthenticationSceneElement.cs" />
     <Compile Include="Security\Configuration\AuthenticationSceneElementCollection.cs" />
+    <Compile Include="Security\Controllers\MemberController.cs" />
     <Compile Include="Security\Controllers\RoleController.cs" />
     <Compile Include="Security\Controllers\UserController.cs" />
     <Compile Include="Themes\ComponentElement.cs" />
