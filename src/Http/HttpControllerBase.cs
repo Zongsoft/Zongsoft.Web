@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
-using System.Web.Http.Results;
 
 using Zongsoft.Data;
 using Zongsoft.Common;
@@ -90,7 +89,7 @@ namespace Zongsoft.Web.Http
 		public virtual void Delete(string id)
 		{
 			if(string.IsNullOrWhiteSpace(id))
-				return;
+				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 
 			var parts = id.Split('-');
 			var succeed = false;
@@ -117,7 +116,7 @@ namespace Zongsoft.Web.Http
 		public virtual void Put(TModel model)
 		{
 			if(model == null)
-				throw new ArgumentNullException("model");
+				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 
 			if(this.DataService.Update(model) < 1)
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
@@ -126,7 +125,7 @@ namespace Zongsoft.Web.Http
 		public virtual TModel Post(TModel model)
 		{
 			if(model == null)
-				throw new ArgumentNullException("model");
+				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 
 			if(this.DataService.Insert(model) > 0)
 				return model;
