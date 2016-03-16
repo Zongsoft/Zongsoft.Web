@@ -31,11 +31,15 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 
 using Zongsoft.Data;
 using Zongsoft.Services;
 using Zongsoft.Security;
 using Zongsoft.Security.Membership;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web.Http.Metadata;
 
 namespace Zongsoft.Web.Security.Controllers
 {
@@ -106,10 +110,17 @@ namespace Zongsoft.Web.Security.Controllers
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 
-		public virtual User Post(User model, string password = null)
+		public virtual User Post(User model)
 		{
 			if(model == null)
 				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+
+			string password = null;
+			IEnumerable<string> values;
+
+			//从请求消息的头部获取指定的用户密码
+			if(this.Request.Headers.TryGetValues("x-password", out values))
+				password = values.FirstOrDefault();
 
 			if(this.UserProvider.CreateUser(model, password))
 				return model;
@@ -118,10 +129,18 @@ namespace Zongsoft.Web.Security.Controllers
 		}
 
 		[HttpPatch, HttpPut]
-		public virtual void Patch(int id, string name, string value)
+		public virtual void Patch(int id, string args)
 		{
-			if(string.IsNullOrWhiteSpace(name))
+			if(string.IsNullOrWhiteSpace(args))
 				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+
+			var parts = args.Split('=', ':');
+
+			if(string.IsNullOrWhiteSpace(parts[0]))
+				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+
+			var name = parts[0];
+			var value = parts.Length > 1 ? parts[1] : null;
 
 			bool succeed = false;
 
@@ -212,24 +231,28 @@ namespace Zongsoft.Web.Security.Controllers
 		}
 
 		[HttpPut]
-		public virtual void Approve(int id, bool approved = true)
+		public virtual void Approve(int id, string args)
 		{
+			var approved = string.IsNullOrWhiteSpace(args) ? true : Zongsoft.Common.Convert.ConvertValue<bool>(args, true);
+
 			if(!this.UserProvider.Approve(id, approved))
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 
 		[HttpPut]
-		public virtual void Suspend(int id, bool suspended = true)
+		public virtual void Suspend(int id, string args)
 		{
+			var suspended = string.IsNullOrWhiteSpace(args) ? true : Zongsoft.Common.Convert.ConvertValue<bool>(args, true);
+
 			if(!this.UserProvider.Suspend(id, suspended))
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 
 		[HttpPut]
-		public virtual void ChangePassword(int id, string oldPassword, string newPassword)
+		public virtual void ChangePassword(int id, [Zongsoft.Web.Http.FromContent]string oldPassword, [Zongsoft.Web.Http.FromContent]string newPassword)
 		{
 			if(!this.UserProvider.ChangePassword(id, oldPassword, newPassword))
-				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 		}
 		#endregion
 	}
