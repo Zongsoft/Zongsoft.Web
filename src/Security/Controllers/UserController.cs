@@ -27,19 +27,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Http.Formatting;
 using System.Web.Http;
-using System.Web.Http.Controllers;
 
 using Zongsoft.Data;
 using Zongsoft.Services;
 using Zongsoft.Security;
 using Zongsoft.Security.Membership;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Web.Http.Metadata;
 
 namespace Zongsoft.Web.Security.Controllers
 {
@@ -129,51 +125,106 @@ namespace Zongsoft.Web.Security.Controllers
 		}
 
 		[HttpPatch, HttpPut]
-		public virtual void Patch(int id, string args)
+		public virtual async Task<int> Patch(int id, string args = null)
 		{
-			if(string.IsNullOrWhiteSpace(args))
-				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+			IDictionary<string, object> dictionary = null;
 
-			var parts = args.Split('=', ':');
-
-			if(string.IsNullOrWhiteSpace(parts[0]))
-				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
-
-			var name = parts[0];
-			var value = parts.Length > 1 ? parts[1] : null;
-
-			bool succeed = false;
-
-			switch(name.Trim().ToLowerInvariant())
+			if(this.Request.Content.IsFormData())
 			{
-				case "name":
-					succeed = this.UserProvider.SetName(id, value);
-					break;
-				case "fullname":
-					succeed = this.UserProvider.SetFullName(id, value);
-					break;
-				case "email":
-					succeed = this.UserProvider.SetEmail(id, value);
-					break;
-				case "phone":
-				case "phonenumber":
-					succeed = this.UserProvider.SetPhoneNumber(id, value);
-					break;
-				case "avatar":
-					succeed = this.UserProvider.SetAvatar(id, value);
-					break;
-				case "principal":
-					succeed = this.UserProvider.SetPrincipalId(id, value);
-					break;
-				case "description":
-					succeed = this.UserProvider.SetDescription(id, value);
-					break;
-				default:
-					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+				var form = await this.Request.Content.ReadAsFormDataAsync();
+
+				if(form != null && form.Count > 0)
+				{
+					dictionary = new Dictionary<string, object>(form.Count, StringComparer.OrdinalIgnoreCase);
+
+					foreach(var key in form.AllKeys)
+					{
+						dictionary[key] = form[key];
+					}
+				}
+			}
+			else if(this.Request.Content.IsMimeMultipartContent())
+			{
+				var multipart = await this.Request.Content.ReadAsMultipartAsync();
+
+				if(multipart != null && multipart.Contents.Count > 0)
+				{
+					dictionary = new Dictionary<string, object>(multipart.Contents.Count, StringComparer.OrdinalIgnoreCase);
+
+					foreach(StreamContent content in multipart.Contents)
+					{
+						var disposition = content.Headers.ContentDisposition;
+
+						if(string.IsNullOrWhiteSpace(disposition.FileName))
+							dictionary[disposition.Name.Trim('"', '\'')] = await content.ReadAsStringAsync();
+						else
+							throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+					}
+				}
+			}
+			else if(string.Equals(this.Request.Content.Headers.ContentType.MediaType, "text/json", StringComparison.OrdinalIgnoreCase) ||
+				    string.Equals(this.Request.Content.Headers.ContentType.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
+			{
+				var text = await this.Request.Content.ReadAsStringAsync();
+
+				if(!string.IsNullOrWhiteSpace(text))
+					dictionary = Zongsoft.Runtime.Serialization.Serializer.Json.Deserialize<Dictionary<string, object>>(text);
 			}
 
-			if(!succeed)
-				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+			if(!string.IsNullOrWhiteSpace(args))
+			{
+				var parts = args.Split('=', ':');
+
+				if(string.IsNullOrWhiteSpace(parts[0]))
+					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+
+				if(dictionary == null)
+					dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+								 {
+									{ parts[0].Trim(), Uri.UnescapeDataString(parts[1]) },
+								 };
+				else
+					dictionary[parts[0].Trim()] = Uri.UnescapeDataString(parts[1]);
+			}
+
+			if(dictionary == null || dictionary.Count == 0)
+				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+
+			int count = 0;
+
+			foreach(var entry in dictionary)
+			{
+				if(string.IsNullOrWhiteSpace(entry.Key))
+					continue;
+
+				switch(entry.Key.ToLowerInvariant())
+				{
+					case "name":
+						count += this.UserProvider.SetName(id, (string)entry.Value) ? 1 : 0;
+						break;
+					case "fullname":
+						count += this.UserProvider.SetFullName(id, (string)entry.Value) ? 1 : 0;
+						break;
+					case "email":
+						count += this.UserProvider.SetEmail(id, (string)entry.Value) ? 1 : 0;
+						break;
+					case "phone":
+					case "phonenumber":
+						count += this.UserProvider.SetPhoneNumber(id, (string)entry.Value) ? 1 : 0;
+						break;
+					case "avatar":
+						count += this.UserProvider.SetAvatar(id, (string)entry.Value) ? 1 : 0;
+						break;
+					case "principal":
+						count += this.UserProvider.SetPrincipalId(id, (string)entry.Value) ? 1 : 0;
+						break;
+					case "description":
+						count += this.UserProvider.SetDescription(id, (string)entry.Value) ? 1 : 0;
+						break;
+				}
+			}
+
+			return count;
 		}
 
 		[HttpGet]
