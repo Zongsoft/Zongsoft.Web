@@ -125,8 +125,20 @@ namespace Zongsoft.Web.Controls
 			{
 				if(!string.IsNullOrWhiteSpace(_button.Id))
 					writer.AddAttribute(HtmlTextWriterAttribute.Id, _button.Id);
-				if(!string.IsNullOrWhiteSpace(_button.Url))
-					writer.AddAttribute(HtmlTextWriterAttribute.Href, BindingUtility.FormatBindingValue(_button.Url, this.GetBindingSource()));
+
+				if(string.IsNullOrWhiteSpace(_button.Url))
+					writer.AddAttribute(HtmlTextWriterAttribute.Href, Utility.EmptyLink);
+				else
+				{
+					var url = BindingUtility.FormatBindingValue(_button.Url, this.GetBindingSource());
+
+					if(string.IsNullOrWhiteSpace(url))
+						url = Utility.EmptyLink;
+					else
+						writer.AddAttribute(HtmlTextWriterAttribute.Target, url);
+
+					writer.AddAttribute(HtmlTextWriterAttribute.Href, url);
+				}
 
 				var cssClass = "ui icon basic button";
 				if(!string.IsNullOrWhiteSpace(_button.CssClass ))

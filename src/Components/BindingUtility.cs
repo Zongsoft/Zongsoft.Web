@@ -216,9 +216,14 @@ namespace Zongsoft.Web.Controls
 				return Zongsoft.Common.EnumUtility.Format(value, format);
 
 			if(string.IsNullOrWhiteSpace(format))
+			{
+				if(value.GetType() == typeof(DateTime))
+					return string.Format(provider, "{0:yyyy-MM-dd HH:mm}", value);
+
 				return string.Format(provider, "{0}", value);
-			else
-				return string.Format(provider, "{0:" + format + "}", value);
+			}
+
+			return string.Format(provider, "{0:" + format + "}", value);
 		}
 		#endregion
 

@@ -60,7 +60,7 @@ namespace Zongsoft.Web.Controls
 			_nullText = string.Empty;
 			_attributes = null;
 			_alignment = HorizontalAlignment.Left;
-			_titleAlignment = HorizontalAlignment.Center;
+			_titleAlignment = HorizontalAlignment.Left;
 		}
 		#endregion
 

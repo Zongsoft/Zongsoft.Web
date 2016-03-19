@@ -270,12 +270,14 @@ namespace Zongsoft.Web.Controls
 
 				if(column.Visible)
 				{
+					style += string.Format("text-align:{0};", column.TitleAlignment.ToString().ToLowerInvariant());
+
 					if(column.Width.Value != 0)
-						style = "width:" + Utility.GetWidth(column.Width, _columns.GetTotalWeight());
+						style += string.Format("width:{0};", Utility.GetWidth(column.Width, _columns.GetTotalWeight()));
 				}
 				else
 				{
-					style = "display:none;";
+					style += "display:none;";
 				}
 
 				if(!string.IsNullOrEmpty(style))
@@ -406,7 +408,10 @@ namespace Zongsoft.Web.Controls
 					writer.AddAttribute(column.Attributes.Keys[i], column.Attributes[i]);
 
 				if(column.Visible)
+				{
 					writer.AddAttribute(HtmlTextWriterAttribute.Align, column.Alignment.ToString().ToLowerInvariant());
+					writer.AddAttribute(HtmlTextWriterAttribute.Style, string.Format("text-align:{0};", column.Alignment.ToString().ToLowerInvariant()));
+				}
 				else
 					writer.AddAttribute(HtmlTextWriterAttribute.Style, "display:none;");
 
