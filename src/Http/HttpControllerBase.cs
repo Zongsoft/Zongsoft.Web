@@ -115,13 +115,13 @@ namespace Zongsoft.Web.Http
 			switch(parts.Length)
 			{
 				case 1:
-					succeed = this.DataService.Delete(parts[0]) > 0;
+					succeed = this.DataService.Delete<string>(parts[0]) > 0;
 					break;
 				case 2:
-					succeed = this.DataService.Delete(parts[0], parts[1]) > 0;
+					succeed = this.DataService.Delete<string, string>(parts[0], parts[1]) > 0;
 					break;
 				case 3:
-					succeed = this.DataService.Delete(parts[0], parts[1], parts[2]) > 0;
+					succeed = this.DataService.Delete<string, string, string>(parts[0], parts[1], parts[2]) > 0;
 					break;
 				default:
 					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
