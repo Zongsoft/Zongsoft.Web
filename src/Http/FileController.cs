@@ -2,7 +2,7 @@
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2015 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2015-2016 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -40,7 +40,7 @@ using System.Net.Http.Formatting;
 using Zongsoft.IO;
 using Zongsoft.Common;
 
-namespace Zongsoft.Web.Controllers
+namespace Zongsoft.Web.Http.Controllers
 {
 	public class FileController : ApiController
 	{
@@ -252,17 +252,21 @@ namespace Zongsoft.Web.Controllers
 		#endregion
 
 		#region 私有方法
+		private string EnsureBasePath(out string scheme)
+		{
+			string path;
+
+			if(Zongsoft.IO.Path.TryParse(this.BasePath, out scheme, out path))
+				return (scheme ?? Zongsoft.IO.FileSystem.Scheme) + ":" + (path ?? "/");
+
+			scheme = Zongsoft.IO.FileSystem.Scheme;
+			return scheme + ":/";
+		}
+
 		private string GetFilePath(string path)
 		{
-			var basePath = this.BasePath;
-
-			if(string.IsNullOrWhiteSpace(basePath))
-				throw new InvalidOperationException("Missing the base-path of file system.");
-
-			var schema = Zongsoft.IO.Path.GetScheme(basePath);
-
-			if(string.IsNullOrWhiteSpace(schema))
-				throw new InvalidOperationException(string.Format("Invalid format of the '{0}' base-path.", basePath));
+			string scheme;
+			string basePath = this.EnsureBasePath(out scheme);
 
 			if(string.IsNullOrWhiteSpace(path))
 				return basePath;
@@ -270,7 +274,7 @@ namespace Zongsoft.Web.Controllers
 			path = Uri.UnescapeDataString(path).Trim();
 
 			if(path.StartsWith("/"))
-				return schema + ":" + path;
+				return scheme + ":" + path;
 			else
 				return Zongsoft.IO.Path.Combine(basePath, path);
 		}

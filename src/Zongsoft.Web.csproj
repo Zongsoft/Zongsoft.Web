@@ -85,8 +85,8 @@
     <Compile Include="Components\LabelOrientation.cs" />
     <Compile Include="Components\ValidationSummary.cs" />
     <Compile Include="ControllerBase.cs" />
-    <Compile Include="Controllers\DirectoryController.cs" />
-    <Compile Include="Controllers\FileController.cs" />
+    <Compile Include="Http\DirectoryController.cs" />
+    <Compile Include="Http\FileController.cs" />
     <Compile Include="Components\BindingUtility.cs" />
     <Compile Include="Components\Button.cs" />
     <Compile Include="Components\ButtonType.cs" />
