@@ -25,6 +25,7 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,66 +40,104 @@ namespace Zongsoft.Web.Http
 	[AttributeUsage(AttributeTargets.Parameter)]
 	public class FromContentAttribute : ParameterBindingAttribute
 	{
+		#region 重写方法
 		public override HttpParameterBinding GetBinding(HttpParameterDescriptor parameter)
 		{
 			return new FromContentBinding(parameter);
 		}
+		#endregion
 
 		private class FromContentBinding : HttpParameterBinding
 		{
+			#region 私有常量
+			private static readonly string CacheKey = "__" + typeof(FromContentBinding).Name + "__";
+			#endregion
+
+			#region 构造函数
 			public FromContentBinding(HttpParameterDescriptor descriptor) : base(descriptor)
 			{
 			}
+			#endregion
 
+			#region 重写方法
 			public override async Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
 			{
-				if(actionContext.Request.Content.IsFormData())
-				{
-					var form = await actionContext.Request.Content.ReadAsFormDataAsync(cancellationToken);
+				//从缓存中获取内容字典
+				IDictionary<string, object> dictionary = this.GetCachedContent(actionContext);
 
-					if(form != null && form.Count > 0)
+				if(dictionary == null)
+				{
+					if(actionContext.Request.Content.IsFormData())
 					{
-						var dictionary = new Dictionary<string, object>(form.Count, StringComparer.OrdinalIgnoreCase);
+						var form = await actionContext.Request.Content.ReadAsFormDataAsync();
 
-						foreach(var key in form.AllKeys)
+						if(form != null && form.Count > 0)
 						{
-							dictionary.Add(key, form[key]);
-						}
+							dictionary = new Dictionary<string, object>(form.Count, StringComparer.OrdinalIgnoreCase);
 
-						this.SetParameters(actionContext, dictionary);
+							foreach(var key in form.AllKeys)
+							{
+								dictionary[key] = form[key];
+							}
+						}
 					}
-				}
-				else
-				{
-					if(string.Equals(actionContext.Request.Content.Headers.ContentType.MediaType, "text/json", StringComparison.OrdinalIgnoreCase) ||
-					   string.Equals(actionContext.Request.Content.Headers.ContentType.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
+					else if(actionContext.Request.Content.IsMimeMultipartContent())
+					{
+						var multipart = await actionContext.Request.Content.ReadAsMultipartAsync();
+
+						if(multipart != null && multipart.Contents.Count > 0)
+						{
+							dictionary = new Dictionary<string, object>(multipart.Contents.Count, StringComparer.OrdinalIgnoreCase);
+
+							foreach(StreamContent content in multipart.Contents)
+							{
+								var disposition = content.Headers.ContentDisposition;
+
+								if(string.IsNullOrWhiteSpace(disposition.FileName))
+									dictionary[disposition.Name.Trim('"', '\'')] = await content.ReadAsStringAsync();
+								else
+									throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+							}
+						}
+					}
+					else if(string.Equals(actionContext.Request.Content.Headers.ContentType.MediaType, "text/json", StringComparison.OrdinalIgnoreCase) ||
+							string.Equals(actionContext.Request.Content.Headers.ContentType.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
 					{
 						var text = await actionContext.Request.Content.ReadAsStringAsync();
-						var dictionary = Zongsoft.Runtime.Serialization.Serializer.Json.Deserialize<IDictionary<string, object>>(text);
-						this.SetParameters(actionContext, dictionary);
+
+						if(!string.IsNullOrWhiteSpace(text))
+						{
+							var result = Zongsoft.Runtime.Serialization.Serializer.Json.Deserialize<Dictionary<string, object>>(text);
+
+							//将区分大小写字典键转换为不区分大小写的字典
+							dictionary = new Dictionary<string, object>(result, StringComparer.OrdinalIgnoreCase);
+						}
 					}
-				}
-			}
 
-			private void SetParameters(HttpActionContext actionContext, IDictionary<string, object> dictionary)
+					//将解析后的内容字典保存到当前操作的扩展属性中缓存起来
+					actionContext.ActionDescriptor.Properties[CacheKey] = dictionary;
+				}
+
+				object value;
+
+				if(this.Descriptor.ParameterType is IDictionary || Zongsoft.Common.TypeExtension.IsAssignableFrom(typeof(IDictionary<string, object>), this.Descriptor.ParameterType))
+					this.SetValue(actionContext, dictionary);
+				else if(dictionary != null && dictionary.TryGetValue(this.Descriptor.ParameterName, out value))
+					this.SetValue(actionContext, Zongsoft.Common.Convert.ConvertValue(value, this.Descriptor.ParameterType));
+			}
+			#endregion
+
+			#region 私有方法
+			private IDictionary<string, object> GetCachedContent(HttpActionContext actionContext)
 			{
-				if(dictionary == null || dictionary.Count < 1)
-					return;
+				object cachedContent;
 
-				var parameters = actionContext.ActionDescriptor.GetParameters();
+				if(actionContext.ActionDescriptor.Properties.TryGetValue(CacheKey, out cachedContent) && cachedContent is IDictionary<string, object>)
+					return (IDictionary<string, object>)cachedContent;
 
-				if(parameters == null || parameters.Count < 1)
-					return;
-
-				foreach(var entry in dictionary)
-				{
-					object value;
-					var parameter = parameters.FirstOrDefault(p => string.Equals(p.ParameterName, entry.Key, StringComparison.OrdinalIgnoreCase));
-
-					if(parameter != null && Zongsoft.Common.Convert.TryConvertValue(entry.Value, parameter.ParameterType, out value))
-						actionContext.ActionArguments[parameter.ParameterName] = value;
-				}
+				return null;
 			}
+			#endregion
 		}
 	}
 }
