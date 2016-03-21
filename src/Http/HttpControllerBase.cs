@@ -154,6 +154,8 @@ namespace Zongsoft.Web.Http
 			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
 		}
 
+		[HttpPost]
+		[Zongsoft.Web.Http.HttpPaging]
 		public virtual IEnumerable<TModel> Query(TConditional conditional, [FromUri]Paging paging = null)
 		{
 			return this.DataService.Select(conditional, paging);
