@@ -25,17 +25,12 @@
  */
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using System.Net.Http.Headers;
-using System.Net.Http.Formatting;
 
 namespace Zongsoft.Web.Http.Controllers
 {
