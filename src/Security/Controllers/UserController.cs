@@ -27,8 +27,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Net.Http;
 using System.Web.Http;
 
@@ -64,21 +62,70 @@ namespace Zongsoft.Web.Security.Controllers
 		#endregion
 
 		#region 公共方法
+		/// <summary>
+		/// 查询指定编号或用户标识、命名空间的用户。
+		/// </summary>
+		/// <param name="id">指定的路由参数，如果该参数为纯数字则会被当做为用户编号；否则请参考备注部分的处理规则。</param>
+		/// <param name="paging">指定的查询分页设置。</param>
+		/// <returns>返回的用户或用户集。</returns>
+		/// <remarks>
+		///		<para>注意：由于路由匹配约定，对于首字符为字母并且中间字符为字母、数字、下划线的路由数据并不会被匹配为<paramref name="id"/>，
+		///		因此对于查询用户标识和命名空间的组合条件，该参数应该使用冒号进行组合；而对于查询指定命名空间内的所有用户则应以冒号打头，大致示意如下：</para>
+		///		<list type="bullet">
+		///			<listheader>
+		///				<term>URL</term>
+		///				<description>备注</description>
+		///			</listheader>
+		///			<item>
+		///				<term>/api/Security/User/101</term>
+		///				<description>查询用户<seealso cref="User.UserId"/>为101的用户。</description>
+		///			</item>
+		///			<item>
+		///				<term>/api/Security/User/admin:zongsoft</term>
+		///				<description>查询用户<seealso cref="User.Name"/>为：admin，且<seealso cref="User.Namespace"/>为：zongsoft的用户。</description>
+		///			</item>
+		///			<item>
+		///				<term>/api/Security/User/13812345678:zongsoft</term>
+		///				<description>查询用户<seealso cref="User.PhoneNumber"/>为：13812345678，且<seealso cref="User.Namespace"/>为：zongsoft的用户。</description>
+		///			</item>
+		///			<item>
+		///				<term>/api/Security/User/zongsoft@gmail.com:zongsoft</term>
+		///				<description>查询用户<seealso cref="User.Email"/>为：zongsoft@gmail.com，且<seealso cref="User.Namespace"/>为：zongsoft的用户。</description>
+		///			</item>
+		///			<item>
+		///				<term>/api/Security/User/:zongsoft</term>
+		///				<description>查询<seealso cref="User.Namespace"/>为：zongsoft的所有用户。</description>
+		///			</item>
+		///			<item>
+		///				<term>/api/Security/User/@zongsoft</term>
+		///				<description>查询<seealso cref="User.Namespace"/>为：zongsoft的所有用户。</description>
+		///			</item>
+		///		</list>
+		/// </remarks>
 		[Zongsoft.Web.Http.HttpPaging]
 		public virtual object Get(string id = null, [FromUri]Paging paging = null)
 		{
 			if(string.IsNullOrWhiteSpace(id))
 				return this.UserProvider.GetAllUsers(null, paging);
 
+			//如果id参数以@符号打头，则将该参数作为命名空间进行查询
+			if(id[0] == '@')
+				return this.UserProvider.GetAllUsers(id.Substring(1), paging);
+
 			int userId;
 
+			//如果id参数为数字，则以用户编号的方式进行查询
 			if(int.TryParse(id, out userId))
 				return this.UserProvider.GetUser(userId);
 
+			//注意：由于用户标识可能为邮箱，而邮箱地址中可能包含“-”横杠符和“@”，因此在此的分隔符只能采用冒号
 			var parts = id.Split(':');
 
 			if(parts.Length == 1)
 				return this.UserProvider.GetAllUsers(id, paging);
+
+			if(string.IsNullOrWhiteSpace(parts[0]))
+				return this.UserProvider.GetAllUsers(parts[1], paging);
 			else
 				return this.UserProvider.GetUser(parts[0], parts[1]);
 		}
@@ -89,7 +136,7 @@ namespace Zongsoft.Web.Security.Controllers
 				return 0;
 
 			int temp;
-			var parts = id.Split(',').Where(p => p.Length > 0 && int.TryParse(p, out temp)).Select(p => int.Parse(p)).ToArray();
+			var parts = id.Split(',', ';').Where(p => p.Length > 0 && int.TryParse(p, out temp)).Select(p => int.Parse(p)).ToArray();
 
 			if(parts.Length > 0)
 				return this.UserProvider.DeleteUsers(parts);
@@ -125,52 +172,8 @@ namespace Zongsoft.Web.Security.Controllers
 		}
 
 		[HttpPatch, HttpPut]
-		public virtual async Task<int> Patch(int id, string args = null)
+		public virtual int Patch(int id, [Zongsoft.Web.Http.FromContent]IDictionary<string, object> content, string args = null)
 		{
-			IDictionary<string, object> dictionary = null;
-
-			if(this.Request.Content.IsFormData())
-			{
-				var form = await this.Request.Content.ReadAsFormDataAsync();
-
-				if(form != null && form.Count > 0)
-				{
-					dictionary = new Dictionary<string, object>(form.Count, StringComparer.OrdinalIgnoreCase);
-
-					foreach(var key in form.AllKeys)
-					{
-						dictionary[key] = form[key];
-					}
-				}
-			}
-			else if(this.Request.Content.IsMimeMultipartContent())
-			{
-				var multipart = await this.Request.Content.ReadAsMultipartAsync();
-
-				if(multipart != null && multipart.Contents.Count > 0)
-				{
-					dictionary = new Dictionary<string, object>(multipart.Contents.Count, StringComparer.OrdinalIgnoreCase);
-
-					foreach(StreamContent content in multipart.Contents)
-					{
-						var disposition = content.Headers.ContentDisposition;
-
-						if(string.IsNullOrWhiteSpace(disposition.FileName))
-							dictionary[disposition.Name.Trim('"', '\'')] = await content.ReadAsStringAsync();
-						else
-							throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
-					}
-				}
-			}
-			else if(string.Equals(this.Request.Content.Headers.ContentType.MediaType, "text/json", StringComparison.OrdinalIgnoreCase) ||
-				    string.Equals(this.Request.Content.Headers.ContentType.MediaType, "application/json", StringComparison.OrdinalIgnoreCase))
-			{
-				var text = await this.Request.Content.ReadAsStringAsync();
-
-				if(!string.IsNullOrWhiteSpace(text))
-					dictionary = Zongsoft.Runtime.Serialization.Serializer.Json.Deserialize<Dictionary<string, object>>(text);
-			}
-
 			if(!string.IsNullOrWhiteSpace(args))
 			{
 				var parts = args.Split('=', ':');
@@ -178,21 +181,21 @@ namespace Zongsoft.Web.Security.Controllers
 				if(string.IsNullOrWhiteSpace(parts[0]))
 					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 
-				if(dictionary == null)
-					dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+				if(content == null)
+					content = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
 								 {
 									{ parts[0].Trim(), Uri.UnescapeDataString(parts[1]) },
 								 };
 				else
-					dictionary[parts[0].Trim()] = Uri.UnescapeDataString(parts[1]);
+					content[parts[0].Trim()] = Uri.UnescapeDataString(parts[1]);
 			}
 
-			if(dictionary == null || dictionary.Count == 0)
+			if(content == null || content.Count == 0)
 				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 
 			int count = 0;
 
-			foreach(var entry in dictionary)
+			foreach(var entry in content)
 			{
 				if(string.IsNullOrWhiteSpace(entry.Key))
 					continue;
