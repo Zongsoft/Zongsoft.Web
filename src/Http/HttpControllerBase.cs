@@ -25,14 +25,17 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Web.Http;
 
 using Zongsoft.Data;
 
 namespace Zongsoft.Web.Http
 {
-	public class HttpControllerBase<TModel, TService> : System.Web.Http.ApiController where TModel : class
-																					  where TService : class, IDataService<TModel>
+	public class HttpControllerBase<TModel, TConditional, TService> : System.Web.Http.ApiController
+																	  where TModel : class
+																	  where TConditional : class, IConditional
+																	  where TService : class, IDataService<TModel>
 	{
 		#region 成员字段
 		private TService _dataService;
@@ -149,6 +152,11 @@ namespace Zongsoft.Web.Http
 				return model;
 
 			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
+		}
+
+		public virtual IEnumerable<TModel> Query(TConditional conditional, [FromUri]Paging paging = null)
+		{
+			return this.DataService.Select(conditional, paging);
 		}
 		#endregion
 	}
