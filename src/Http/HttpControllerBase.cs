@@ -154,6 +154,33 @@ namespace Zongsoft.Web.Http
 			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
 		}
 
+		public virtual void Patch(string id, [FromContent]IDictionary<string, object> data)
+		{
+			if(string.IsNullOrWhiteSpace(id) || data == null)
+				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+
+			var count = 0;
+			var parts = id.Split('-');
+
+			switch(parts.Length)
+			{
+				case 1:
+					count = this.DataService.Update<string>(data, parts[0]);
+					break;
+				case 2:
+					count = this.DataService.Update<string, string>(data, parts[0], parts[1]);
+					break;
+				case 3:
+					count = this.DataService.Update<string, string, string>(data, parts[0], parts[1], parts[2]);
+					break;
+				default:
+					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+			}
+
+			if(count < 1)
+				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+		}
+
 		[HttpPost]
 		[Zongsoft.Web.Http.HttpPaging]
 		public virtual IEnumerable<TModel> Query(TConditional conditional, [FromUri]Paging paging = null)
