@@ -154,6 +154,7 @@ namespace Zongsoft.Web.Http
 			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
 		}
 
+		[HttpPatch, HttpPut]
 		public virtual void Patch(string id, [FromContent]IDictionary<string, object> data)
 		{
 			if(string.IsNullOrWhiteSpace(id) || data == null)
