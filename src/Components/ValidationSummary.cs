@@ -80,7 +80,7 @@ namespace Zongsoft.Web.Controls
 						if(i > 0)
 							this.Script.Append(", ");
 
-						this.Script.AppendFormat("'{0}'", state.Errors[i].ErrorMessage);
+						this.Script.AppendFormat("'{0}'", state.Errors[i].ErrorMessage.Replace('\'', '"'));
 					}
 
 					this.Script.Append("]");
@@ -107,7 +107,7 @@ namespace Zongsoft.Web.Controls
 						if(i > 0)
 							this.Script.Append(", ");
 
-						this.Script.AppendFormat("'{0}'", state.Errors[i].ErrorMessage);
+						this.Script.AppendFormat("'{0}'", state.Errors[i].ErrorMessage.Replace('\'', '"'));
 					}
 
 					this.Script.AppendLine("]");
