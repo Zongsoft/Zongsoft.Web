@@ -35,34 +35,18 @@ namespace Zongsoft.Web.Controls
 {
 	public class ValidationSummary : DataBoundControl
 	{
-		#region 成员字段
-		private System.Text.StringBuilder _script;
-		#endregion
-
-		#region 内部属性
-		protected System.Text.StringBuilder Script
-		{
-			get
-			{
-				if(_script == null)
-					System.Threading.Interlocked.CompareExchange(ref _script, new System.Text.StringBuilder(), null);
-
-				return _script;
-			}
-		}
-		#endregion
-
 		#region 生成方法
 		protected override void Render(HtmlTextWriter writer)
 		{
 			if(this.Page == null || this.Page.ModelState.IsValid)
 			{
 				this.RenderScript(writer, "var validation_info = null;");
-
 				return;
 			}
 
-			int fieldCount = 0;
+			var count = 0;
+			var summary = new System.Text.StringBuilder();
+			var fields = new System.Text.StringBuilder();
 
 			foreach(var key in this.Page.ModelState.Keys)
 			{
@@ -73,58 +57,59 @@ namespace Zongsoft.Web.Controls
 
 				if(string.IsNullOrWhiteSpace(key))
 				{
-					this.Script.AppendFormat("summary : [");
+					count = 0;
+					summary.Append("[");
 
-					for(int i = 0; i < state.Errors.Count; i++)
+					foreach(var error in state.Errors)
 					{
-						if(i > 0)
-							this.Script.Append(", ");
+						if(!string.IsNullOrWhiteSpace(error.ErrorMessage))
+						{
+							if(count++ > 0)
+								summary.AppendLine(", ");
 
-						this.Script.AppendFormat("'{0}'", state.Errors[i].ErrorMessage.Replace('\'', '"'));
+							summary.AppendFormat("'{0}'", error.ErrorMessage.Replace('\'', '"'));
+						}
 					}
 
-					this.Script.Append("]");
+					summary.Append("]");
 				}
 				else
 				{
-					if(fieldCount++ == 0)
-					{
-						if(this.Script.Length > 0)
-							this.Script.AppendLine(",");
+					if(fields.Length > 0)
+						fields.AppendLine(", ");
 
-						this.Script.AppendLine("fields : [");
+					fields.AppendLine("{");
+					fields.AppendLine("\t'identifier': '" + key + "',");
+					fields.Append("\t'messages': [");
+
+					count = 0;
+
+					foreach(var error in state.Errors)
+					{
+						if(!string.IsNullOrWhiteSpace(error.ErrorMessage))
+						{
+							if(count++ > 0)
+								fields.Append(", ");
+
+							fields.AppendFormat("'{0}'", error.ErrorMessage.Replace('\'', '"'));
+						}
 					}
 
-					if(fieldCount > 1)
-						this.Script.AppendLine(",");
-
-					this.Script.AppendLine("{");
-					this.Script.AppendLine("\tidentifier : '" + key + "',");
-					this.Script.Append("\tmessages : [");
-
-					for(int i = 0; i < state.Errors.Count; i++)
-					{
-						if(i > 0)
-							this.Script.Append(", ");
-
-						this.Script.AppendFormat("'{0}'", state.Errors[i].ErrorMessage.Replace('\'', '"'));
-					}
-
-					this.Script.AppendLine("]");
-					this.Script.Append("}");
+					fields.AppendLine("]");
+					fields.Append("}");
 				}
 			}
 
-			if(fieldCount > 0)
-				this.Script.AppendLine("]");
-
-			if(_script != null && _script.Length > 0)
+			if(fields.Length > 0 || summary.Length > 0)
 			{
 				//this.Page.ClientScript.RegisterStartupScript(this.GetType(),
 				//	string.IsNullOrWhiteSpace(this.ID) ? this.GetType().Name : this.ID,
 				//	"var validation_info = {" + Environment.NewLine + _script.ToString() + "}", true);
 
-				this.RenderScript(writer, "var validation_info = {" + Environment.NewLine + _script.ToString() + "};");
+				this.RenderScript(writer, "var validation_info = {" + Environment.NewLine +
+					"'fields': " + fields.ToString() + "," + Environment.NewLine +
+					"'summary': " + summary.ToString() + Environment.NewLine +
+					"};");
 			}
 		}
 		#endregion
