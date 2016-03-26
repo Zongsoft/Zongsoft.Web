@@ -142,7 +142,7 @@ namespace Zongsoft.Web
 		[HttpPost]
 		public virtual ActionResult Edit(TModel model, string redirectUrl = null)
 		{
-			if(model == null)
+			if(model == null || (!this.ModelState.IsValid))
 				return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
 			try
@@ -174,7 +174,7 @@ namespace Zongsoft.Web
 		[HttpPost]
 		public virtual ActionResult Create(TModel model, string redirectUrl = null)
 		{
-			if(model == null)
+			if(model == null || (!this.ModelState.IsValid))
 				return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
 			try

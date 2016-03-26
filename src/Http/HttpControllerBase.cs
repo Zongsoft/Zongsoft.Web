@@ -136,7 +136,7 @@ namespace Zongsoft.Web.Http
 
 		public virtual void Put(TModel model)
 		{
-			if(model == null)
+			if(model == null || (!this.ModelState.IsValid))
 				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 
 			if(this.DataService.Update(model) < 1)
@@ -145,7 +145,7 @@ namespace Zongsoft.Web.Http
 
 		public virtual TModel Post(TModel model)
 		{
-			if(model == null)
+			if(model == null || (!this.ModelState.IsValid))
 				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 
 			if(this.DataService.Insert(model) > 0)
