@@ -79,8 +79,8 @@ namespace Zongsoft.Web.Controls
 						fields.AppendLine(", ");
 
 					fields.AppendLine("{");
-					fields.AppendLine("\t'identifier': '" + key + "',");
-					fields.Append("\t'messages': [");
+					fields.AppendLine("\tidentifier: '" + key + "',");
+					fields.Append("\tmessages: [");
 
 					count = 0;
 
@@ -107,8 +107,8 @@ namespace Zongsoft.Web.Controls
 				//	"var validation_info = {" + Environment.NewLine + _script.ToString() + "}", true);
 
 				this.RenderScript(writer, "var validation_info = {" + Environment.NewLine +
-					"'fields': " + fields.ToString() + "," + Environment.NewLine +
-					"'summary': " + summary.ToString() + Environment.NewLine +
+					"fields: [" + Environment.NewLine + fields.ToString() + "]," + Environment.NewLine +
+					"summary: " + summary.ToString() + Environment.NewLine +
 					"};");
 			}
 		}
