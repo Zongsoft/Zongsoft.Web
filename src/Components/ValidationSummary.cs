@@ -58,7 +58,6 @@ namespace Zongsoft.Web.Controls
 				if(string.IsNullOrWhiteSpace(key))
 				{
 					count = 0;
-					summary.Append("[");
 
 					foreach(var error in state.Errors)
 					{
@@ -70,8 +69,6 @@ namespace Zongsoft.Web.Controls
 							summary.AppendFormat("'{0}'", error.ErrorMessage.Replace('\'', '"'));
 						}
 					}
-
-					summary.Append("]");
 				}
 				else
 				{
@@ -108,7 +105,7 @@ namespace Zongsoft.Web.Controls
 
 				this.RenderScript(writer, "var validation_info = {" + Environment.NewLine +
 					"fields: [" + Environment.NewLine + fields.ToString() + "]," + Environment.NewLine +
-					"summary: " + summary.ToString() + Environment.NewLine +
+					"summary: [" + summary.ToString() + "]" + Environment.NewLine +
 					"};");
 			}
 		}
