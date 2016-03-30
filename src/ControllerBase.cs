@@ -171,7 +171,7 @@ namespace Zongsoft.Web
 		[HttpGet]
 		public virtual ActionResult Create()
 		{
-			return this.View();
+			return this.View(Activator.CreateInstance<TModel>());
 		}
 
 		[HttpPost]
