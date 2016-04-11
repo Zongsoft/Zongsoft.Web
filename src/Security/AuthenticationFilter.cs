@@ -43,6 +43,7 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 公共属性
+		[Zongsoft.Services.ServiceDependency]
 		public ICredentialProvider CredentialProvider
 		{
 			get

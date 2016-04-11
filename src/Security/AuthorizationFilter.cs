@@ -25,9 +25,7 @@
  */
 
 using System;
-using System.ComponentModel;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
@@ -44,6 +42,7 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 公共属性
+		[Zongsoft.Services.ServiceDependency]
 		public IAuthorization Authorization
 		{
 			get
@@ -59,6 +58,7 @@ namespace Zongsoft.Web.Security
 			}
 		}
 
+		[Zongsoft.Services.ServiceDependency]
 		public ICredentialProvider CredentialProvider
 		{
 			get
