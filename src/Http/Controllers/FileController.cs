@@ -127,7 +127,7 @@ namespace Zongsoft.Web.Http.Controllers
 			if(string.IsNullOrWhiteSpace(path))
 				throw new HttpResponseException(HttpStatusCode.BadRequest);
 
-			return _accessor.Put(this.Request, path);
+			return _accessor.SetInfo(this.Request, path);
 		}
 
 		/// <summary>
@@ -137,7 +137,7 @@ namespace Zongsoft.Web.Http.Controllers
 		/// <returns>返回新增文件的<see cref="Zongsoft.IO.FileInfo"/>描述信息实体对象集。</returns>
 		public Task<IEnumerable<Zongsoft.IO.FileInfo>> Post(string path = null)
 		{
-			return _accessor.Post(this.Request, path);
+			return _accessor.Upload(this.Request, path);
 		}
 		#endregion
 	}

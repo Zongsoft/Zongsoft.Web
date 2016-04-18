@@ -167,7 +167,7 @@ namespace Zongsoft.Web
 		/// </summary>
 		/// <param name="request">网络请求消息。</param>
 		/// <param name="path">指定要修改的文件相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
-		public async Task<bool> Put(HttpRequestMessage request, string path)
+		public async Task<bool> SetInfo(HttpRequestMessage request, string path)
 		{
 			if(request == null)
 				throw new ArgumentNullException("request");
@@ -206,7 +206,7 @@ namespace Zongsoft.Web
 		/// <param name="request">网络请求消息。</param>
 		/// <param name="path">指定新增文件的目录路径（绝对路径以/斜杠打头）。</param>
 		/// <returns>返回新增文件的<see cref="Zongsoft.IO.FileInfo"/>描述信息实体对象集。</returns>
-		public async Task<IEnumerable<Zongsoft.IO.FileInfo>> Post(HttpRequestMessage request, string path = null)
+		public async Task<IEnumerable<Zongsoft.IO.FileInfo>> Upload(HttpRequestMessage request, string path = null)
 		{
 			var directoryPath = this.GetFilePath(path);
 
