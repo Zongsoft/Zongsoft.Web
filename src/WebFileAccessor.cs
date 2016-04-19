@@ -446,10 +446,10 @@ namespace Zongsoft.Web
 				if(string.IsNullOrWhiteSpace(token))
 					return string.Empty;
 
-				if(token.StartsWith("\"", StringComparison.Ordinal) && token.EndsWith("\"", StringComparison.Ordinal) && token.Length > 1)
+				if(token.Length > 1 && token[0] == '"' && token[token.Length - 1] == '"')
 					return token.Substring(1, token.Length - 2);
 
-				return token.Trim();
+				return token;
 			}
 			#endregion
 		}
