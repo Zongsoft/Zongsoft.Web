@@ -106,17 +106,14 @@ namespace Zongsoft.Web
 			//将分页信息传递给视图
 			this.ViewData["Paging"] = paging;
 
-			if(string.IsNullOrWhiteSpace(id))
-				return this.View(this.OnIndex((TConditional)null, null, paging));
-
-			//获取当前请求对应的模型数据
-			var model = this.OnIndex(id, null, paging);
+			//根据当前请求获取数据
+			object data = string.IsNullOrWhiteSpace(id) ? this.OnIndex((TConditional)null, null, paging) : this.OnIndex(id, null, paging);
 
 			//如果模型数据为集合类型，则返回“Index”默认视图；否则返回“Details”详细视图
-			if(model != null && (model is System.Collections.IEnumerable || Zongsoft.Common.TypeExtension.IsAssignableFrom(typeof(IEnumerable<>), model.GetType())))
-				return this.View(model);
+			if(data != null && (data is System.Collections.IEnumerable || Zongsoft.Common.TypeExtension.IsAssignableFrom(typeof(IEnumerable<>), data.GetType())))
+				return this.View(this.GetViewModel("Index", data));
 			else
-				return this.View("Details", model);
+				return this.View("Details", this.GetViewModel("Index", data));
 		}
 
 		[HttpPost]
@@ -127,7 +124,10 @@ namespace Zongsoft.Web
 			//将查询条件传递给视图
 			this.ViewData["Conditional"] = conditional;
 
-			return this.View(this.OnIndex(conditional, null, paging));
+			//获取视图模型
+			var model = this.GetViewModel("Index", this.OnIndex(conditional, null, paging));
+
+			return this.View(model);
 		}
 
 		[HttpGet]
@@ -136,7 +136,10 @@ namespace Zongsoft.Web
 			if(string.IsNullOrWhiteSpace(id))
 				return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
-			return this.View(this.OnIndex(id));
+			//获取视图模型
+			var model = this.GetViewModel("Edit", this.OnIndex(id));
+
+			return this.View(model);
 		}
 
 		[HttpPost]
@@ -146,7 +149,7 @@ namespace Zongsoft.Web
 				return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
 			if(!this.ModelState.IsValid)
-				return this.View(model);
+				return this.View(this.GetViewModel("Edit", model));
 
 			try
 			{
@@ -165,13 +168,13 @@ namespace Zongsoft.Web
 				this.ModelState.AddModelError(string.Empty, ex.Message);
 			}
 
-			return this.View(model);
+			return this.View(this.GetViewModel("Edit", model));
 		}
 
 		[HttpGet]
 		public virtual ActionResult Create()
 		{
-			return this.View(Activator.CreateInstance<TModel>());
+			return this.View(this.GetViewModel("Create", null));
 		}
 
 		[HttpPost]
@@ -181,7 +184,7 @@ namespace Zongsoft.Web
 				return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
 			if(!this.ModelState.IsValid)
-				return this.View(model);
+				return this.View(this.GetViewModel("Create", model));
 
 			try
 			{
@@ -200,14 +203,13 @@ namespace Zongsoft.Web
 				this.ModelState.AddModelError(string.Empty, ex.Message);
 			}
 
-			return this.View(model);
+			return this.View(this.GetViewModel("Create", model));
 		}
 
 		[HttpGet]
 		public virtual ActionResult Delete(string id)
 		{
-			var model = this.OnIndex(id);
-			return this.View(model);
+			return this.View(this.GetViewModel("Delete", this.OnIndex(id)));
 		}
 
 		[HttpDelete]
@@ -283,6 +285,14 @@ namespace Zongsoft.Web
 		protected virtual int OnCreate(TModel model, string scope = null)
 		{
 			return this.DataService.Insert(model, scope);
+		}
+
+		protected virtual object GetViewModel(string actionName, object model)
+		{
+			if(model == null && string.Equals(actionName, "Create", StringComparison.OrdinalIgnoreCase))
+				return Activator.CreateInstance<TModel>();
+
+			return model;
 		}
 		#endregion
 	}
