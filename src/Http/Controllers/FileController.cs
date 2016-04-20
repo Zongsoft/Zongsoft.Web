@@ -25,16 +25,11 @@
  */
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using System.Net.Http.Headers;
-
-using Zongsoft.IO;
 
 namespace Zongsoft.Web.Http.Controllers
 {
@@ -75,7 +70,7 @@ namespace Zongsoft.Web.Http.Controllers
 			if(string.IsNullOrWhiteSpace(path))
 				throw new HttpResponseException(HttpStatusCode.BadRequest);
 
-			return _accessor.Get(path);
+			return _accessor.Read(path);
 		}
 
 		/// <summary>
@@ -131,13 +126,13 @@ namespace Zongsoft.Web.Http.Controllers
 		}
 
 		/// <summary>
-		/// 新增一个文件或多个文件。
+		/// 上传一个文件或多个文件。
 		/// </summary>
-		/// <param name="path">指定新增文件的目录路径（绝对路径以/斜杠打头）。</param>
-		/// <returns>返回新增文件的<see cref="Zongsoft.IO.FileInfo"/>描述信息实体对象集。</returns>
-		public Task<IEnumerable<Zongsoft.IO.FileInfo>> Post(string path = null)
+		/// <param name="directory">指定上传文件的目录路径（绝对路径以/斜杠打头）。</param>
+		/// <returns>返回上传成功的<see cref="Zongsoft.IO.FileInfo"/>文件描述信息实体对象集。</returns>
+		public Task<IEnumerable<Zongsoft.IO.FileInfo>> Post(string directory = null)
 		{
-			return _accessor.Upload(this.Request, path);
+			return _accessor.Write(this.Request, directory);
 		}
 		#endregion
 	}
