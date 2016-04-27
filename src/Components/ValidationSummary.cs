@@ -66,7 +66,7 @@ namespace Zongsoft.Web.Controls
 							if(count++ > 0)
 								summary.AppendLine(", ");
 
-							summary.AppendFormat("'{0}'", error.ErrorMessage.Replace('\'', '"'));
+							summary.AppendFormat("'{0}'", RepairMessage(error.ErrorMessage.Replace('\'', '"')));
 						}
 					}
 				}
@@ -88,7 +88,7 @@ namespace Zongsoft.Web.Controls
 							if(count++ > 0)
 								fields.Append(", ");
 
-							fields.AppendFormat("'{0}'", error.ErrorMessage.Replace('\'', '"'));
+							fields.AppendFormat("'{0}'", RepairMessage(error.ErrorMessage.Replace('\'', '"')));
 						}
 					}
 
@@ -121,6 +121,14 @@ namespace Zongsoft.Web.Controls
 			writer.RenderBeginTag(HtmlTextWriterTag.Script);
 			writer.Write(script);
 			writer.RenderEndTag();
+		}
+
+		private string RepairMessage(string message)
+		{
+			if(string.IsNullOrWhiteSpace(message))
+				return string.Empty;
+
+			return message.Replace('\r', ' ').Replace('\n', ' ');
 		}
 		#endregion
 	}
