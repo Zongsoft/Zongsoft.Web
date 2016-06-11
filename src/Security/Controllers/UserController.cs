@@ -285,20 +285,14 @@ namespace Zongsoft.Web.Security.Controllers
 		}
 
 		[HttpPut]
-		public virtual void Approve(int id, string args)
+		public virtual void Status(int id, string args)
 		{
-			var approved = string.IsNullOrWhiteSpace(args) ? true : Zongsoft.Common.Convert.ConvertValue<bool>(args, true);
+			if(string.IsNullOrWhiteSpace(args))
+				return;
 
-			if(!this.UserProvider.Approve(id, approved))
-				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
-		}
+			var status = Zongsoft.Common.Convert.ConvertValue<UserStatus>(args);
 
-		[HttpPut]
-		public virtual void Suspend(int id, string args)
-		{
-			var suspended = string.IsNullOrWhiteSpace(args) ? true : Zongsoft.Common.Convert.ConvertValue<bool>(args, true);
-
-			if(!this.UserProvider.Suspend(id, suspended))
+			if(!this.UserProvider.SetStatus(id, status))
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 

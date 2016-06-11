@@ -315,12 +315,8 @@ namespace Zongsoft.Web.Security
 			return attribute.Mode;
 		}
 
-		internal static AuthorizationMode GetAuthorizationMode(ActionDescriptor actionDescriptor, System.Web.Routing.RequestContext requestContext, out string schemaId, out string actionId, out ICredentialValidator validator)
+		internal static AuthorizationAttribute GetAuthorizationAttribute(ActionDescriptor actionDescriptor, System.Web.Routing.RequestContext requestContext)
 		{
-			schemaId = null;
-			actionId = null;
-			validator = null;
-
 			//查找位于Action方法的授权标记
 			var attribute = (AuthorizationAttribute)actionDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
 
@@ -330,38 +326,38 @@ namespace Zongsoft.Web.Security
 				attribute = (AuthorizationAttribute)actionDescriptor.ControllerDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
 
 				if(attribute == null)
-					return AuthorizationMode.Disabled;
-
-				validator = attribute.Validator;
+					return null;
 
 				if(attribute.Mode == AuthorizationMode.Required)
 				{
-					schemaId = string.IsNullOrWhiteSpace(attribute.SchemaId) ? GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string) : attribute.SchemaId;
-					actionId = actionDescriptor.ActionName;
+					if(string.IsNullOrWhiteSpace(attribute.SchemaId))
+						return new AuthorizationAttribute(GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string)) { ValidatorType = attribute.ValidatorType };
 				}
 
-				return attribute.Mode;
+				return attribute;
 			}
 
-			validator = attribute.Validator;
-
-			if(attribute.Mode != AuthorizationMode.Required)
-				return attribute.Mode;
-
-			schemaId = attribute.SchemaId;
-			actionId = string.IsNullOrWhiteSpace(attribute.ActionId) ? actionDescriptor.ActionName : attribute.ActionId;
-
-			if(string.IsNullOrWhiteSpace(schemaId))
+			if(attribute.Mode == AuthorizationMode.Required)
 			{
-				var controllerAttribute = (AuthorizationAttribute)Attribute.GetCustomAttribute(actionDescriptor.ControllerDescriptor.ControllerType, typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true);
+				string schemaId = attribute.SchemaId, actionId = attribute.ActionId;
 
-				if(controllerAttribute == null || string.IsNullOrWhiteSpace(controllerAttribute.SchemaId))
-					schemaId = GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string);
-				else
-					schemaId = controllerAttribute.SchemaId;
+				if(string.IsNullOrWhiteSpace(schemaId))
+				{
+					var controllerAttribute = (AuthorizationAttribute)actionDescriptor.ControllerDescriptor.GetCustomAttributes(typeof(AuthorizationAttribute), true).FirstOrDefault();
+
+					if(controllerAttribute == null || string.IsNullOrWhiteSpace(controllerAttribute.SchemaId))
+						schemaId = GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string);
+					else
+						schemaId = controllerAttribute.SchemaId;
+				}
+
+				if(string.IsNullOrWhiteSpace(actionId))
+					actionId = actionDescriptor.ActionName;
+
+				return new AuthorizationAttribute(schemaId, actionId) { ValidatorType = attribute.ValidatorType };
 			}
 
-			return attribute.Mode;
+			return attribute;
 		}
 		#endregion
 

@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Web.Mvc;
+using System.Linq;
 
 using Zongsoft.Security;
 using Zongsoft.Security.Membership;
@@ -38,6 +39,7 @@ namespace Zongsoft.Web.Security
 	{
 		#region 成员字段
 		private IAuthorization _authorization;
+		private IMemberProvider _memberProvider;
 		private ICredentialProvider _credentialProvider;
 		#endregion
 
@@ -55,6 +57,22 @@ namespace Zongsoft.Web.Security
 					throw new ArgumentNullException();
 
 				_authorization = value;
+			}
+		}
+
+		[Zongsoft.Services.ServiceDependency]
+		public IMemberProvider MemberProvider
+		{
+			get
+			{
+				return _memberProvider;
+			}
+			set
+			{
+				if(value == null)
+					throw new ArgumentNullException();
+
+				_memberProvider = value;
 			}
 		}
 
@@ -78,14 +96,11 @@ namespace Zongsoft.Web.Security
 		#region 验证方法
 		public void OnAuthorization(System.Web.Mvc.AuthorizationContext filterContext)
 		{
-			string schemaId, actionId;
-			ICredentialValidator validator;
-
-			//获取授权验证的方式
-			var mode = AuthenticationUtility.GetAuthorizationMode(filterContext.ActionDescriptor, filterContext.RequestContext, out schemaId, out actionId, out validator);
+			//获取授权验证的声明描述
+			var attribute = AuthenticationUtility.GetAuthorizationAttribute(filterContext.ActionDescriptor, filterContext.RequestContext);
 
 			//忽略授权验证
-			if(mode == AuthorizationMode.Disabled)
+			if(attribute == null || attribute.Mode == AuthorizationMode.Disabled)
 				return;
 
 			//如果连身份验证都未通过则返回身份验证失败并退出
@@ -96,23 +111,30 @@ namespace Zongsoft.Web.Security
 			}
 
 			//进行凭证验证(确保凭证是未过期并且可用的)
-			filterContext.Result = this.ValidateCredential(filterContext.HttpContext, filterContext.HttpContext.User as CredentialPrincipal, validator);
+			filterContext.Result = this.ValidateCredential(filterContext.HttpContext, filterContext.HttpContext.User as CredentialPrincipal, attribute.Validator);
 
 			//如果返回的结果不为空则退出
 			if(filterContext.Result != null)
 				return;
 
-			if(mode == AuthorizationMode.Required)
+			//获取当前请求对应的用户编号
+			var userId = ((CredentialPrincipal)filterContext.HttpContext.User).Identity.Credential.User.UserId;
+
+			switch(attribute.Mode)
 			{
-				//获取授权验证服务
-				var authorization = this.Authorization;
-
-				if(authorization == null)
-					throw new MissingMemberException(this.GetType().FullName, "Authorization");
-
-				//执行授权验证操作，如果验证失败则返回验证失败的响应
-				if(!authorization.Authorize(((CredentialPrincipal)filterContext.HttpContext.User).Identity.Credential.User.UserId, schemaId, actionId))
-					filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+				case AuthorizationMode.Identity:
+					if(attribute.Roles != null && attribute.Roles.Length > 0)
+					{
+						//如果当前用户即不属于系统管理员也不属于指定角色的成员，则返回验证失败的响应
+						if(!this.MemberProvider.InRoles(userId, Role.Administrators) && !this.MemberProvider.InRoles(userId, attribute.Roles))
+							filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+					}
+					break;
+				case AuthorizationMode.Required:
+					//执行授权验证操作，如果验证失败则返回验证失败的响应
+					if(!this.Authorization.Authorize(userId, attribute.SchemaId, attribute.ActionId))
+						filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+					break;
 			}
 		}
 		#endregion
