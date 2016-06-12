@@ -173,6 +173,8 @@
     <Compile Include="Http\FromContentAttribute.cs" />
     <Compile Include="Http\HttpControllerBase.cs" />
     <Compile Include="Http\HttpPagingAttribute.cs" />
+    <Compile Include="Http\Security\AuthenticationFilter.cs" />
+    <Compile Include="Http\Security\AuthenticationUtility.cs" />
     <Compile Include="InputValidationFilter.cs" />
     <Compile Include="InputValidationUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -246,6 +248,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
