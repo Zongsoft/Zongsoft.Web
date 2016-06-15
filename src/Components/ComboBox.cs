@@ -321,6 +321,9 @@ namespace Zongsoft.Web.Controls
 			}
 			else
 			{
+				if(!this.Enabled)
+					this.CssClass = this.CssClass + " disabled";
+
 				this.AddAttributes(writer, "ID");
 				writer.RenderBeginTag(HtmlTextWriterTag.Div);
 
@@ -380,7 +383,7 @@ namespace Zongsoft.Web.Controls
 			if(!string.IsNullOrWhiteSpace(this.ID))
 				writer.AddAttribute(HtmlTextWriterAttribute.For, this.ID);
 
-			writer.AddAttribute(HtmlTextWriterAttribute.Class, this.LabelCssClass);
+			writer.AddAttribute(HtmlTextWriterAttribute.Class, this.LabelCssClass + (this.Enabled ? "" : " disabled"));
 			writer.RenderBeginTag(HtmlTextWriterTag.Label);
 			writer.WriteEncodedText(this.Label);
 			writer.RenderEndTag();
