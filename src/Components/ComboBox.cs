@@ -25,12 +25,9 @@
  */
 
 using System;
-using System.IO;
 using System.ComponentModel;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Web;
 using System.Web.UI;
 
@@ -74,6 +71,21 @@ namespace Zongsoft.Web.Controls
 			{
 				if(!string.IsNullOrWhiteSpace(value))
 					this.SetPropertyValue(() => this.Name, value);
+			}
+		}
+
+		[Bindable(true)]
+		[DefaultValue(true)]
+		[PropertyMetadata("disabled", PropertyRender = "BooleanPropertyRender.False")]
+		public bool Enabled
+		{
+			get
+			{
+				return this.GetPropertyValue(() => this.Enabled);
+			}
+			set
+			{
+				this.SetPropertyValue(() => this.Enabled, value);
 			}
 		}
 
