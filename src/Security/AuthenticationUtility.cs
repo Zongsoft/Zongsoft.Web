@@ -378,7 +378,7 @@ namespace Zongsoft.Web.Security
 			var applicationContext = Zongsoft.ComponentModel.ApplicationContextBase.Current;
 
 			if(applicationContext != null && applicationContext.OptionManager != null)
-				return applicationContext.OptionManager.GetOptionObject("/Security/Authentication") as Configuration.AuthenticationElement;
+				return applicationContext.OptionManager.GetOptionValue("/Security/Authentication") as Configuration.AuthenticationElement;
 
 			return null;
 		}
