@@ -310,7 +310,7 @@ namespace Zongsoft.Web.Security
 			var attribute = GetAuthorizationAttribute(actionDescriptor);
 
 			if(attribute == null)
-				return AuthorizationMode.Disabled;
+				return AuthorizationMode.Anonymous;
 
 			return attribute.Mode;
 		}
@@ -328,7 +328,7 @@ namespace Zongsoft.Web.Security
 				if(attribute == null)
 					return null;
 
-				if(attribute.Mode == AuthorizationMode.Required)
+				if(attribute.Mode == AuthorizationMode.Requires)
 				{
 					if(string.IsNullOrWhiteSpace(attribute.SchemaId))
 						return new AuthorizationAttribute(GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string)) { ValidatorType = attribute.ValidatorType };
@@ -337,7 +337,7 @@ namespace Zongsoft.Web.Security
 				return attribute;
 			}
 
-			if(attribute.Mode == AuthorizationMode.Required)
+			if(attribute.Mode == AuthorizationMode.Requires)
 			{
 				string schemaId = attribute.SchemaId, actionId = attribute.ActionId;
 

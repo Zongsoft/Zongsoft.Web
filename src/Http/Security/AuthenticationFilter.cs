@@ -92,7 +92,7 @@ namespace Zongsoft.Web.Http.Security
 		{
 			var principal = context.ActionContext.RequestContext.Principal;
 
-			if(AuthenticationUtility.IsAuthenticated(principal) || AuthenticationUtility.GetAuthorizationMode(context.ActionContext.ActionDescriptor) == AuthorizationMode.Disabled)
+			if(AuthenticationUtility.IsAuthenticated(principal) || AuthenticationUtility.GetAuthorizationMode(context.ActionContext.ActionDescriptor) == AuthorizationMode.Anonymous)
 				return;
 
 			var challenge = new System.Net.Http.Headers.AuthenticationHeaderValue("API");

@@ -25,9 +25,6 @@
  */
 
 using System;
-using System.ComponentModel;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web.Mvc;
 using System.Web.Mvc.Filters;
 
@@ -73,7 +70,7 @@ namespace Zongsoft.Web.Security
 
 		public void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
 		{
-			if(AuthenticationUtility.IsAuthenticated || AuthenticationUtility.GetAuthorizationMode(filterContext.ActionDescriptor) == AuthorizationMode.Disabled)
+			if(AuthenticationUtility.IsAuthenticated || AuthenticationUtility.GetAuthorizationMode(filterContext.ActionDescriptor) == AuthorizationMode.Anonymous)
 				return;
 
 			var url = Utility.RepairQueryString(Zongsoft.Web.Security.AuthenticationUtility.GetLoginUrl(), filterContext.HttpContext.Request.Url.Query);

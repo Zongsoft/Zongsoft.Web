@@ -100,7 +100,7 @@ namespace Zongsoft.Web.Security
 			var attribute = AuthenticationUtility.GetAuthorizationAttribute(filterContext.ActionDescriptor, filterContext.RequestContext);
 
 			//忽略授权验证
-			if(attribute == null || attribute.Mode == AuthorizationMode.Disabled)
+			if(attribute == null || attribute.Mode == AuthorizationMode.Anonymous)
 				return;
 
 			//如果连身份验证都未通过则返回身份验证失败并退出
@@ -130,7 +130,7 @@ namespace Zongsoft.Web.Security
 							filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
 					}
 					break;
-				case AuthorizationMode.Required:
+				case AuthorizationMode.Requires:
 					//执行授权验证操作，如果验证失败则返回验证失败的响应
 					if(!this.Authorization.Authorize(userId, attribute.SchemaId, attribute.ActionId))
 						filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
