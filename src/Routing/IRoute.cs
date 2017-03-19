@@ -27,10 +27,42 @@
 using System;
 using System.Collections.Generic;
 
-namespace Zongsoft.Web.Http.Routing
+namespace Zongsoft.Web.Routing
 {
-	public interface IHttpRouteProvider
+	public interface IRoute
 	{
-		IEnumerable<KeyValuePair<string, System.Web.Http.Routing.IHttpRoute>> GetRoutes();
+		string Name
+		{
+			get;
+		}
+
+		string Url
+		{
+			get;
+			set;
+		}
+
+		object Handler
+		{
+			get;
+			set;
+		}
+
+		IDictionary<string, object> Constraints
+		{
+			get;
+		}
+
+		IDictionary<string, object> Defaults
+		{
+			get;
+		}
+
+		IDictionary<string, object> States
+		{
+			get;
+		}
+
+		object ToRoute();
 	}
 }

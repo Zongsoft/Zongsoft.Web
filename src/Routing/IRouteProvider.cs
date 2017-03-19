@@ -31,6 +31,6 @@ namespace Zongsoft.Web.Routing
 {
 	public interface IRouteProvider
 	{
-		IEnumerable<System.Web.Routing.RouteBase> GetRoutes();
+		IEnumerable<IRoute> GetRoutes();
 	}
 }
