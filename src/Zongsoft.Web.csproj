@@ -186,21 +186,6 @@
     <Compile Include="Security\Configuration\AuthenticationElement.cs" />
     <Compile Include="Security\Configuration\AuthenticationSceneElement.cs" />
     <Compile Include="Security\Configuration\AuthenticationSceneElementCollection.cs" />
-    <Compile Include="Themes\ComponentElement.cs" />
-    <Compile Include="Themes\ComponentElementCollection.cs" />
-    <Compile Include="Themes\DependencyElement.cs" />
-    <Compile Include="Themes\DependencyElementCollection.cs" />
-    <Compile Include="Themes\ElementBase.cs" />
-    <Compile Include="Themes\ElementCollectionBase.cs" />
-    <Compile Include="Themes\FileElement.cs" />
-    <Compile Include="Themes\FileElementCollection.cs" />
-    <Compile Include="Themes\IncludeElement.cs" />
-    <Compile Include="Themes\IncludeElementCollection.cs" />
-    <Compile Include="Themes\IncludeMode.cs" />
-    <Compile Include="Themes\Theme.cs" />
-    <Compile Include="Themes\ThemeException.cs" />
-    <Compile Include="Themes\ThemeResolver.cs" />
-    <Compile Include="Themes\ThemeUtility.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="WebFileAccessor.cs" />
     <Compile Include="WebFileSystem.cs" />
@@ -234,9 +219,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Components\Readme.md" />
-    <None Include="Themes\Theme.xml">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md">
