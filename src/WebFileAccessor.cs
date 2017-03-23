@@ -498,7 +498,14 @@ namespace Zongsoft.Web
 				var filePath = Zongsoft.IO.Path.Combine(_directoryPath, fileName);
 
 				//生成文件信息的描述实体
-				Zongsoft.IO.FileInfo fileInfo = new Zongsoft.IO.FileInfo(filePath, (headers.ContentDisposition.Size.HasValue ? headers.ContentDisposition.Size.Value : -1), DateTime.Now, null, FileSystem.GetUrl(filePath));
+				var fileInfo = new Zongsoft.IO.FileInfo(filePath, (headers.ContentDisposition.Size.HasValue ? headers.ContentDisposition.Size.Value : -1), DateTime.Now, null, FileSystem.GetUrl(filePath))
+				{
+					Type = contentType,
+				};
+
+				//将上传的文件项的键名加入到文件描述实体的扩展属性中
+				if(!string.IsNullOrWhiteSpace(dispositionName))
+					fileInfo.Properties.Add("Name", dispositionName);
 
 				//将上传的原始文件名加入到文件描述实体的扩展属性中
 				fileInfo.Properties.Add("FileName", Uri.UnescapeDataString(UnquoteToken(headers.ContentDisposition.FileName)));
