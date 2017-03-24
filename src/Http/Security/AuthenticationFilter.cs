@@ -25,22 +25,21 @@
  */
 
 using System;
-using System.ComponentModel;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web.Http;
-using System.Web.Http.Description;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http.Filters;
 
 using Zongsoft.Security;
 using Zongsoft.Security.Membership;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Zongsoft.Web.Http.Security
 {
 	public class AuthenticationFilter : IAuthenticationFilter
 	{
+		#region 常量定义
+		private const string HTTP_AUTHORIZATION_SCHEME = "Credential";
+		#endregion
+
 		#region 成员字段
 		private ICredentialProvider _credentialProvider;
 
@@ -77,10 +76,10 @@ namespace Zongsoft.Web.Http.Security
 		#region 验证实现
 		public async Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
 		{
-			if(context.Request.Headers.Authorization == null || !string.Equals(context.Request.Headers.Authorization.Scheme, "API", StringComparison.OrdinalIgnoreCase))
+			if(context.Request.Headers.Authorization == null || !string.Equals(context.Request.Headers.Authorization.Scheme, HTTP_AUTHORIZATION_SCHEME, StringComparison.OrdinalIgnoreCase))
 				return;
 
-			var credentialId = GetAuthenticationKey(context.Request.Headers.Authorization.Parameter);
+			var credentialId = GetCredentialId(context.Request.Headers.Authorization.Parameter);
 
 			if(string.IsNullOrWhiteSpace(credentialId))
 				context.Principal = CredentialPrincipal.Empty;
@@ -95,23 +94,18 @@ namespace Zongsoft.Web.Http.Security
 			if(AuthenticationUtility.IsAuthenticated(principal) || AuthenticationUtility.GetAuthorizationMode(context.ActionContext.ActionDescriptor) == AuthorizationMode.Anonymous)
 				return;
 
-			var challenge = new System.Net.Http.Headers.AuthenticationHeaderValue("API");
+			var challenge = new System.Net.Http.Headers.AuthenticationHeaderValue(HTTP_AUTHORIZATION_SCHEME);
 			context.Result = new System.Web.Http.Results.UnauthorizedResult(new[] { challenge }, context.Request);
 		}
 		#endregion
 
 		#region 私有方法
-		private static string GetAuthenticationKey(string text)
+		private static string GetCredentialId(string text)
 		{
 			if(string.IsNullOrWhiteSpace(text))
 				return null;
 
-			int index = text.IndexOf(':');
-
-			if(index > 0)
-				return text.Substring(0, index);
-
-			return null;
+			return text.Trim();
 		}
 		#endregion
 	}
