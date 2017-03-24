@@ -92,19 +92,28 @@ namespace Zongsoft.Web.Http
 			if(string.IsNullOrWhiteSpace(id))
 				return this.DataService.Select(null, paging);
 
+			object result = null;
 			var parts = id.Split('-');
 
 			switch(parts.Length)
 			{
 				case 1:
-					return this.DataService.Get<string>(parts[0], paging);
+					result = this.DataService.Get<string>(parts[0], paging);
+					break;
 				case 2:
-					return this.DataService.Get<string, string>(parts[0], parts[1], paging);
+					result = this.DataService.Get<string, string>(parts[0], parts[1], paging);
+					break;
 				case 3:
-					return this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], paging);
+					result = this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], paging);
+					break;
 				default:
 					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 			}
+
+			if(result == null)
+				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+
+			return result;
 		}
 
 		public virtual void Delete(string id)
