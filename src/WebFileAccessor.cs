@@ -43,6 +43,9 @@ namespace Zongsoft.Web
 	{
 		#region 常量定义
 		private const string EXTENDED_PROPERTY_PREFIX = "x-zfs-";
+
+		private const string EXTENDED_PROPERTY_DISPOSITIONNAME = "DispositionName";
+		private const string EXTENDED_PROPERTY_FILENAME = "FileName";
 		#endregion
 
 		#region 成员字段
@@ -234,9 +237,15 @@ namespace Zongsoft.Web
 
 			if(result.FormData != null && result.FormData.Count > 0)
 			{
-				foreach(var fileEntry in result.FileData)
+				foreach(var fileInfo in result.FileData)
 				{
-					var prefix = EXTENDED_PROPERTY_PREFIX + fileEntry.Key + "-";
+					string dispositionName, prefix;
+
+					if(fileInfo.HasProperties && fileInfo.Properties.TryGetValue(EXTENDED_PROPERTY_DISPOSITIONNAME, out dispositionName))
+						prefix = EXTENDED_PROPERTY_PREFIX + dispositionName + "-";
+					else
+						continue;
+
 					var updateRequires = false;
 
 					foreach(var formEntry in result.FormData)
@@ -244,17 +253,17 @@ namespace Zongsoft.Web
 						if(formEntry.Key.Length > prefix.Length && formEntry.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
 						{
 							updateRequires = true;
-							fileEntry.Value.Properties[formEntry.Key.Substring(prefix.Length)] = formEntry.Value;
+							fileInfo.Properties[formEntry.Key.Substring(prefix.Length)] = formEntry.Value;
 						}
 					}
 
 					if(updateRequires)
-						await FileSystem.File.SetInfoAsync(fileEntry.Value.Path.Url, fileEntry.Value.Properties);
+						await FileSystem.File.SetInfoAsync(fileInfo.Path.Url, fileInfo.Properties);
 				}
 			}
 
 			//返回新增的文件信息实体集
-			return result.FileData.Values;
+			return result.FileData;
 		}
 		#endregion
 
@@ -385,7 +394,7 @@ namespace Zongsoft.Web
 			private int _index;
 			private string _directoryPath;
 			private IDictionary<string, string> _headers;
-			private IDictionary<string, Zongsoft.IO.FileInfo> _fileData;
+			private IList<Zongsoft.IO.FileInfo> _fileData;
 			private IDictionary<string, string> _formData;
 			private Collection<bool> _isFormData;
 			private Action<WritingEventArgs> _onWriting;
@@ -399,7 +408,7 @@ namespace Zongsoft.Web
 
 				_directoryPath = directoryPath;
 				_headers = headers;
-				_fileData = new Dictionary<string, Zongsoft.IO.FileInfo>();
+				_fileData = new List<Zongsoft.IO.FileInfo>();
 				_isFormData = new Collection<bool>();
 				_formData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 				_onWriting = onWriting;
@@ -415,7 +424,7 @@ namespace Zongsoft.Web
 				}
 			}
 
-			public IDictionary<string, Zongsoft.IO.FileInfo> FileData
+			public IList<Zongsoft.IO.FileInfo> FileData
 			{
 				get
 				{
@@ -505,10 +514,10 @@ namespace Zongsoft.Web
 
 				//将上传的文件项的键名加入到文件描述实体的扩展属性中
 				if(!string.IsNullOrWhiteSpace(dispositionName))
-					fileInfo.Properties.Add("Name", dispositionName);
+					fileInfo.Properties.Add(EXTENDED_PROPERTY_DISPOSITIONNAME, dispositionName);
 
 				//将上传的原始文件名加入到文件描述实体的扩展属性中
-				fileInfo.Properties.Add("FileName", Uri.UnescapeDataString(UnquoteToken(headers.ContentDisposition.FileName)));
+				fileInfo.Properties.Add(EXTENDED_PROPERTY_FILENAME, Uri.UnescapeDataString(UnquoteToken(headers.ContentDisposition.FileName)));
 
 				if(_headers != null && _headers.Count > 0 && !string.IsNullOrWhiteSpace(dispositionName))
 				{
@@ -520,10 +529,8 @@ namespace Zongsoft.Web
 					}
 				}
 
-				var infoKey = string.IsNullOrWhiteSpace(dispositionName) ? fileName : dispositionName;
-
 				//将文件信息对象加入到集合中
-				_fileData.Add(infoKey, fileInfo);
+				_fileData.Add(fileInfo);
 
 				//在表单数据标记列表中按顺序将当前内容标记为非普通表单域（即二进制文件域）
 				_isFormData.Add(false);
@@ -536,7 +543,7 @@ namespace Zongsoft.Web
 				catch
 				{
 					if(fileInfo != null)
-						_fileData.Remove(infoKey);
+						_fileData.Remove(fileInfo);
 
 					throw;
 				}
@@ -554,13 +561,6 @@ namespace Zongsoft.Web
 					}
 					else
 					{
-						if(content.Headers.ContentDisposition != null && content.Headers.ContentDisposition.Size.HasValue)
-						{
-							Zongsoft.IO.FileInfo info;
-
-							if(_fileData.TryGetValue(UnquoteToken(content.Headers.ContentDisposition.Name), out info))
-								info.Size = content.Headers.ContentDisposition.Size.Value;
-						}
 					}
 				}
 			}
