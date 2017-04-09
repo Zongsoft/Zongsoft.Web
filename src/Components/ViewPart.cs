@@ -32,7 +32,7 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class ViewPart : Zongsoft.ComponentModel.NotifyObject, IDataBoundControlPart
+	public class ViewPart : Zongsoft.Common.ModelBase, IDataBoundControlPart
 	{
 		#region 成员字段
 		private DataBoundControl _owner;

@@ -31,7 +31,7 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class Image : Zongsoft.ComponentModel.NotifyObject
+	public class Image : Zongsoft.Common.ModelBase
 	{
 		#region 成员字段
 		private DataBoundControl _owner;
