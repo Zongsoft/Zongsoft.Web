@@ -25,6 +25,7 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Web.Http;
 
@@ -110,7 +111,13 @@ namespace Zongsoft.Web.Http
 					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 			}
 
-			if(result == null)
+			bool isNullOrEmpty;
+
+			//包装结果对象并判断结果对象是否为空或空集合
+			result = this.GetResult(result, out isNullOrEmpty);
+
+			//如果解析后的结果对象为空或空集合则抛出404异常
+			if(isNullOrEmpty)
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 
 			return result;
@@ -196,6 +203,108 @@ namespace Zongsoft.Web.Http
 		public virtual IEnumerable<TModel> Query(TConditional conditional, [FromUri]Paging paging = null)
 		{
 			return this.DataService.Select(conditional, paging);
+		}
+		#endregion
+
+		#region 私有方法
+		private object GetResult(object value, out bool isNullOrEmpty)
+		{
+			isNullOrEmpty = value == null;
+
+			if(value == null)
+				return null;
+
+			if(value is IEnumerable)
+			{
+				var result = new ResultEnumerable((IEnumerable)value);
+				isNullOrEmpty = result.IsNullOrEmpty;
+				return result;
+			}
+
+			return value;
+		}
+		#endregion
+
+		#region 嵌套子类
+		private class ResultEnumerable : IEnumerable
+		{
+			#region 成员字段
+			private ResultEnumerator _enumerator;
+			#endregion
+
+			#region 构造函数
+			public ResultEnumerable(IEnumerable items)
+			{
+				_enumerator = new ResultEnumerator(items);
+			}
+			#endregion
+
+			#region 公共属性
+			public bool IsNullOrEmpty
+			{
+				get
+				{
+					return _enumerator.IsNullOrEmpty;
+				}
+			}
+			#endregion
+
+			#region 公共方法
+			public IEnumerator GetEnumerator()
+			{
+				return _enumerator;
+			}
+			#endregion
+		}
+
+		private class ResultEnumerator : IEnumerator
+		{
+			#region 私有变量
+			private int _flag;
+			private bool _isNullOrEmpty;
+			private IEnumerator _iterator;
+			#endregion
+
+			#region 构造函数
+			public ResultEnumerator(IEnumerable items)
+			{
+				_iterator = items.GetEnumerator();
+				_isNullOrEmpty = !_iterator.MoveNext();
+			}
+			#endregion
+
+			#region 公共属性
+			public bool IsNullOrEmpty
+			{
+				get
+				{
+					return _isNullOrEmpty;
+				}
+			}
+
+			public object Current
+			{
+				get
+				{
+					return _iterator.Current;
+				}
+			}
+			#endregion
+
+			#region 公共方法
+			public bool MoveNext()
+			{
+				if(System.Threading.Interlocked.Exchange(ref _flag, 1) == 0)
+					return !_isNullOrEmpty;
+
+				return _iterator.MoveNext();
+			}
+
+			public void Reset()
+			{
+				_iterator.Reset();
+			}
+			#endregion
 		}
 		#endregion
 	}
