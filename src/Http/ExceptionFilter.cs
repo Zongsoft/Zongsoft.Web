@@ -25,6 +25,8 @@
  */
 
 using System;
+using System.Net;
+using System.Net.Http;
 using System.Web.Http.Filters;
 
 namespace Zongsoft.Web.Http
@@ -33,8 +35,43 @@ namespace Zongsoft.Web.Http
 	{
 		public override void OnException(HttpActionExecutedContext actionExecutedContext)
 		{
-			if(actionExecutedContext.Exception != null)
-				Zongsoft.Diagnostics.Logger.Error(actionExecutedContext.Exception);
+			if(actionExecutedContext.Exception == null)
+				return;
+
+			if(actionExecutedContext.Exception is Zongsoft.Security.Membership.AuthenticationException ||
+			   actionExecutedContext.Exception is Zongsoft.Security.Membership.AuthorizationException)
+			{
+				actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception, HttpStatusCode.Forbidden);
+
+				//退出，不用记录日志
+				return;
+			}
+
+			//生成返回的异常消息内容
+			actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception);
+
+			//默认将异常信息写入日志文件
+			Zongsoft.Diagnostics.Logger.Error(actionExecutedContext.Exception);
+		}
+
+		private HttpResponseMessage GetExceptionResponse(Exception exception, HttpStatusCode status = HttpStatusCode.InternalServerError)
+		{
+			if(exception == null)
+				return null;
+
+			var message = exception.Message;
+
+			if(exception.InnerException != null)
+				message += Environment.NewLine + exception.InnerException.Message;
+
+			message = message?.Replace('"', '\'');
+
+			var response = new HttpResponseMessage(status)
+			{
+				Content = new StringContent($"{{\"type\":\"{exception.GetType().Name}\",\"message\":\"{message}\"}}", System.Text.Encoding.UTF8, "application/json")
+			};
+
+			return response;
 		}
 	}
 }
