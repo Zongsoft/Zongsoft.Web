@@ -54,6 +54,14 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 属性定义
+		protected Zongsoft.Security.Credential Credential
+		{
+			get
+			{
+				return (this.RequestContext?.Principal?.Identity as Zongsoft.Security.CredentialIdentity)?.Credential;
+			}
+		}
+
 		[Zongsoft.Services.ServiceDependency]
 		protected TService DataService
 		{
