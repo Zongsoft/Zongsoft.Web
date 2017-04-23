@@ -174,6 +174,7 @@
     <Compile Include="Http\FromContentAttribute.cs" />
     <Compile Include="Http\HttpControllerBase.cs" />
     <Compile Include="Http\HttpPagingAttribute.cs" />
+    <Compile Include="Http\HttpResponseExceptionUtility.cs" />
     <Compile Include="Http\Security\AuthenticationFilter.cs" />
     <Compile Include="Http\Security\AuthenticationUtility.cs" />
     <Compile Include="Http\Security\AuthorizationFilter.cs" />
