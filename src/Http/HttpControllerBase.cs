@@ -40,7 +40,7 @@ namespace Zongsoft.Web.Http
 																	  where TService : class, IDataService<TModel>
 	{
 		#region 私有变量
-		private static readonly Regex _regex = new Regex(@"\s*(?<part>(\w+)|(\*)|(\(.+\)))\s*-?", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1));
+		private static readonly Regex _regex = new Regex(@"\s*(?<part>(\w+)|(\*)|(\([^\(\)]+\)))\s*-?", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1));
 		#endregion
 
 		#region 成员字段
