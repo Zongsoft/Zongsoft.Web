@@ -28,6 +28,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Web.Http;
+using System.Text.RegularExpressions;
 
 using Zongsoft.Data;
 
@@ -38,6 +39,10 @@ namespace Zongsoft.Web.Http
 																	  where TConditional : class, IConditional
 																	  where TService : class, IDataService<TModel>
 	{
+		#region 私有变量
+		private static readonly Regex _regex = new Regex(@"\s*(?<part>(\w+)|(\*)|(\(.+\)))\s*-?", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1));
+		#endregion
+
 		#region 成员字段
 		private TService _dataService;
 		private Zongsoft.Services.IServiceProvider _serviceProvider;
@@ -211,6 +216,34 @@ namespace Zongsoft.Web.Http
 		public virtual IEnumerable<TModel> Query(TConditional conditional, [FromUri]Paging paging = null)
 		{
 			return this.DataService.Select(conditional, paging);
+		}
+		#endregion
+
+		#region 保护方法
+		protected string[] Slice(string text)
+		{
+			if(string.IsNullOrWhiteSpace(text))
+				return new string[0];
+
+			var matches = _regex.Matches(text);
+			var result = new string[matches.Count];
+
+			for(var i = 0; i < matches.Count; i++)
+			{
+				if(matches[i].Success)
+				{
+					result[i] = matches[i].Groups["part"].Value;
+
+					if(result[i] == "*")
+						result[i] = string.Empty;
+				}
+				else
+				{
+					result[i] = string.Empty;
+				}
+			}
+
+			return result;
 		}
 		#endregion
 
