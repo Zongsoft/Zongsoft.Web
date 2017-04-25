@@ -303,6 +303,7 @@ namespace Zongsoft.Web
 			private int _index;
 			private bool _cancel;
 			private bool _overwrite;
+			private bool _extensionAppend;
 			private string _directory;
 			private string _fileName;
 			#endregion
@@ -313,6 +314,7 @@ namespace Zongsoft.Web
 				_index = index;
 				_cancel = false;
 				_overwrite = false;
+				_extensionAppend = true;
 				_directory = directory;
 				_fileName = fileName;
 			}
@@ -357,6 +359,21 @@ namespace Zongsoft.Web
 				set
 				{
 					_overwrite = value;
+				}
+			}
+
+			/// <summary>
+			/// 获取或设置一个值，指示是否自动添加文件的扩展名。
+			/// </summary>
+			public bool ExtensionAppend
+			{
+				get
+				{
+					return _extensionAppend;
+				}
+				set
+				{
+					_extensionAppend = value;
 				}
 			}
 
@@ -480,6 +497,9 @@ namespace Zongsoft.Web
 				//定义文件写入的模式
 				bool overwrite = false;
 
+				//定义文件的扩展名是否自动添加
+				bool extensionAppend = true;
+
 				//执行写入前的回调方法
 				if(_onWriting != null)
 				{
@@ -492,15 +512,16 @@ namespace Zongsoft.Web
 					if(args.Cancel)
 						return null;
 
-					//获取写入的文件名和写入模式
+					//获取文件写入参数
 					fileName = args.FileName;
 					overwrite = args.Overwrite;
+					extensionAppend = args.ExtensionAppend;
 				}
 
 				//如果文件名为空，则生成一个以“当前日期-时间-随机数.ext”的默认文件名
 				if(string.IsNullOrWhiteSpace(fileName))
-					fileName = string.Format("{0:yyyyMMdd-HHmmss}-{1}{2}", DateTime.Now, (uint)Zongsoft.Common.RandomGenerator.GenerateInt32(), extensionName);
-				else if(!fileName.EndsWith(extensionName))
+					fileName = string.Format("{0:yyyyMMdd-HHmmss}-{1}{2}", DateTime.Now, (uint)Zongsoft.Common.RandomGenerator.GenerateInt32(), extensionAppend ? string.Empty : extensionName);
+				else if(extensionAppend && !fileName.EndsWith(extensionName))
 					fileName = fileName + extensionName;
 
 				//生成文件的完整路径
