@@ -101,10 +101,30 @@ namespace Zongsoft.Web.Http
 
 		#region 公共方法
 		[Zongsoft.Web.Http.HttpPaging]
-		public virtual object Get(string id = null, [FromUri]Paging paging = null)
+		public virtual object Get(string id = null, [FromUri]string key = null, [FromUri]Paging paging = null)
 		{
 			if(string.IsNullOrWhiteSpace(id))
-				return this.DataService.Select(null, paging);
+			{
+				if(string.IsNullOrWhiteSpace(key))
+					return this.DataService.Select(null, paging);
+
+				var attribute = (DataSearchKeyAttribute)Attribute.GetCustomAttribute(typeof(TConditional), typeof(DataSearchKeyAttribute), true);
+
+				if(attribute != null)
+				{
+					var searchKey = attribute.GetSearchKey(key, "Key", "$Key");
+
+					if(searchKey != null)
+						return this.DataService.Select(searchKey, paging);
+				}
+
+				//指定了key参数，但当前条件不支持默认关键字查询则抛出无效的请求异常(即400错误)
+				throw HttpResponseExceptionUtility.BadRequest("The service does not support the search with key.");
+			}
+
+			//如果同时指定了id和key参数，则抛出无效的请求异常(即400错误)
+			if(key != null)
+				throw HttpResponseExceptionUtility.BadRequest("Cannot specify the 'id' and 'key' argument at the same time.");
 
 			object result = null;
 			var parts = id.Split('-');
