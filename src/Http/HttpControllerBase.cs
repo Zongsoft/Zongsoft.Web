@@ -28,7 +28,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Web.Http;
-using System.Text.RegularExpressions;
 
 using Zongsoft.Data;
 
@@ -39,10 +38,6 @@ namespace Zongsoft.Web.Http
 																	  where TConditional : class, IConditional
 																	  where TService : class, IDataService<TModel>
 	{
-		#region 私有变量
-		private static readonly Regex _regex = new Regex(@"\s*(?<part>(\w+)|(\*)|(\([^\(\)]+\)))\s*-?", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1));
-		#endregion
-
 		#region 成员字段
 		private TService _dataService;
 		private Zongsoft.Services.IServiceProvider _serviceProvider;
@@ -108,18 +103,7 @@ namespace Zongsoft.Web.Http
 				if(string.IsNullOrWhiteSpace(key))
 					return this.DataService.Select(null, paging);
 
-				var attribute = (DataSearchKeyAttribute)Attribute.GetCustomAttribute(typeof(TConditional), typeof(DataSearchKeyAttribute), true);
-
-				if(attribute != null)
-				{
-					var searchKey = attribute.GetSearchKey(key, "Key", "$Key");
-
-					if(searchKey != null)
-						return this.DataService.Select(searchKey, paging);
-				}
-
-				//指定了key参数，但当前条件不支持默认关键字查询则抛出无效的请求异常(即400错误)
-				throw HttpResponseExceptionUtility.BadRequest("The service does not support the search with key.");
+				return this.DataService.Search(key, paging);
 			}
 
 			//如果同时指定了id和key参数，则抛出无效的请求异常(即400错误)
@@ -127,33 +111,42 @@ namespace Zongsoft.Web.Http
 				throw HttpResponseExceptionUtility.BadRequest("Cannot specify the 'id' and 'key' argument at the same time.");
 
 			object result = null;
-			var parts = id.Split('-');
+			var parts = this.Slice(id);
 
 			switch(parts.Length)
 			{
 				case 1:
-					result = this.DataService.Get<string>(parts[0], paging);
+					//如果只指定了一个参数并且参数包含冒号，则直接返回搜索操作结果
+					if(parts[0].Contains(":"))
+						return this.DataService.Search(parts[0], paging);
+
+					result = this.DataService.Get<string>(parts[0]);
 					break;
 				case 2:
-					result = this.DataService.Get<string, string>(parts[0], parts[1], paging);
+					result = this.DataService.Get<string, string>(parts[0], parts[1]);
 					break;
 				case 3:
-					result = this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], paging);
+					result = this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2]);
 					break;
 				default:
 					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 			}
 
-			bool isNullOrEmpty;
-
-			//包装结果对象并判断结果对象是否为空或空集合
-			result = this.GetResult(result, out isNullOrEmpty);
-
-			//如果解析后的结果对象为空或空集合则抛出404异常
-			if(isNullOrEmpty)
+			//如果结果对象为空则抛出404异常
+			if(result == null)
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 
 			return result;
+		}
+
+		[HttpGet]
+		[HttpPaging]
+		public virtual object Search(string keyword, [FromUri]Paging paging = null)
+		{
+			if(string.IsNullOrWhiteSpace(keyword))
+				throw HttpResponseExceptionUtility.BadRequest("Missing keyword for search.");
+
+			return this.DataService.Search(keyword, paging);
 		}
 
 		public virtual void Delete(string id)
@@ -242,28 +235,7 @@ namespace Zongsoft.Web.Http
 		#region 保护方法
 		protected string[] Slice(string text)
 		{
-			if(string.IsNullOrWhiteSpace(text))
-				return new string[0];
-
-			var matches = _regex.Matches(text);
-			var result = new string[matches.Count];
-
-			for(var i = 0; i < matches.Count; i++)
-			{
-				if(matches[i].Success)
-				{
-					result[i] = matches[i].Groups["part"].Value;
-
-					if(result[i] == "*")
-						result[i] = string.Empty;
-				}
-				else
-				{
-					result[i] = string.Empty;
-				}
-			}
-
-			return result;
+			return Utility.Slice(text);
 		}
 		#endregion
 

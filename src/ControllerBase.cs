@@ -107,7 +107,7 @@ namespace Zongsoft.Web
 			this.ViewData["Paging"] = paging;
 
 			//根据当前请求获取数据
-			object data = string.IsNullOrWhiteSpace(id) ? this.OnIndex((TConditional)null, null, paging) : this.OnIndex(id, null, paging);
+			object data = string.IsNullOrWhiteSpace(id) ? this.OnIndex((TConditional)null, null, paging) : this.OnIndex(id);
 
 			//如果模型数据为集合类型，则返回“Index”默认视图；否则返回“Details”详细视图
 			if(data != null && (data is System.Collections.IEnumerable || Zongsoft.Common.TypeExtension.IsAssignableFrom(typeof(IEnumerable<>), data.GetType())))
@@ -232,21 +232,21 @@ namespace Zongsoft.Web
 		#endregion
 
 		#region 保护方法
-		protected virtual object OnIndex(string id, string scope = null, Paging paging = null, params Sorting[] sortings)
+		protected virtual object OnIndex(string id, string scope = null)
 		{
 			if(string.IsNullOrWhiteSpace(id))
 				return null;
 
-			var parts = id.Split('-');
+			var parts = Utility.Slice(id);
 
 			switch(parts.Length)
 			{
 				case 1:
-					return this.DataService.Get<string>(parts[0], scope, paging, sortings);
+					return this.DataService.Get<string>(parts[0], scope);
 				case 2:
-					return this.DataService.Get<string, string>(parts[0], parts[1], scope, paging, sortings);
+					return this.DataService.Get<string, string>(parts[0], parts[1], scope);
 				case 3:
-					return this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], scope, paging, sortings);
+					return this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], scope);
 				default:
 					return null;
 			}
