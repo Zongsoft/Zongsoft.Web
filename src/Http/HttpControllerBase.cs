@@ -98,19 +98,25 @@ namespace Zongsoft.Web.Http
 		[Zongsoft.Web.Http.HttpPaging]
 		public virtual object Get(string id = null, [FromUri]string key = null, [FromUri]Paging paging = null)
 		{
+			object result = null;
+
 			if(string.IsNullOrWhiteSpace(id))
 			{
 				if(string.IsNullOrWhiteSpace(key))
 					return this.DataService.Select(null, paging);
 
-				return this.DataService.Search(key, paging);
+				result = this.DataService.Search(key, paging);
+
+				if(result == null)
+					throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+
+				return result;
 			}
 
 			//如果同时指定了id和key参数，则抛出无效的请求异常(即400错误)
 			if(key != null)
 				throw HttpResponseExceptionUtility.BadRequest("Cannot specify the 'id' and 'key' argument at the same time.");
 
-			object result = null;
 			var parts = this.Slice(id);
 
 			switch(parts.Length)
@@ -118,7 +124,14 @@ namespace Zongsoft.Web.Http
 				case 1:
 					//如果只指定了一个参数并且参数包含冒号，则直接返回搜索操作结果
 					if(parts[0].Contains(":"))
-						return this.DataService.Search(parts[0], paging);
+					{
+						result = this.DataService.Search(parts[0], paging);
+
+						if(result == null)
+							throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+
+						return result;
+					}
 
 					result = this.DataService.Get<string>(parts[0]);
 					break;
