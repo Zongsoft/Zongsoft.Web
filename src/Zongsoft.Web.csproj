@@ -175,6 +175,7 @@
     <Compile Include="Http\HttpControllerBase.cs" />
     <Compile Include="Http\HttpPagingAttribute.cs" />
     <Compile Include="Http\HttpResponseExceptionUtility.cs" />
+    <Compile Include="Http\JsonMediaTypeFormatter.cs" />
     <Compile Include="Http\Security\AuthenticationFilter.cs" />
     <Compile Include="Http\Security\AuthenticationUtility.cs" />
     <Compile Include="Http\Security\AuthorizationFilter.cs" />
@@ -187,6 +188,7 @@
     <Compile Include="Security\Configuration\AuthenticationElement.cs" />
     <Compile Include="Security\Configuration\AuthenticationSceneElement.cs" />
     <Compile Include="Security\Configuration\AuthenticationSceneElementCollection.cs" />
+    <Compile Include="TaskHelper.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="WebFileAccessor.cs" />
     <Compile Include="WebFileSystem.cs" />
