@@ -83,9 +83,9 @@ namespace Zongsoft.Web.Http
 			{
 				return Task.FromResult(this.ReadFromStream(type, readStream, content, formatterLogger));
 			}
-			catch(Exception e)
+			catch(Exception ex)
 			{
-				return TaskHelper.FromError<object>(e);
+				return TaskHelper.FromError<object>(ex);
 			}
 		}
 
@@ -102,12 +102,12 @@ namespace Zongsoft.Web.Http
 			{
 				return Zongsoft.Runtime.Serialization.Serializer.Json.Deserialize(readStream, type);
 			}
-			catch(Exception e)
+			catch(Exception ex)
 			{
 				if(formatterLogger == null)
 					throw;
 
-				formatterLogger.LogError(String.Empty, e);
+				formatterLogger.LogError(String.Empty, ex);
 				return GetDefaultValueForType(type);
 			}
 		}
