@@ -95,7 +95,7 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 公共方法
-		[Zongsoft.Web.Http.HttpPaging]
+		[HttpPaging]
 		public virtual object Get(string id = null, [FromUri]string key = null, [FromUri]Paging paging = null)
 		{
 			object result = null;
@@ -238,7 +238,7 @@ namespace Zongsoft.Web.Http
 		}
 
 		[HttpPost]
-		[Zongsoft.Web.Http.HttpPaging]
+		[HttpPaging]
 		public virtual IEnumerable<TModel> Query(TConditional conditional, [FromUri]Paging paging = null)
 		{
 			return this.DataService.Select(conditional, paging);
