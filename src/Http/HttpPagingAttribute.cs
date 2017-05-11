@@ -50,7 +50,7 @@ namespace Zongsoft.Web.Http
 				//获取当前操作是否支持数据分页加载
 				var paging = this.GetPaging(context.ActionContext.ActionArguments);
 
-				if(paging != null && paging.PageCount > 0)
+				if(paging != null)
 				{
 					//注意：由于数据可能未被加载，因此分页结果尚未计算；故此需要显式加载数据以驱动分页计算
 					context.Response.Content.LoadIntoBufferAsync();
