@@ -51,14 +51,8 @@ namespace Zongsoft.Web.Http
 			//生成返回的异常消息内容
 			actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception);
 
-			var data = new Dictionary<string, string>()
-			{
-				{ "http.method", actionExecutedContext.Request.Method.Method },
-				{ "http.url", actionExecutedContext.Request.RequestUri.OriginalString },
-			};
-
 			//默认将异常信息写入日志文件
-			Zongsoft.Diagnostics.Logger.Error(actionExecutedContext.Exception, data);
+			Zongsoft.Diagnostics.Logger.Error(actionExecutedContext.Exception, $"[{actionExecutedContext.Request.Method.Method}] {actionExecutedContext.Request.RequestUri.OriginalString}");
 		}
 
 		private HttpResponseMessage GetExceptionResponse(Exception exception, HttpStatusCode status = HttpStatusCode.InternalServerError)
