@@ -25,8 +25,10 @@
  */
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Http;
 using System.Web.Http.Filters;
 
 using Zongsoft.Security;
@@ -76,10 +78,20 @@ namespace Zongsoft.Web.Http.Security
 		#region 验证实现
 		public async Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
 		{
-			if(context.Request.Headers.Authorization == null || !string.Equals(context.Request.Headers.Authorization.Scheme, HTTP_AUTHORIZATION_SCHEME, StringComparison.OrdinalIgnoreCase))
-				return;
+			string credentialId = null;
 
-			var credentialId = GetCredentialId(context.Request.Headers.Authorization.Parameter);
+			//优先从HTTP的Authorization头获取凭证编号，如果没有获取成功则从请求的Cookie中获取
+			if(context.Request.Headers.Authorization != null && string.Equals(context.Request.Headers.Authorization.Scheme, HTTP_AUTHORIZATION_SCHEME, StringComparison.OrdinalIgnoreCase))
+			{
+				credentialId = GetCredentialId(context.Request.Headers.Authorization.Parameter);
+			}
+			else
+			{
+				var cookie = context.Request.Headers.GetCookies(Zongsoft.Web.Security.AuthenticationUtility.CredentialKey).FirstOrDefault();
+
+				if(cookie != null)
+					credentialId = cookie[Zongsoft.Web.Security.AuthenticationUtility.CredentialKey].Value;
+			}
 
 			if(string.IsNullOrWhiteSpace(credentialId))
 				context.Principal = CredentialPrincipal.Empty;
