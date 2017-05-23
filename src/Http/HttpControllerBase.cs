@@ -133,13 +133,13 @@ namespace Zongsoft.Web.Http
 						return result;
 					}
 
-					result = this.DataService.Get<string>(parts[0]);
+					result = this.DataService.Get<string>(parts[0], paging);
 					break;
 				case 2:
-					result = this.DataService.Get<string, string>(parts[0], parts[1]);
+					result = this.DataService.Get<string, string>(parts[0], parts[1], paging);
 					break;
 				case 3:
-					result = this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2]);
+					result = this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], paging);
 					break;
 				default:
 					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
