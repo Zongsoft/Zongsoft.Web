@@ -520,7 +520,7 @@ namespace Zongsoft.Web
 
 				//如果文件名为空，则生成一个以“当前日期-时间-随机数.ext”的默认文件名
 				if(string.IsNullOrWhiteSpace(fileName))
-					fileName = string.Format("{0:yyyyMMdd-HHmmss}-{1}{2}", DateTime.Now, (uint)Zongsoft.Common.RandomGenerator.GenerateInt32(), extensionAppend ? string.Empty : extensionName);
+					fileName = string.Format("{0:yyyyMMdd-HHmmss}-{1}{2}", DateTime.Now, (uint)Zongsoft.Common.RandomGenerator.GenerateInt32(), extensionAppend ? extensionName : string.Empty);
 				else if(extensionAppend && !fileName.EndsWith(extensionName))
 					fileName = fileName + extensionName;
 
