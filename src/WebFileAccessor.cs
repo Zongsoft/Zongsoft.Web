@@ -27,7 +27,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
@@ -36,6 +35,7 @@ using System.Web.Http;
 using System.Net.Http.Headers;
 
 using Zongsoft.IO;
+using Zongsoft.Collections;
 
 namespace Zongsoft.Web
 {
@@ -93,7 +93,7 @@ namespace Zongsoft.Web
 			if(string.IsNullOrWhiteSpace(path))
 				throw new ArgumentNullException("path");
 
-			var properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+			var properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 			var stream = FileSystem.File.Open(this.GetFilePath(path), FileMode.Open, FileAccess.Read, properties);
 
 			if(stream == null)
@@ -179,7 +179,7 @@ namespace Zongsoft.Web
 			if(string.IsNullOrWhiteSpace(path))
 				throw new ArgumentNullException("path");
 
-			var properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+			var properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
 			foreach(var header in request.Headers)
 			{
@@ -239,10 +239,11 @@ namespace Zongsoft.Web
 			{
 				foreach(var fileInfo in result.FileData)
 				{
-					string dispositionName, prefix;
+					object dispositionName;
+					string prefix;
 
 					if(fileInfo.HasProperties && fileInfo.Properties.TryGetValue(EXTENDED_PROPERTY_DISPOSITIONNAME, out dispositionName))
-						prefix = EXTENDED_PROPERTY_PREFIX + dispositionName + "-";
+						prefix = EXTENDED_PROPERTY_PREFIX + (string)dispositionName + "-";
 					else
 						continue;
 
@@ -407,13 +408,18 @@ namespace Zongsoft.Web
 
 		private class MultipartStorageFileStreamProvider : MultipartStreamProvider
 		{
+			#region 常量定义
+			//注意：扩展属性名包含冒号(:)的会被某些文件系统忽略
+			private const string EXTENDED_PROPERTY_FILESTREAM = "ignore:FileStream";
+			#endregion
+
 			#region 成员字段
 			private int _index;
 			private string _directoryPath;
 			private IDictionary<string, string> _headers;
 			private IList<Zongsoft.IO.FileInfo> _fileData;
 			private IDictionary<string, string> _formData;
-			private Collection<bool> _isFormData;
+			private System.Collections.ObjectModel.Collection<bool> _isFormData;
 			private Action<WritingEventArgs> _onWriting;
 			#endregion
 
@@ -426,7 +432,7 @@ namespace Zongsoft.Web
 				_directoryPath = directoryPath;
 				_headers = headers;
 				_fileData = new List<Zongsoft.IO.FileInfo>();
-				_isFormData = new Collection<bool>();
+				_isFormData = new System.Collections.ObjectModel.Collection<bool>();
 				_formData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 				_onWriting = onWriting;
 			}
@@ -559,7 +565,11 @@ namespace Zongsoft.Web
 				try
 				{
 					//调用文件系统根据完整文件路径去创建一个新建文件流
-					return FileSystem.File.Open(filePath, (overwrite ? FileMode.Create : FileMode.CreateNew), FileAccess.Write, (fileInfo.HasProperties ? fileInfo.Properties : null));
+					var stream = FileSystem.File.Open(filePath, (overwrite ? FileMode.Create : FileMode.CreateNew), FileAccess.Write, (fileInfo.HasProperties ? fileInfo.Properties : null));
+
+					fileInfo.Properties.Add(EXTENDED_PROPERTY_FILESTREAM, stream);
+
+					return stream;
 				}
 				catch
 				{
@@ -573,6 +583,7 @@ namespace Zongsoft.Web
 			public override async Task ExecutePostProcessingAsync()
 			{
 				int index = 0;
+				int fileIndex = 0;
 
 				foreach(var content in this.Contents)
 				{
@@ -582,6 +593,14 @@ namespace Zongsoft.Web
 					}
 					else
 					{
+						Stream stream;
+						var fileInfo = _fileData[fileIndex++];
+
+						if(fileInfo != null && fileInfo.Properties.TryGetValue(EXTENDED_PROPERTY_FILESTREAM, out stream) && stream != null)
+						{
+							fileInfo.Size = this.GetStramLength(stream);
+							fileInfo.Properties.Remove(EXTENDED_PROPERTY_FILESTREAM);
+						}
 					}
 				}
 			}
@@ -597,6 +616,21 @@ namespace Zongsoft.Web
 					return token.Substring(1, token.Length - 2);
 
 				return token;
+			}
+
+			private long GetStramLength(Stream stream)
+			{
+				if(stream == null)
+					return 0;
+
+				try
+				{
+					return stream.Length;
+				}
+				catch
+				{
+					return -1;
+				}
 			}
 			#endregion
 		}
