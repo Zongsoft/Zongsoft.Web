@@ -99,13 +99,13 @@ namespace Zongsoft.Web
 			#endregion
 
 			#region 公共方法
-			public bool Create(string virtualPath, IDictionary<string, string> properties = null)
+			public bool Create(string virtualPath, IDictionary<string, object> properties = null)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.Directory.Create(physicalPath, properties);
 			}
 
-			public Task<bool> CreateAsync(string virtualPath, IDictionary<string, string> properties = null)
+			public Task<bool> CreateAsync(string virtualPath, IDictionary<string, object> properties = null)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.Directory.CreateAsync(physicalPath, properties);
@@ -161,13 +161,13 @@ namespace Zongsoft.Web
 				return LocalFileSystem.Instance.Directory.GetInfoAsync(physicalPath);
 			}
 
-			public bool SetInfo(string virtualPath, IDictionary<string, string> properties)
+			public bool SetInfo(string virtualPath, IDictionary<string, object> properties)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.Directory.SetInfo(physicalPath, properties);
 			}
 
-			public Task<bool> SetInfoAsync(string virtualPath, IDictionary<string, string> properties)
+			public Task<bool> SetInfoAsync(string virtualPath, IDictionary<string, object> properties)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.Directory.SetInfoAsync(physicalPath, properties);
@@ -322,37 +322,37 @@ namespace Zongsoft.Web
 				return LocalFileSystem.Instance.File.GetInfoAsync(physicalPath);
 			}
 
-			public bool SetInfo(string virtualPath, IDictionary<string, string> properties)
+			public bool SetInfo(string virtualPath, IDictionary<string, object> properties)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.File.SetInfo(physicalPath, properties);
 			}
 
-			public Task<bool> SetInfoAsync(string virtualPath, IDictionary<string, string> properties)
+			public Task<bool> SetInfoAsync(string virtualPath, IDictionary<string, object> properties)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.File.SetInfoAsync(physicalPath, properties);
 			}
 
-			public System.IO.Stream Open(string virtualPath, IDictionary<string, string> properties = null)
+			public System.IO.Stream Open(string virtualPath, IDictionary<string, object> properties = null)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.File.Open(physicalPath, properties);
 			}
 
-			public System.IO.Stream Open(string virtualPath, System.IO.FileMode mode, IDictionary<string, string> properties = null)
+			public System.IO.Stream Open(string virtualPath, System.IO.FileMode mode, IDictionary<string, object> properties = null)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.File.Open(physicalPath, mode, properties);
 			}
 
-			public System.IO.Stream Open(string virtualPath, System.IO.FileMode mode, System.IO.FileAccess access, IDictionary<string, string> properties = null)
+			public System.IO.Stream Open(string virtualPath, System.IO.FileMode mode, System.IO.FileAccess access, IDictionary<string, object> properties = null)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.File.Open(physicalPath, mode, access, properties);
 			}
 
-			public System.IO.Stream Open(string virtualPath, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, IDictionary<string, string> properties = null)
+			public System.IO.Stream Open(string virtualPath, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, IDictionary<string, object> properties = null)
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 				return LocalFileSystem.Instance.File.Open(physicalPath, mode, access, share, properties);
