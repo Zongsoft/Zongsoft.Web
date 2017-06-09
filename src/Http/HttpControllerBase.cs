@@ -27,6 +27,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Web.Http;
 
 using Zongsoft.Data;
@@ -165,7 +166,7 @@ namespace Zongsoft.Web.Http
 		public virtual void Delete(string id)
 		{
 			if(string.IsNullOrWhiteSpace(id))
-				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+				throw HttpResponseExceptionUtility.BadRequest("Missing the id argument.");
 
 			var parts = id.Split('-');
 			var succeed = false;
@@ -182,7 +183,7 @@ namespace Zongsoft.Web.Http
 					succeed = this.DataService.Delete<string, string, string>(parts[0], parts[1], parts[2]) > 0;
 					break;
 				default:
-					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+					throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
 			}
 
 			if(!succeed)
@@ -192,7 +193,7 @@ namespace Zongsoft.Web.Http
 		public virtual void Put(TModel model)
 		{
 			if(model == null || (!this.ModelState.IsValid))
-				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+				throw HttpResponseExceptionUtility.BadRequest(this.ModelState);
 
 			if(this.DataService.Update(model) < 1)
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
@@ -201,7 +202,7 @@ namespace Zongsoft.Web.Http
 		public virtual TModel Post(TModel model)
 		{
 			if(model == null || (!this.ModelState.IsValid))
-				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+				throw HttpResponseExceptionUtility.BadRequest(this.ModelState);
 
 			if(this.DataService.Insert(model) > 0)
 				return model;
@@ -213,7 +214,7 @@ namespace Zongsoft.Web.Http
 		public virtual void Patch(string id, [FromContent]IDictionary<string, object> data)
 		{
 			if(string.IsNullOrWhiteSpace(id) || data == null)
-				throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+				throw HttpResponseExceptionUtility.BadRequest("Missing the id argument.");
 
 			var count = 0;
 			var parts = id.Split('-');
@@ -230,7 +231,7 @@ namespace Zongsoft.Web.Http
 					count = this.DataService.Update<string, string, string>(data, parts[0], parts[1], parts[2]);
 					break;
 				default:
-					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+					throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
 			}
 
 			if(count < 1)
