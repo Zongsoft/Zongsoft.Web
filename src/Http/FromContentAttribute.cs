@@ -37,6 +37,7 @@ using System.Web.Http.Controllers;
 
 namespace Zongsoft.Web.Http
 {
+	[Obsolete]
 	[AttributeUsage(AttributeTargets.Parameter)]
 	public class FromContentAttribute : ParameterBindingAttribute
 	{
