@@ -122,10 +122,11 @@ namespace Zongsoft.Web.Http
 			public override Task ExecuteBindingAsync(ModelMetadataProvider metadataProvider, HttpActionContext actionContext, CancellationToken cancellationToken)
 			{
 				var routeData = actionContext.RequestContext.RouteData;
+				object value;
 
 				//从当前请求的路由数据中获取指定的键值，获取失败则抛出异常
-				if(!routeData.Values.TryGetValue(this.Attribute.Key, out var value))
-					return TaskHelper.FromError(HttpResponseExceptionUtility.BadRequest($"Resolve '{this.Attribute.Key}' route data failed for the '{this.Descriptor.ParameterName}' parameter."));
+				if(!routeData.Values.TryGetValue(this.Attribute.Key, out value))
+					return TaskHelper.FromError(HttpResponseExceptionUtility.BadRequest(string.Format("Resolve '{0}' route data failed for the '{1}' parameter.", this.Attribute.Key, this.Descriptor.ParameterName)));
 
 				//获取指定键值切分之后的部位顺序
 				var ordinal = this.GetOrdinal(actionContext);
