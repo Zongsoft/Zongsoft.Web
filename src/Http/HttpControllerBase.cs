@@ -51,6 +51,7 @@ namespace Zongsoft.Web.Http
 				throw new ArgumentNullException("serviceProvider");
 
 			_serviceProvider = serviceProvider;
+			_dataService = serviceProvider.ResolveRequired<TService>();
 		}
 		#endregion
 
@@ -63,7 +64,6 @@ namespace Zongsoft.Web.Http
 			}
 		}
 
-		[Zongsoft.Services.ServiceDependency]
 		protected TService DataService
 		{
 			get
@@ -211,7 +211,7 @@ namespace Zongsoft.Web.Http
 		}
 
 		[HttpPatch, HttpPut]
-		public virtual void Patch(string id, [FromContent]IDictionary<string, object> data)
+		public virtual void Patch(string id, IDictionary<string, object> data)
 		{
 			if(string.IsNullOrWhiteSpace(id) || data == null)
 				throw HttpResponseExceptionUtility.BadRequest("Missing the id argument.");

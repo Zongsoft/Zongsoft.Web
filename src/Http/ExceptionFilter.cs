@@ -52,7 +52,7 @@ namespace Zongsoft.Web.Http
 			actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception);
 
 			//默认将异常信息写入日志文件
-			Zongsoft.Diagnostics.Logger.Error(actionExecutedContext.Exception, $"[{actionExecutedContext.Request.Method.Method}] {actionExecutedContext.Request.RequestUri.OriginalString}");
+			Zongsoft.Diagnostics.Logger.Error(actionExecutedContext.Exception, this.GetLoggingMessage(actionExecutedContext));
 		}
 
 		private HttpResponseMessage GetExceptionResponse(Exception exception, HttpStatusCode status = HttpStatusCode.InternalServerError)
@@ -73,6 +73,34 @@ namespace Zongsoft.Web.Http
 			};
 
 			return response;
+		}
+
+		private string GetLoggingMessage(HttpActionExecutedContext actionExecutedContext)
+		{
+			var text = new System.Text.StringBuilder();
+
+			text.AppendLine("[" + actionExecutedContext.Request.Method.Method + "] " + actionExecutedContext.Request.RequestUri.OriginalString);
+			text.AppendLine();
+
+			if(actionExecutedContext.ActionContext.RequestContext.Principal != null)
+				text.AppendLine(actionExecutedContext.ActionContext.RequestContext.Principal.ToString());
+
+			text.AppendLine("{");
+			foreach(var header in actionExecutedContext.Request.Headers)
+			{
+				text.AppendFormat("\t{0}: {1}" + Environment.NewLine, header.Key, this.GetHeaderValue(header.Value));
+			}
+			text.AppendLine("}");
+
+			return text.ToString();
+		}
+
+		private string GetHeaderValue(IEnumerable<string> values)
+		{
+			if(values == null)
+				return null;
+
+			return string.Join("|", values);
 		}
 	}
 }
