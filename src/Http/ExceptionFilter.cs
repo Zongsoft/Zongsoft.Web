@@ -34,6 +34,7 @@ namespace Zongsoft.Web.Http
 {
 	public class ExceptionFilter : ExceptionFilterAttribute
 	{
+		#region 重写方法
 		public override void OnException(HttpActionExecutedContext actionExecutedContext)
 		{
 			if(actionExecutedContext.Exception == null)
@@ -48,13 +49,31 @@ namespace Zongsoft.Web.Http
 				return;
 			}
 
+			if(actionExecutedContext.Exception is System.NotSupportedException)
+			{
+				actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception, HttpStatusCode.MethodNotAllowed);
+
+				//退出，不用记录日志
+				return;
+			}
+
+			if(actionExecutedContext.Exception is System.NotImplementedException)
+			{
+				actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception, HttpStatusCode.NotImplemented);
+
+				//退出，不用记录日志
+				return;
+			}
+
 			//生成返回的异常消息内容
 			actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception);
 
 			//默认将异常信息写入日志文件
 			Zongsoft.Diagnostics.Logger.Error(actionExecutedContext.Exception, this.GetLoggingMessage(actionExecutedContext));
 		}
+		#endregion
 
+		#region 私有方法
 		private HttpResponseMessage GetExceptionResponse(Exception exception, HttpStatusCode status = HttpStatusCode.InternalServerError)
 		{
 			if(exception == null)
@@ -102,5 +121,6 @@ namespace Zongsoft.Web.Http
 
 			return string.Join("|", values);
 		}
+		#endregion
 	}
 }
