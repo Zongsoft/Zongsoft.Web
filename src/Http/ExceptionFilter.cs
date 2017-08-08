@@ -65,8 +65,13 @@ namespace Zongsoft.Web.Http
 				return;
 			}
 
+			var statusCode = HttpStatusCode.InternalServerError;
+
+			if(actionExecutedContext.Exception is Zongsoft.Data.DataConflictException)
+				statusCode = HttpStatusCode.Conflict;
+
 			//生成返回的异常消息内容
-			actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception);
+			actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception, statusCode);
 
 			//默认将异常信息写入日志文件
 			Zongsoft.Diagnostics.Logger.Error(actionExecutedContext.Exception, this.GetLoggingMessage(actionExecutedContext));
