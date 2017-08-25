@@ -168,7 +168,42 @@ namespace Zongsoft.Web.Http
 			if(string.IsNullOrWhiteSpace(id))
 				throw HttpResponseExceptionUtility.BadRequest("Missing the id argument.");
 
-			var parts = id.Split('-');
+			string[] parts;
+			var entries = id.Split('|');
+
+			if(entries != null && entries.Length > 1)
+			{
+				int count = 0;
+
+				using(var transaction = new Zongsoft.Transactions.Transaction())
+				{
+					foreach(var entry in entries)
+					{
+						parts = entry.Split('-');
+
+						switch(parts.Length)
+						{
+							case 1:
+								count += this.DataService.Delete<string>(parts[0]);
+								break;
+							case 2:
+								count += this.DataService.Delete<string, string>(parts[0], parts[1]);
+								break;
+							case 3:
+								count += this.DataService.Delete<string, string, string>(parts[0], parts[1], parts[2]);
+								break;
+							default:
+								throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
+						}
+					}
+
+					transaction.Commit();
+				}
+
+				return;
+			}
+
+			parts = id.Split('-');
 			var succeed = false;
 
 			switch(parts.Length)
