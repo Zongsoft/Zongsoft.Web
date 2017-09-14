@@ -104,9 +104,9 @@ namespace Zongsoft.Web.Http
 			if(string.IsNullOrWhiteSpace(id))
 			{
 				if(string.IsNullOrWhiteSpace(key))
-					return this.DataService.Select(null, paging);
+					return this.DataService.Select(null, this.GetScope(), paging);
 
-				result = this.DataService.Search(key, paging);
+				result = this.DataService.Search(key, this.GetScope(), paging);
 
 				if(result == null)
 					throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
@@ -126,7 +126,7 @@ namespace Zongsoft.Web.Http
 					//如果只指定了一个参数并且参数包含冒号，则直接返回搜索操作结果
 					if(parts[0].Contains(":"))
 					{
-						result = this.DataService.Search(parts[0], paging);
+						result = this.DataService.Search(parts[0], this.GetScope(), paging);
 
 						if(result == null)
 							throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
@@ -134,13 +134,13 @@ namespace Zongsoft.Web.Http
 						return result;
 					}
 
-					result = this.DataService.Get<string>(parts[0], paging);
+					result = this.DataService.Get<string>(parts[0], this.GetScope(), paging);
 					break;
 				case 2:
-					result = this.DataService.Get<string, string>(parts[0], parts[1], paging);
+					result = this.DataService.Get<string, string>(parts[0], parts[1], this.GetScope(), paging);
 					break;
 				case 3:
-					result = this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], paging);
+					result = this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], this.GetScope(), paging);
 					break;
 				default:
 					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
@@ -160,7 +160,7 @@ namespace Zongsoft.Web.Http
 			if(string.IsNullOrWhiteSpace(keyword))
 				throw HttpResponseExceptionUtility.BadRequest("Missing keyword for search.");
 
-			return this.DataService.Search(keyword, paging);
+			return this.DataService.Search(keyword, this.GetScope(), paging);
 		}
 
 		public virtual void Delete(string id)
@@ -230,7 +230,7 @@ namespace Zongsoft.Web.Http
 			if(model == null || (!this.ModelState.IsValid))
 				throw HttpResponseExceptionUtility.BadRequest(this.ModelState);
 
-			if(this.DataService.Update(model) < 1)
+			if(this.DataService.Update(model, this.GetScope()) < 1)
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 
@@ -239,7 +239,7 @@ namespace Zongsoft.Web.Http
 			if(model == null || (!this.ModelState.IsValid))
 				throw HttpResponseExceptionUtility.BadRequest(this.ModelState);
 
-			if(this.DataService.Insert(model) > 0)
+			if(this.DataService.Insert(model, this.GetScope()) > 0)
 				return model;
 
 			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
@@ -257,13 +257,13 @@ namespace Zongsoft.Web.Http
 			switch(parts.Length)
 			{
 				case 1:
-					count = this.DataService.Update<string>(data, parts[0]);
+					count = this.DataService.Update<string>(data, parts[0], this.GetScope());
 					break;
 				case 2:
-					count = this.DataService.Update<string, string>(data, parts[0], parts[1]);
+					count = this.DataService.Update<string, string>(data, parts[0], parts[1], this.GetScope());
 					break;
 				case 3:
-					count = this.DataService.Update<string, string, string>(data, parts[0], parts[1], parts[2]);
+					count = this.DataService.Update<string, string, string>(data, parts[0], parts[1], parts[2], this.GetScope());
 					break;
 				default:
 					throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
@@ -277,7 +277,7 @@ namespace Zongsoft.Web.Http
 		[HttpPaging]
 		public virtual IEnumerable<TModel> Query(TConditional conditional, [FromUri]Paging paging = null)
 		{
-			return this.DataService.Select(conditional, paging);
+			return this.DataService.Select(conditional, this.GetScope(), paging);
 		}
 		#endregion
 
@@ -289,6 +289,20 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 私有方法
+		private string GetScope()
+		{
+			const string HTTP_SCOPE_HEADER = "x-data-scope";
+
+			IEnumerable<string> values;
+
+			if(this.Request.Headers.TryGetValues(HTTP_SCOPE_HEADER, out values) && values != null)
+			{
+				return string.Join(",", values);
+			}
+
+			return null;
+		}
+
 		private object GetResult(object value, out bool isNullOrEmpty)
 		{
 			isNullOrEmpty = value == null;
