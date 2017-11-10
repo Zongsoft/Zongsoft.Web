@@ -26,7 +26,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Http;
@@ -34,6 +33,7 @@ using System.Web.Http;
 
 namespace Zongsoft.Web.Http.Controllers
 {
+	[Obsolete]
 	public class DirectoryController : ApiController
 	{
 		#region 成员字段

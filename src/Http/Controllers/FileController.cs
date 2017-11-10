@@ -42,20 +42,23 @@ namespace Zongsoft.Web.Http.Controllers
 		#region 构造函数
 		public FileController()
 		{
-			_accessor = new WebFileAccessor();
 		}
 		#endregion
 
 		#region 公共属性
-		public string BasePath
+		[Zongsoft.Services.ServiceDependency]
+		public WebFileAccessor Accessor
 		{
 			get
 			{
-				return _accessor.BasePath;
+				return _accessor;
 			}
 			set
 			{
-				_accessor.BasePath = value;
+				if(value == null)
+					throw new ArgumentNullException();
+
+				_accessor = value;
 			}
 		}
 		#endregion
@@ -67,7 +70,7 @@ namespace Zongsoft.Web.Http.Controllers
 		/// <param name="path">指定要下载的文件的相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
 		public HttpResponseMessage Get(string path)
 		{
-			if(string.IsNullOrWhiteSpace(path))
+			if(string.IsNullOrEmpty(path))
 				throw new HttpResponseException(HttpStatusCode.BadRequest);
 
 			return _accessor.Read(path);
@@ -81,7 +84,7 @@ namespace Zongsoft.Web.Http.Controllers
 		[HttpGet]
 		public string Path(string path)
 		{
-			if(string.IsNullOrWhiteSpace(path))
+			if(string.IsNullOrEmpty(path))
 				throw new HttpResponseException(HttpStatusCode.BadRequest);
 
 			return _accessor.GetUrl(path);
@@ -95,7 +98,7 @@ namespace Zongsoft.Web.Http.Controllers
 		[HttpGet]
 		public Task<Zongsoft.IO.FileInfo> Info(string path)
 		{
-			if(string.IsNullOrWhiteSpace(path))
+			if(string.IsNullOrEmpty(path))
 				throw new HttpResponseException(HttpStatusCode.BadRequest);
 
 			return _accessor.GetInfo(path);
@@ -107,7 +110,7 @@ namespace Zongsoft.Web.Http.Controllers
 		/// <param name="path">指定要删除的文件的相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
 		public Task<bool> Delete(string path)
 		{
-			if(string.IsNullOrWhiteSpace(path))
+			if(string.IsNullOrEmpty(path))
 				throw new HttpResponseException(HttpStatusCode.BadRequest);
 
 			return _accessor.Delete(path);
@@ -119,7 +122,7 @@ namespace Zongsoft.Web.Http.Controllers
 		/// <param name="path">指定要修改的文件相对路径或绝对路径（绝对路径以/斜杠打头）。</param>
 		public Task<bool> Put(string path)
 		{
-			if(string.IsNullOrWhiteSpace(path))
+			if(string.IsNullOrEmpty(path))
 				throw new HttpResponseException(HttpStatusCode.BadRequest);
 
 			return _accessor.SetInfo(this.Request, path);
