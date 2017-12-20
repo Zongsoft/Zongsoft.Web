@@ -26,12 +26,16 @@
 
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Zongsoft.Runtime.Serialization;
 
 namespace Zongsoft.Web.Http
 {
@@ -42,9 +46,19 @@ namespace Zongsoft.Web.Http
 		private static readonly System.Net.Http.Headers.MediaTypeHeaderValue TextJsonMediaType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/json");
 		#endregion
 
+		#region 私有变量
+		private Runtime.Serialization.TextSerializationSettings _settings;
+		#endregion
+
 		#region 构造函数
-		public JsonMediaTypeFormatter()
+		public JsonMediaTypeFormatter() : this(null)
 		{
+		}
+
+		public JsonMediaTypeFormatter(Zongsoft.Runtime.Serialization.TextSerializationSettings settings)
+		{
+			_settings = settings;
+
 			this.SupportedEncodings.Add(new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
 			this.SupportedEncodings.Add(new System.Text.UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
 
@@ -136,7 +150,96 @@ namespace Zongsoft.Web.Http
 		private void WriteToStream(Type type, object value, Stream writeStream, HttpContent content)
 		{
 			var effectiveEncoding = this.SelectCharacterEncoding(content == null ? null : content.Headers);
-			Zongsoft.Runtime.Serialization.Serializer.Json.Serialize(writeStream, value);
+
+			using(var writer = new StreamWriter(writeStream, effectiveEncoding))
+			{
+				Runtime.Serialization.Serializer.Json.Serialize(writer, value, _settings);
+			}
+		}
+
+		public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)
+		{
+			var settings = this.GetSerializationSettings(request.Headers);
+
+			if(settings == null)
+				return base.GetPerRequestFormatterInstance(type, request, mediaType);
+			else
+				return new JsonMediaTypeFormatter(settings);
+		}
+		#endregion
+
+		#region 私有方法
+		private TextSerializationSettings GetSerializationSettings(HttpRequestHeaders headers)
+		{
+			if(headers == null)
+				return null;
+
+			var behaviors = this.GetHeaderValues(headers, "x-json-behaviors");
+			var datetimeFormat = this.GetHeaderValue(headers, "x-json-datetime");
+			var casing = this.GetHeaderValue(headers, "x-json-casing");
+
+			if((behaviors == null || behaviors.Count == 0) && string.IsNullOrEmpty(datetimeFormat) && string.IsNullOrEmpty(casing))
+				return null;
+
+			var settings = new TextSerializationSettings()
+			{
+				DateTimeFormat = datetimeFormat
+			};
+
+			if(!string.IsNullOrEmpty(casing) && Enum.TryParse<SerializationNamingConvention>(casing, true, out var naming))
+				settings.NamingConvention = naming;
+
+			if(behaviors != null && behaviors.Count > 0)
+			{
+				settings.Indented = behaviors.Contains("indented");
+
+				if(behaviors.Contains("ignores:none"))
+					settings.SerializationBehavior = SerializationBehavior.None;
+				else if(behaviors.Contains("ignores:default") || behaviors.Contains("ignores:null"))
+					settings.SerializationBehavior = SerializationBehavior.IgnoreDefaultValue;
+			}
+
+			return settings;
+		}
+
+		private ISet<string> GetHeaderValues(HttpHeaders headers, string name)
+		{
+			if(headers == null || string.IsNullOrEmpty(name))
+				return null;
+
+			IEnumerable<string> values;
+
+			if(headers.TryGetValues(name, out values) && values != null)
+			{
+				var hashset = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+				foreach(var value in values)
+				{
+					if(string.IsNullOrWhiteSpace(value))
+						continue;
+
+					var parts = value.Split(',', ';').Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => p.Trim());
+					hashset.UnionWith(parts);
+				}
+
+				if(hashset.Count > 0)
+					return hashset;
+			}
+
+			return null;
+		}
+
+		private string GetHeaderValue(HttpHeaders headers, string name)
+		{
+			if(headers == null || string.IsNullOrEmpty(name))
+				return null;
+
+			IEnumerable<string> values;
+
+			if(headers.TryGetValues(name, out values))
+				return string.Join(string.Empty, values);
+
+			return null;
 		}
 		#endregion
 	}
