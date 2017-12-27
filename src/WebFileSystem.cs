@@ -78,8 +78,20 @@ namespace Zongsoft.Web
 		#region 公共方法
 		public string GetUrl(string path)
 		{
+			if(string.IsNullOrEmpty(path))
+				return null;
+
 			var url = HttpContext.Current.Request.Url;
 			return url.Scheme + "://" + url.Authority + path;
+		}
+
+		public string GetUrl(Zongsoft.IO.Path path)
+		{
+			if(path == null)
+				return null;
+
+			var url = HttpContext.Current.Request.Url;
+			return url.Scheme + "://" + url.Authority + path.FullPath;
 		}
 
 		public static string GetPhysicalPath(string virtualPath)
