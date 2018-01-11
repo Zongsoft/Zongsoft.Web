@@ -68,8 +68,13 @@ namespace Zongsoft.Web.Controls
 		{
 			bool value;
 
+			var attributeValue = property.AttributeName;
+
+			if(attributeValue.StartsWith("data-", StringComparison.Ordinal))
+				attributeValue = attributeValue.Substring(5);
+
 			if(Zongsoft.Common.Convert.TryConvertValue(property.Value, out value) && (value == _renderValue))
-				writer.AddAttribute(property.AttributeName, property.AttributeName);
+				writer.AddAttribute(property.AttributeName, attributeValue);
 
 			return true;
 		}

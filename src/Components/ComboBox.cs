@@ -76,7 +76,7 @@ namespace Zongsoft.Web.Controls
 
 		[Bindable(true)]
 		[DefaultValue(true)]
-		[PropertyMetadata("disabled", PropertyRender = "BooleanPropertyRender.False")]
+		[PropertyMetadata("data-disabled", PropertyRender = "BooleanPropertyRender.False")]
 		public bool Enabled
 		{
 			get
