@@ -376,8 +376,13 @@ namespace Zongsoft.Web
 			{
 				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
 
-				if(mode != System.IO.FileMode.Open && !System.IO.Directory.Exists(physicalPath))
-					System.IO.Directory.CreateDirectory(physicalPath);
+				if(mode != System.IO.FileMode.Open)
+				{
+					var directory = System.IO.Path.GetDirectoryName(physicalPath);
+
+					if(!System.IO.Directory.Exists(directory))
+						System.IO.Directory.CreateDirectory(directory);
+				}
 
 				return physicalPath;
 			}
