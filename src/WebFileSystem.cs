@@ -354,20 +354,32 @@ namespace Zongsoft.Web
 
 			public System.IO.Stream Open(string virtualPath, System.IO.FileMode mode, IDictionary<string, object> properties = null)
 			{
-				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
+				var physicalPath = this.EnsureDirecotry(virtualPath, mode);
 				return LocalFileSystem.Instance.File.Open(physicalPath, mode, properties);
 			}
 
 			public System.IO.Stream Open(string virtualPath, System.IO.FileMode mode, System.IO.FileAccess access, IDictionary<string, object> properties = null)
 			{
-				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
+				var physicalPath = this.EnsureDirecotry(virtualPath, mode);
 				return LocalFileSystem.Instance.File.Open(physicalPath, mode, access, properties);
 			}
 
 			public System.IO.Stream Open(string virtualPath, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, IDictionary<string, object> properties = null)
 			{
-				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
+				var physicalPath = this.EnsureDirecotry(virtualPath, mode);
 				return LocalFileSystem.Instance.File.Open(physicalPath, mode, access, share, properties);
+			}
+			#endregion
+
+			#region 私有方法
+			private string EnsureDirecotry(string virtualPath, System.IO.FileMode mode)
+			{
+				var physicalPath = WebFileSystem.GetPhysicalPath(virtualPath);
+
+				if(mode != System.IO.FileMode.Open && !System.IO.Directory.Exists(physicalPath))
+					System.IO.Directory.CreateDirectory(physicalPath);
+
+				return physicalPath;
 			}
 			#endregion
 		}
