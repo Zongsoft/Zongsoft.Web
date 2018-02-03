@@ -111,7 +111,7 @@ namespace Zongsoft.Web.Security
 			}
 
 			//进行凭证验证(确保凭证是未过期并且可用的)
-			filterContext.Result = this.ValidateCredential(filterContext.HttpContext, filterContext.HttpContext.User as CredentialPrincipal, attribute.Validator);
+			filterContext.Result = this.ValidateCredential(filterContext.HttpContext, filterContext.HttpContext.User as CredentialPrincipal, attribute.GetValidator());
 
 			//如果返回的结果不为空则退出
 			if(filterContext.Result != null)
@@ -140,7 +140,7 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 私有方法
-		private ActionResult ValidateCredential(HttpContextBase httpContext, CredentialPrincipal principal, ICredentialValidator validator)
+		private ActionResult ValidateCredential(HttpContextBase httpContext, CredentialPrincipal principal, Common.IValidator<Credential> validator)
 		{
 			//获取凭证提供者服务
 			var credentialProvider = this.CredentialProvider;
