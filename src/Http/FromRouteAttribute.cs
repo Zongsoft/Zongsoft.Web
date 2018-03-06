@@ -45,7 +45,16 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 构造函数
-		public FromRouteAttribute(string key, int ordinal = -1)
+		public FromRouteAttribute(string key)
+		{
+			if(string.IsNullOrWhiteSpace(key))
+				throw new ArgumentNullException(nameof(key));
+
+			_key = key.Trim();
+			_ordinal = -1;
+		}
+
+		public FromRouteAttribute(string key, int ordinal)
 		{
 			if(string.IsNullOrWhiteSpace(key))
 				throw new ArgumentNullException(nameof(key));
@@ -56,6 +65,9 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 公共属性
+		/// <summary>
+		/// 获取绑定到的路由项键名称，譬如：id、args 等。
+		/// </summary>
 		public string Key
 		{
 			get
@@ -64,6 +76,9 @@ namespace Zongsoft.Web.Http
 			}
 		}
 
+		/// <summary>
+		/// 获取或设置绑定到相同路由项被分隔后的条目序号。默认值-1，表示按参数声明的顺序绑定。
+		/// </summary>
 		public int Ordinal
 		{
 			get
@@ -76,6 +91,9 @@ namespace Zongsoft.Web.Http
 			}
 		}
 
+		/// <summary>
+		/// 获取或设置绑定参数值的类型转换器的类型。
+		/// </summary>
 		public Type ConverterType
 		{
 			get
