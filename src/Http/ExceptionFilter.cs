@@ -87,9 +87,11 @@ namespace Zongsoft.Web.Http
 			var message = exception.Message;
 
 			if(exception.InnerException != null)
-				message += Environment.NewLine + exception.InnerException.Message;
+				message += @"\n" + exception.InnerException.Message;
 
-			message = message?.Replace('"', '\'');
+			//将双引号替换成单引号；将回车符删除；将换行符替换成对应的转义标识
+			if(message != null && message.Length > 0)
+				message = message.Replace('"', '\'').Replace("\r", "").Replace("\n", "\\n");
 
 			var response = new HttpResponseMessage(status)
 			{
