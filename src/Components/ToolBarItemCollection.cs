@@ -65,18 +65,12 @@ namespace Zongsoft.Web.Controls
 			return item.Name;
 		}
 
-		protected override void InsertItems(int index, IEnumerable<ToolBarItem> items)
+		protected override void AddItem(ToolBarItem item)
 		{
-			if(items == null)
-				return;
+			if(item != null && string.IsNullOrWhiteSpace(item.Name))
+				item.Name = "ToolbarItem_" + System.Threading.Interlocked.Increment(ref _index).ToString();
 
-			foreach(var item in items)
-			{
-				if(string.IsNullOrWhiteSpace(item.Name))
-					item.Name = "ToolbarItem_" + System.Threading.Interlocked.Increment(ref _index).ToString();
-			}
-
-			base.InsertItems(index, items);
+			base.AddItem(item);
 		}
 		#endregion
 	}

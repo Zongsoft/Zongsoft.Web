@@ -25,9 +25,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 
 namespace Zongsoft.Web.Controls
 {
@@ -78,7 +75,7 @@ namespace Zongsoft.Web.Controls
 			return item.Name;
 		}
 
-		protected override void SetItem(int index, TreeViewNode item)
+		protected override void SetItem(string name, TreeViewNode item)
 		{
 			if(item == null)
 				throw new ArgumentNullException("item");
@@ -90,64 +87,18 @@ namespace Zongsoft.Web.Controls
 			item.Parent = _parent;
 
 			//调用基类同名方法
-			base.SetItem(index, item);
+			base.SetItem(name, item);
 		}
 
-		protected override void InsertItems(int index, IEnumerable<TreeViewNode> items)
+		protected override void AddItem(TreeViewNode item)
 		{
-			if(items == null)
-				throw new ArgumentNullException("items");
-
-			foreach(var item in items)
+			if(item != null)
 			{
-				if(item.Parent != null)
-					throw new ArgumentException();
-
 				item.TreeView = _treeView;
 				item.Parent = _parent;
 			}
 
-			//使用同步锁，以确保不与删除和清除方法冲突
-			lock(_syncRoot)
-			{
-				//调用基类同名方法
-				base.InsertItems(index, items);
-			}
-		}
-
-		protected override void RemoveItem(int index)
-		{
-			lock(_syncRoot)
-			{
-				var item = base[index];
-
-				if(item != null)
-				{
-					item.TreeView = null;
-					item.Parent = null;
-				}
-
-				//调用基类同名方法
-				base.RemoveItem(index);
-			}
-		}
-
-		protected override void ClearItems()
-		{
-			lock(_syncRoot)
-			{
-				foreach(var item in base.Items)
-				{
-					if(item != null)
-					{
-						item.TreeView = null;
-						item.Parent = null;
-					}
-				}
-
-				//调用基类同名方法
-				base.ClearItems();
-			}
+			base.AddItem(item);
 		}
 		#endregion
 	}

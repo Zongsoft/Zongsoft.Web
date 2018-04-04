@@ -54,23 +54,20 @@ namespace Zongsoft.Web.Controls
 			return item.Name;
 		}
 
-		protected override void InsertItems(int index, IEnumerable<GridColumnBase> items)
-		{
-			if(items != null)
-			{
-				foreach(var item in items)
-					item.Grid = _grid;
-			}
-
-			base.InsertItems(index, items);
-		}
-
-		protected override void SetItem(int index, GridColumnBase item)
+		protected override void AddItem(GridColumnBase item)
 		{
 			if(item != null)
 				item.Grid = _grid;
 
-			base.SetItem(index, item);
+			base.AddItem(item);
+		}
+
+		protected override void SetItem(string name, GridColumnBase item)
+		{
+			if(item != null)
+				item.Grid = _grid;
+
+			base.SetItem(name, item);
 		}
 		#endregion
 

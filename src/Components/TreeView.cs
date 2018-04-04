@@ -354,9 +354,11 @@ namespace Zongsoft.Web.Controls
 		{
 			if(_nodes != null)
 			{
-				for(int i = 0; i < _nodes.Count; i++)
+				int index = 0;
+
+				foreach(var node in _nodes)
 				{
-					this.RenderNode(writer, _nodes[i], 0, i);
+					this.RenderNode(writer, node, 0, index++);
 				}
 			}
 
@@ -416,11 +418,13 @@ namespace Zongsoft.Web.Controls
 
 				writer.RenderBeginTag(this.GetListTagName());
 
-				for(int i = 0; i < node.Nodes.Count; i++)
+				int childIndex = 0;
+
+				foreach(var child in node.Nodes)
 				{
 					this.RenderNode(writer,
-									node.Nodes[i],
-									depth + 1, i);
+									child,
+									depth + 1, childIndex++);
 				}
 
 				writer.RenderEndTag();

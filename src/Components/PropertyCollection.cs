@@ -54,22 +54,20 @@ namespace Zongsoft.Web.Controls
 			return item.Name;
 		}
 
-		protected override void InsertItems(int index, IEnumerable<Property> items)
-		{
-			foreach(var item in items)
-			{
-				item.Owner = _owner;
-			}
-
-			base.InsertItems(index, items);
-		}
-
-		protected override void SetItem(int index, Property item)
+		protected override void AddItem(Property item)
 		{
 			if(item != null)
 				item.Owner = _owner;
 
-			base.SetItem(index, item);
+			base.AddItem(item);
+		}
+
+		protected override void SetItem(string name, Property item)
+		{
+			if(item != null)
+				item.Owner = _owner;
+
+			base.SetItem(name, item);
 		}
 		#endregion
 	}

@@ -60,10 +60,12 @@ namespace Zongsoft.Web.Controls
 		#region 公共方法
 		public IEnumerable<TabStripPanel> GetVisiblePanels()
 		{
-			foreach(var item in base.Items)
+			var iterator = this.GetEnumerator();
+
+			while(iterator.MoveNext())
 			{
-				if(item.Visible)
-					yield return item;
+				if(iterator.Current.Visible)
+					yield return iterator.Current;
 			}
 		}
 		#endregion
