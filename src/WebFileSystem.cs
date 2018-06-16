@@ -33,7 +33,6 @@ using Zongsoft.IO;
 
 namespace Zongsoft.Web
 {
-	[Zongsoft.Collections.Matcher(typeof(Zongsoft.IO.FileSystem.Matcher))]
 	public class WebFileSystem : Zongsoft.IO.IFileSystem
 	{
 		#region 单例字段
