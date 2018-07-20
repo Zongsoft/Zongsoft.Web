@@ -277,7 +277,7 @@ namespace Zongsoft.Web.Http
 		[HttpPaging]
 		public virtual IEnumerable<TModel> Query(TConditional conditional, [FromUri]Paging paging = null)
 		{
-			return this.DataService.Select(conditional, this.GetScope(), paging);
+			return this.DataService.Select(conditional.ToCondition(), this.GetScope(), paging);
 		}
 		#endregion
 

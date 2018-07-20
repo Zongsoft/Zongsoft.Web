@@ -254,7 +254,7 @@ namespace Zongsoft.Web
 
 		protected virtual object OnIndex(TConditional conditional, string scope = null, Paging paging = null, params Sorting[] sortings)
 		{
-			return this.DataService.Select(conditional, scope, paging, sortings);
+			return this.DataService.Select(conditional.ToCondition(), scope, paging, sortings);
 		}
 
 		protected virtual int OnDelete(string id, string cascades = null)
