@@ -172,7 +172,8 @@
     <Compile Include="Components\Widget.cs" />
     <Compile Include="Http\ExceptionFilter.cs" />
     <Compile Include="Http\FromRouteAttribute.cs" />
-    <Compile Include="Http\HttpControllerBase.cs" />
+    <Compile Include="Http\HttpControllerBase`2.cs" />
+    <Compile Include="Http\HttpControllerBase`3.cs" />
     <Compile Include="Http\HttpPagingAttribute.cs" />
     <Compile Include="Http\HttpResponseExceptionUtility.cs" />
     <Compile Include="Http\JsonMediaTypeFormatter.cs" />
