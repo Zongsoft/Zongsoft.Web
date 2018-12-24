@@ -45,12 +45,11 @@ namespace Zongsoft.Web.Http
 		protected HttpControllerBase(Zongsoft.Services.IServiceProvider serviceProvider)
 		{
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-			_dataService = serviceProvider.ResolveRequired<TService>();
 		}
 		#endregion
 
 		#region 属性定义
-		protected Zongsoft.Security.Credential Credential
+		protected virtual Zongsoft.Security.Credential Credential
 		{
 			get
 			{
@@ -62,14 +61,10 @@ namespace Zongsoft.Web.Http
 		{
 			get
 			{
-				return _dataService;
-			}
-			set
-			{
-				if(value == null)
-					throw new ArgumentNullException();
+				if(_dataService == null)
+					_dataService = this.GetService() ?? throw new InvalidOperationException("Missing required data service.");
 
-				_dataService = value;
+				return _dataService;
 			}
 		}
 
@@ -259,6 +254,11 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 保护方法
+		protected virtual TService GetService()
+		{
+			return _serviceProvider.ResolveRequired<TService>();
+		}
+
 		protected string GetSchema()
 		{
 			const string HTTP_SCHEMA_HEADER = "x-data-schema";
