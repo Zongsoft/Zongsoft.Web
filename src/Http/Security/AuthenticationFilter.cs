@@ -61,7 +61,7 @@ namespace Zongsoft.Web.Http.Security
 			get
 			{
 				if(_credentialProvider == null)
-					_credentialProvider = Zongsoft.ComponentModel.ApplicationContextBase.Current.ServiceFactory.Default.Resolve<ICredentialProvider>();
+					_credentialProvider = Zongsoft.Services.ApplicationContext.Current.Services.Resolve<ICredentialProvider>();
 
 				return _credentialProvider;
 			}

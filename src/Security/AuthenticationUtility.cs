@@ -174,11 +174,13 @@ namespace Zongsoft.Web.Security
 		{
 			if(credentialProvider == null)
 			{
-				var applicationContext = Zongsoft.ComponentModel.ApplicationContextBase.Current;
+				var applicationContext = Services.ApplicationContext.Current;
 
-				if(applicationContext != null && applicationContext.ServiceFactory != null)
+				if(applicationContext != null && applicationContext.Services != null)
+					credentialProvider = applicationContext.Services.Resolve<ICredentialProvider>();
+				else
 				{
-					var serviceProvider = applicationContext.ServiceFactory.GetProvider("Security");
+					var serviceProvider = Services.ServiceProviderFactory.Instance.GetProvider("Security");
 
 					if(serviceProvider != null)
 						credentialProvider = serviceProvider.Resolve<ICredentialProvider>();
@@ -375,10 +377,10 @@ namespace Zongsoft.Web.Security
 
 		private static Configuration.AuthenticationElement GetAuthenticationElement()
 		{
-			var applicationContext = Zongsoft.ComponentModel.ApplicationContextBase.Current;
+			var applicationContext = Zongsoft.Services.ApplicationContext.Current;
 
-			if(applicationContext != null && applicationContext.OptionManager != null)
-				return applicationContext.OptionManager.GetOptionValue("/Security/Authentication") as Configuration.AuthenticationElement;
+			if(applicationContext != null && applicationContext.Options != null)
+				return applicationContext.Options.GetOptionValue("/Security/Authentication") as Configuration.AuthenticationElement;
 
 			return null;
 		}
