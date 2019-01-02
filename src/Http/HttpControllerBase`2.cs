@@ -148,7 +148,7 @@ namespace Zongsoft.Web.Http
 				throw HttpResponseExceptionUtility.BadRequest("Missing the id argument.");
 
 			string[] parts;
-			var entries = id.Split('|');
+			var entries = id.Split('|', ',');
 
 			if(entries != null && entries.Length > 1)
 			{
