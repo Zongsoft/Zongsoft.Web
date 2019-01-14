@@ -45,7 +45,7 @@ namespace Zongsoft.Web.Http
 		public override void OnActionExecuted(HttpActionExecutedContext context)
 		{
 			//注意：当Action发生未处理异常会导致Response属性为空
-			if(context.Response != null && context.Response.IsSuccessStatusCode)
+			if(context.Response != null && context.Response.Content != null && context.Response.IsSuccessStatusCode)
 			{
 				//获取当前操作是否支持数据分页加载
 				var paging = this.GetPaging(context.ActionContext.ActionArguments);
