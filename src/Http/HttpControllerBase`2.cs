@@ -97,10 +97,7 @@ namespace Zongsoft.Web.Http
 
 				result = this.DataService.Search(key, this.GetSchema(), paging);
 
-				if(result == null)
-					throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
-
-				return result;
+				return result ?? new HttpResponseMessage(System.Net.HttpStatusCode.NoContent);
 			}
 
 			//如果同时指定了id和key参数，则抛出无效的请求异常(即400错误)
@@ -135,11 +132,7 @@ namespace Zongsoft.Web.Http
 					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 			}
 
-			//如果结果对象为空则抛出404异常
-			if(result == null)
-				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
-
-			return result;
+			return result ?? new HttpResponseMessage(System.Net.HttpStatusCode.NoContent);
 		}
 
 		public virtual void Delete(string id)
