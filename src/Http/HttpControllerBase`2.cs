@@ -85,19 +85,14 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 公共方法
-		[HttpPaging]
 		public virtual object Get(string id = null, [FromUri]string key = null, [FromUri]Paging paging = null)
 		{
-			object result = null;
-
 			if(string.IsNullOrWhiteSpace(id))
 			{
 				if(string.IsNullOrWhiteSpace(key))
-					return this.DataService.Select(null, this.GetSchema(), paging);
-
-				result = this.DataService.Search(key, this.GetSchema(), paging);
-
-				return result ?? new HttpResponseMessage(System.Net.HttpStatusCode.NoContent);
+					return this.GetResult(this.DataService.Select(null, this.GetSchema(), paging));
+				else
+					return this.GetResult(this.DataService.Search(key, this.GetSchema(), paging));
 			}
 
 			//如果同时指定了id和key参数，则抛出无效的请求异常(即400错误)
@@ -105,34 +100,22 @@ namespace Zongsoft.Web.Http
 				throw HttpResponseExceptionUtility.BadRequest("Cannot specify the 'id' and 'key' argument at the same time.");
 
 			var parts = this.Slice(id);
+			IPaginator paginator = null;
 
 			switch(parts.Length)
 			{
 				case 1:
-					//如果只指定了一个参数并且参数包含冒号，则直接返回搜索操作结果
 					if(parts[0].Contains(":"))
-					{
-						result = this.DataService.Search(parts[0], this.GetSchema(), paging);
-
-						if(result == null)
-							throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
-
-						return result;
-					}
-
-					result = this.DataService.Get<string>(parts[0], this.GetSchema(), paging);
-					break;
+						return this.GetResult(this.DataService.Search(parts[0], this.GetSchema(), paging));
+					else
+						return this.GetResult(this.DataService.Get<string>(parts[0], this.GetSchema(), paging, null, out paginator), paginator);
 				case 2:
-					result = this.DataService.Get<string, string>(parts[0], parts[1], this.GetSchema(), paging);
-					break;
+					return this.GetResult(this.DataService.Get<string, string>(parts[0], parts[1], this.GetSchema(), paging, null, out paginator), paginator);
 				case 3:
-					result = this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], this.GetSchema(), paging);
-					break;
+					return this.GetResult(this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], this.GetSchema(), paging, null, out paginator), paginator);
 				default:
 					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
 			}
-
-			return result ?? new HttpResponseMessage(System.Net.HttpStatusCode.NoContent);
 		}
 
 		public virtual void Delete(string id)
@@ -268,6 +251,34 @@ namespace Zongsoft.Web.Http
 		{
 			return Utility.Slice(text);
 		}
+
+		protected object GetResult(object data, IPaginator paginator = null)
+		{
+			if(data == null)
+				return new HttpResponseMessage(System.Net.HttpStatusCode.NoContent);
+
+			if(paginator == null)
+				paginator = data as IPaginator;
+
+			if(paginator != null)
+			{
+				var result = new Result(data);
+
+				paginator.Paginated += Paginator_Paginated;
+
+				void Paginator_Paginated(object sender, PagingEventArgs e)
+				{
+					if(result.Paging == null)
+						result.Paging = new Dictionary<string, string>();
+
+					result.Paging[string.IsNullOrEmpty(e.Name) ? "$" : e.Name] = e.Paging.ToString();
+				}
+
+				return result;
+			}
+
+			return data;
+		}
 		#endregion
 
 		#region 私有方法
@@ -288,6 +299,21 @@ namespace Zongsoft.Web.Http
 			return value;
 		}
 		#endregion
+
+		private class Result
+		{
+			[Zongsoft.Runtime.Serialization.SerializationMember("$")]
+			public object Data;
+
+			[Zongsoft.Runtime.Serialization.SerializationMember("$paging")]
+			public IDictionary<string, string> Paging;
+
+			public Result(object data)
+			{
+				this.Data = data;
+				this.Paging = null;
+			}
+		}
 
 		#region 嵌套子类
 		private class ResultEnumerable : IEnumerable

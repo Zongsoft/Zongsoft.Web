@@ -25,9 +25,6 @@
  */
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Web.Http;
 
 using Zongsoft.Data;
@@ -47,20 +44,18 @@ namespace Zongsoft.Web.Http
 
 		#region 公共方法
 		[HttpGet]
-		[HttpPaging]
 		public virtual object Search(string keyword, [FromUri]Paging paging = null)
 		{
 			if(string.IsNullOrWhiteSpace(keyword))
 				throw HttpResponseExceptionUtility.BadRequest("Missing keyword for search.");
 
-			return this.DataService.Search(keyword, this.GetSchema(), paging);
+			return this.GetResult(this.DataService.Search(keyword, this.GetSchema(), paging));
 		}
 
 		[HttpPost]
-		[HttpPaging]
-		public virtual IEnumerable<TModel> Query(TConditional conditional, [FromUri]Paging paging = null)
+		public virtual object Query(TConditional conditional, [FromUri]Paging paging = null)
 		{
-			return this.DataService.Select(Conditional.ToCondition(conditional), this.GetSchema(), paging);
+			return this.GetResult(this.DataService.Select(Conditional.ToCondition(conditional), this.GetSchema(), paging));
 		}
 		#endregion
 	}

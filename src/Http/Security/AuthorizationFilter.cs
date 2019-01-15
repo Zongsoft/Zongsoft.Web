@@ -19,9 +19,10 @@ namespace Zongsoft.Web.Http.Security
 			}
 		}
 
-		public Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
+		public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
 		{
-			return continuation();
+			var response = await continuation();
+			return response;
 		}
 	}
 }
