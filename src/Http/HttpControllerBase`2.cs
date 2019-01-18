@@ -49,6 +49,21 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 属性定义
+		protected virtual bool CanDelete
+		{
+			get => true;
+		}
+
+		protected virtual bool CanCreate
+		{
+			get => true;
+		}
+
+		protected virtual bool CanUpdate
+		{
+			get => true;
+		}
+
 		protected virtual Zongsoft.Security.Credential Credential
 		{
 			get
@@ -120,6 +135,9 @@ namespace Zongsoft.Web.Http
 
 		public virtual void Delete(string id)
 		{
+			if(!this.CanDelete)
+				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
+
 			if(string.IsNullOrWhiteSpace(id))
 				throw HttpResponseExceptionUtility.BadRequest("Missing the id argument.");
 
@@ -180,17 +198,11 @@ namespace Zongsoft.Web.Http
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 
-		public virtual void Put(TModel model)
-		{
-			if(model == null || (!this.ModelState.IsValid))
-				throw HttpResponseExceptionUtility.BadRequest(this.ModelState);
-
-			if(this.DataService.Update(model, this.GetSchema()) < 1)
-				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
-		}
-
 		public virtual TModel Post(TModel model)
 		{
+			if(!this.CanCreate)
+				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
+
 			if(model == null || (!this.ModelState.IsValid))
 				throw HttpResponseExceptionUtility.BadRequest(this.ModelState);
 
@@ -200,9 +212,24 @@ namespace Zongsoft.Web.Http
 			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
 		}
 
+		public virtual void Put(TModel model)
+		{
+			if(!this.CanUpdate)
+				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
+
+			if(model == null || (!this.ModelState.IsValid))
+				throw HttpResponseExceptionUtility.BadRequest(this.ModelState);
+
+			if(this.DataService.Update(model, this.GetSchema()) < 1)
+				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+		}
+
 		[HttpPatch, HttpPut]
 		public virtual void Patch(string id, IDictionary<string, object> data)
 		{
+			if(!this.CanUpdate)
+				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
+
 			if(string.IsNullOrWhiteSpace(id) || data == null)
 				throw HttpResponseExceptionUtility.BadRequest("Missing the id argument.");
 
