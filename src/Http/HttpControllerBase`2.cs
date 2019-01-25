@@ -51,17 +51,17 @@ namespace Zongsoft.Web.Http
 		#region 属性定义
 		protected virtual bool CanDelete
 		{
-			get => true;
+			get => this.DataService.CanDelete;
 		}
 
 		protected virtual bool CanCreate
 		{
-			get => true;
+			get => this.DataService.CanInsert | this.DataService.CanUpsert;
 		}
 
 		protected virtual bool CanUpdate
 		{
-			get => true;
+			get => this.DataService.CanUpdate | this.DataService.CanUpsert;
 		}
 
 		protected virtual Zongsoft.Security.Credential Credential
