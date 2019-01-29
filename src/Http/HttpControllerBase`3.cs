@@ -43,6 +43,31 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 公共方法
+		[HttpPost]
+		public virtual object Count(TConditional conditional)
+		{
+			if(conditional == null)
+				return this.DataService.Count(null);
+			else
+				return this.DataService.Count(Conditional.ToCondition(conditional));
+		}
+
+		[HttpPost]
+		public virtual object Exists(TConditional conditional)
+		{
+			bool existed = false;
+
+			if(conditional == null)
+				existed = this.DataService.Exists(null);
+			else
+				existed = this.DataService.Exists(Conditional.ToCondition(conditional));
+
+			if(existed)
+				return this.Ok();
+			else
+				return this.NotFound();
+		}
+
 		[HttpGet]
 		public virtual object Search(string keyword, [FromUri]Paging paging = null)
 		{

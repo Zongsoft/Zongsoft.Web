@@ -100,6 +100,64 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 公共方法
+		[HttpGet]
+		public virtual object Count(string id = null)
+		{
+			if(string.IsNullOrEmpty(id))
+				return this.DataService.Count(null);
+
+			var parts = this.Slice(id);
+
+			//switch(parts.Length)
+			//{
+			//	case 1:
+			//		return this.DataService.Count(parts[0]);
+			//	case 2:
+			//		return this.DataService.Count(parts[0], parts[1]);
+			//	case 3:
+			//		return this.DataService.Count(parts[0], parts[1], parts[2]);
+			//	default:
+			//		return this.BadRequest();
+			//}
+
+			return this.BadRequest();
+		}
+
+		[HttpGet]
+		public virtual object Exists(string id = null)
+		{
+			var existed = false;
+
+			if(string.IsNullOrEmpty(id))
+			{
+				existed = this.DataService.Exists(null);
+			}
+			else
+			{
+				var parts = this.Slice(id);
+
+				switch(parts.Length)
+				{
+					case 1:
+						existed = this.DataService.Exists(parts[0]);
+						break;
+					case 2:
+						existed = this.DataService.Exists(parts[0], parts[1]);
+						break;
+					case 3:
+						existed = this.DataService.Exists(parts[0], parts[1], parts[2]);
+						break;
+					default:
+						return this.BadRequest();
+				}
+			}
+
+			if(existed)
+				return this.Ok();
+			else
+				return this.NotFound();
+		}
+
 		public virtual object Get(string id = null, [FromUri]string key = null, [FromUri]Paging paging = null)
 		{
 			if(string.IsNullOrWhiteSpace(id))
@@ -112,7 +170,7 @@ namespace Zongsoft.Web.Http
 
 			//如果同时指定了id和key参数，则抛出无效的请求异常(即400错误)
 			if(key != null)
-				throw HttpResponseExceptionUtility.BadRequest("Cannot specify the 'id' and 'key' argument at the same time.");
+				return this.BadRequest("Cannot specify the 'id' and 'key' argument at the same time.");
 
 			var parts = this.Slice(id);
 			IPaginator paginator = null;
@@ -129,7 +187,7 @@ namespace Zongsoft.Web.Http
 				case 3:
 					return this.GetResult(this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], this.GetSchema(), paging, null, out paginator), paginator);
 				default:
-					throw new HttpResponseException(System.Net.HttpStatusCode.BadRequest);
+					return this.BadRequest();
 			}
 		}
 
@@ -327,6 +385,7 @@ namespace Zongsoft.Web.Http
 		}
 		#endregion
 
+		#region 嵌套子类
 		private class Result
 		{
 			[Zongsoft.Runtime.Serialization.SerializationMember("$")]
@@ -342,7 +401,6 @@ namespace Zongsoft.Web.Http
 			}
 		}
 
-		#region 嵌套子类
 		private class ResultEnumerable : IEnumerable
 		{
 			#region 成员字段
