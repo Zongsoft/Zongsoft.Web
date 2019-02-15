@@ -32,9 +32,9 @@ using Zongsoft.Data;
 namespace Zongsoft.Web.Http
 {
 	public class HttpControllerBase<TModel, TConditional, TService> : HttpControllerBase<TModel, TService>
-																	  where TModel : class
-																	  where TConditional : class, IEntity
-																	  where TService : class, IDataService<TModel>
+	                                                                  where TModel : class
+	                                                                  where TConditional : class, IEntity
+	                                                                  where TService : class, IDataService<TModel>
 	{
 		#region 构造函数
 		protected HttpControllerBase(Zongsoft.Services.IServiceProvider serviceProvider) : base(serviceProvider)
