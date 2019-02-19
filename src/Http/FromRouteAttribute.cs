@@ -165,7 +165,23 @@ namespace Zongsoft.Web.Http
 				{
 					object targetValue;
 
-					if(Zongsoft.Common.Convert.TryConvertValue(value, this.Descriptor.ParameterType, out targetValue))
+					if(value != null && value is string text && text.Length > 0 && (this.Descriptor.ParameterType.IsArray || Zongsoft.Common.TypeExtension.IsCollection(this.Descriptor.ParameterType)))
+					{
+						var parts = text.Split(',');
+						var elementType = Zongsoft.Common.TypeExtension.GetElementType(this.Descriptor.ParameterType);
+						var array = Array.CreateInstance(elementType, parts.Length);
+
+						for(int i = 0; i < parts.Length; i++)
+						{
+							if(Zongsoft.Common.Convert.TryConvertValue(parts[i], elementType, out var element))
+								array.SetValue(element, i);
+							else
+								actionContext.ModelState.AddModelError(this.Descriptor.ParameterName, $"The specified '{parts[i]}' is an invalid element value and cannot be converted to '{elementType.Name}' type.");
+						}
+
+						value = array;
+					}
+					else if(Zongsoft.Common.Convert.TryConvertValue(value, this.Descriptor.ParameterType, out targetValue))
 						value = targetValue;
 					else
 						value = this.Descriptor.DefaultValue;
