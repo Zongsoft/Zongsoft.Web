@@ -126,7 +126,7 @@ namespace Zongsoft.Web.Security
 					if(attribute.Roles != null && attribute.Roles.Length > 0)
 					{
 						//如果当前用户即不属于系统管理员也不属于指定角色的成员，则返回验证失败的响应
-						if(!this.MemberProvider.InRoles(userId, Role.Administrators) && !this.MemberProvider.InRoles(userId, attribute.Roles))
+						if(!this.MemberProvider.InRoles(userId, "Administrators") && !this.MemberProvider.InRoles(userId, attribute.Roles))
 							filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
 					}
 					break;
