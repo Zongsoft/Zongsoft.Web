@@ -197,7 +197,7 @@ namespace Zongsoft.Web.Http
 				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
 
 			if(string.IsNullOrWhiteSpace(id))
-				throw HttpResponseExceptionUtility.BadRequest("Missing the id argument.");
+				throw HttpResponseExceptionUtility.BadRequest("Missing the id parameter of the delete operation.");
 
 			string[] parts;
 			var entries = id.Split('|', ',');
@@ -261,52 +261,48 @@ namespace Zongsoft.Web.Http
 			if(!this.CanCreate)
 				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
 
-			if(model == null || (!this.ModelState.IsValid))
-				throw HttpResponseExceptionUtility.BadRequest(this.ModelState);
+			//确认模型是否有效
+			this.EnsureModel(model);
 
 			if(this.DataService.Insert(model, this.GetSchema()) > 0)
 				return model;
 
 			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
 		}
-
-		public virtual void Put(TModel model)
+ 
+		public virtual void Put(string id, TModel model)
 		{
 			if(!this.CanUpdate)
 				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
 
-			if(model == null || (!this.ModelState.IsValid))
-				throw HttpResponseExceptionUtility.BadRequest(this.ModelState);
+			if(string.IsNullOrWhiteSpace(id))
+				throw HttpResponseExceptionUtility.BadRequest("Missing the id parameter of the update operation.");
 
-			if(this.DataService.Update(model, this.GetSchema()) < 1)
-				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
-		}
-
-		[HttpPatch, HttpPut]
-		public virtual void Patch(string id, IDictionary<string, object> data)
-		{
-			if(!this.CanUpdate)
-				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
-
-			if(string.IsNullOrWhiteSpace(id) || data == null)
-				throw HttpResponseExceptionUtility.BadRequest("Missing the id argument.");
+			//确认模型是否有效
+			this.EnsureModel(model);
 
 			var count = 0;
-			var parts = id.Split('-');
 
-			switch(parts.Length)
+			if(string.IsNullOrEmpty(id))
+				count = this.DataService.Update(model, this.GetSchema());
+			else
 			{
-				case 1:
-					count = this.DataService.Update<string>(data, parts[0], this.GetSchema());
-					break;
-				case 2:
-					count = this.DataService.Update<string, string>(data, parts[0], parts[1], this.GetSchema());
-					break;
-				case 3:
-					count = this.DataService.Update<string, string, string>(data, parts[0], parts[1], parts[2], this.GetSchema());
-					break;
-				default:
-					throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
+				var parts = this.Slice(id);
+
+				switch(parts.Length)
+				{
+					case 1:
+						count = this.DataService.Update(model, parts[0], this.GetSchema());
+						break;
+					case 2:
+						count = this.DataService.Update(model, parts[0], parts[1], this.GetSchema());
+						break;
+					case 3:
+						count = this.DataService.Update(model, parts[0], parts[1], parts[2], this.GetSchema());
+						break;
+					default:
+						throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
+				}
 			}
 
 			if(count < 1)
@@ -367,6 +363,31 @@ namespace Zongsoft.Web.Http
 		#endregion
 
 		#region 私有方法
+		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private void EnsureModel(TModel model)
+		{
+			if(model == null)
+				throw HttpResponseExceptionUtility.BadRequest("Missing required data.");
+
+			if(this.ModelState.IsValid)
+				return;
+
+			var message = new System.Text.StringBuilder();
+
+			foreach(var state in this.ModelState)
+			{
+				foreach(var error in state.Value.Errors)
+				{
+					if(error.Exception == null)
+						message.AppendLine($"[{state.Key}]{error.ErrorMessage}");
+					else
+						message.AppendLine($"[{state.Key}]{error.Exception.GetType().Name}:{error.ErrorMessage}");
+				}
+			}
+
+			throw HttpResponseExceptionUtility.BadRequest(message.ToString());
+		}
+
 		private object GetResult(object value, out bool isNullOrEmpty)
 		{
 			isNullOrEmpty = value == null;
