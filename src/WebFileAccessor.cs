@@ -213,7 +213,7 @@ namespace Zongsoft.Web
 		/// <returns>返回写入成功的<see cref="Zongsoft.IO.FileInfo"/>文件描述信息实体对象集。</returns>
 		public async Task<IEnumerable<Zongsoft.IO.FileInfo>> Write(HttpRequestMessage request, string directory = null, Action<WritingEventArgs> onWriting = null)
 		{
-			var directoryPath = this.GetFilePath(directory);
+			var filePath = this.GetFilePath(directory);
 
 			//检测请求的内容是否为Multipart类型
 			if(!request.Content.IsMimeMultipartContent("form-data"))
@@ -230,7 +230,7 @@ namespace Zongsoft.Web
 			}
 
 			//创建多段表单信息的文件流操作的供应程序
-			var provider = new MultipartStorageFileStreamProvider(directoryPath, headers, onWriting);
+			var provider = new MultipartStorageFileStreamProvider(filePath, headers, onWriting);
 
 			//从当前请求内容读取多段信息并写入文件中
 			var result = await request.Content.ReadAsMultipartAsync(provider);
@@ -323,7 +323,7 @@ namespace Zongsoft.Web
 
 			#region 公共属性
 			/// <summary>
-			/// 获取当前文件的序号，从零开始。
+			/// 获取当前文件的序号，从一开始。
 			/// </summary>
 			public int Index
 			{
@@ -411,11 +411,14 @@ namespace Zongsoft.Web
 			#region 常量定义
 			//注意：扩展属性名包含冒号(:)的会被某些文件系统忽略
 			private const string EXTENDED_PROPERTY_FILESTREAM = "ignore:FileStream";
+
+			private static readonly DateTime EPOCH = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 			#endregion
 
 			#region 成员字段
 			private int _index;
-			private string _directoryPath;
+			private string _filePath;
+			private string _directory;
 			private IDictionary<string, string> _headers;
 			private IList<Zongsoft.IO.FileInfo> _fileData;
 			private IDictionary<string, string> _formData;
@@ -424,26 +427,36 @@ namespace Zongsoft.Web
 			#endregion
 
 			#region 构造函数
-			public MultipartStorageFileStreamProvider(string directoryPath, IDictionary<string, string> headers, Action<WritingEventArgs> onWriting)
+			public MultipartStorageFileStreamProvider(string filePath, IDictionary<string, string> headers, Action<WritingEventArgs> onWriting)
 			{
-				if(string.IsNullOrWhiteSpace(directoryPath))
-					throw new ArgumentNullException("directoryPath");
+				if(string.IsNullOrEmpty(filePath))
+					throw new ArgumentNullException(nameof(filePath));
 
-				_directoryPath = directoryPath;
+				_filePath = filePath;
 				_headers = headers;
 				_fileData = new List<Zongsoft.IO.FileInfo>();
 				_isFormData = new System.Collections.ObjectModel.Collection<bool>();
 				_formData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 				_onWriting = onWriting;
+
+				if(_filePath[_filePath.Length - 1] == '/')
+					_directory = _filePath;
+				else
+				{
+					var index = _filePath.LastIndexOf('/');
+
+					if(index > 0)
+						_directory = _filePath.Substring(0, index + 1);
+				}
 			}
 			#endregion
 
 			#region 公共属性
-			public string DirectoryPath
+			public string FilePath
 			{
 				get
 				{
-					return _directoryPath;
+					return _filePath;
 				}
 			}
 
@@ -468,10 +481,9 @@ namespace Zongsoft.Web
 			public override Stream GetStream(HttpContent parent, HttpContentHeaders headers)
 			{
 				if(parent == null)
-					throw new ArgumentNullException("parent");
-
+					throw new ArgumentNullException(nameof(parent));
 				if(headers == null)
-					throw new ArgumentNullException("headers");
+					throw new ArgumentNullException(nameof(headers));
 
 				//判断当前内容项是否为普通表单域，如果是则返回一个内存流
 				if(headers.ContentDisposition == null || string.IsNullOrEmpty(headers.ContentDisposition.FileName))
@@ -490,14 +502,24 @@ namespace Zongsoft.Web
 					contentType = System.Web.MimeMapping.GetMimeMapping(headers.ContentDisposition.FileName);
 
 				string fileName = null;
+
+				//设置文件名的初始值
+				if(_filePath[_filePath.Length - 1] != '/')
+				{
+					var index = _filePath.LastIndexOf('/');
+
+					if(index > 0 && index < _filePath.Length - 1)
+						fileName = _filePath.Substring(index + 1);
+				}
+
 				var dispositionName = UnquoteToken(headers.ContentDisposition.Name);
 				var extensionName = System.IO.Path.GetExtension(UnquoteToken(headers.ContentDisposition.FileName));
 
 				if(!string.IsNullOrWhiteSpace(dispositionName))
 				{
 					//获取请求头中显式指定的文件名（注意：该文件名支持模板格式）
-					if(_headers.TryGetValue(dispositionName + ".name", out fileName))
-						fileName = Zongsoft.Text.TemplateEvaluatorManager.Default.Evaluate<string>(fileName, null).ToLowerInvariant() + extensionName;
+					if(_headers.TryGetValue(dispositionName + ".name", out var value))
+						fileName = Zongsoft.Text.TemplateEvaluatorManager.Default.Evaluate<string>(value, null).ToLowerInvariant() + extensionName;
 				}
 
 				//定义文件写入的模式
@@ -510,7 +532,7 @@ namespace Zongsoft.Web
 				if(_onWriting != null)
 				{
 					//创建回调参数
-					var args = new WritingEventArgs(_directoryPath, fileName, Interlocked.Increment(ref _index));
+					var args = new WritingEventArgs(_filePath, fileName, Interlocked.Increment(ref _index));
 
 					//执行写入前的回调
 					_onWriting(args);
@@ -524,14 +546,14 @@ namespace Zongsoft.Web
 					extensionAppend = args.ExtensionAppend;
 				}
 
-				//如果文件名为空，则生成一个以“当前日期-时间-随机数.ext”的默认文件名
+				//如果文件名为空，则生成一个以“时间戳-随机数.ext”的默认文件名
 				if(string.IsNullOrWhiteSpace(fileName))
-					fileName = string.Format("{0:yyyyMMdd-HHmmss}-{1}{2}", DateTime.Now, (uint)Zongsoft.Common.RandomGenerator.GenerateInt32(), extensionAppend ? extensionName : string.Empty);
+					fileName = string.Format("X{0}-{1}{2}", ((long)(DateTime.UtcNow - EPOCH).TotalSeconds).ToString(), Zongsoft.Common.RandomGenerator.GenerateString(), extensionAppend ? extensionName : string.Empty);
 				else if(extensionAppend && !fileName.EndsWith(extensionName))
-					fileName = fileName + extensionName;
+					fileName += extensionName;
 
 				//生成文件的完整路径
-				var filePath = Zongsoft.IO.Path.Combine(_directoryPath, fileName);
+				var filePath = Zongsoft.IO.Path.Combine(_directory, fileName);
 
 				//生成文件信息的描述实体
 				var fileInfo = new Zongsoft.IO.FileInfo(filePath, (headers.ContentDisposition.Size.HasValue ? headers.ContentDisposition.Size.Value : -1), DateTime.Now, null, FileSystem.GetUrl(filePath))
