@@ -25,17 +25,24 @@
  */
 
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http;
+using System.Threading.Tasks;
 
+using Zongsoft.IO;
 using Zongsoft.Data;
 
 namespace Zongsoft.Web.Http
 {
 	public class HttpControllerBase<TModel, TService> : System.Web.Http.ApiController where TService : class, IDataService<TModel>
 	{
+		#region 单例字段
+		private static readonly WebFileAccessor _accessor = new WebFileAccessor();
+		#endregion
+
 		#region 成员字段
 		private TService _dataService;
 		private Zongsoft.Services.IServiceProvider _serviceProvider;
@@ -310,6 +317,74 @@ namespace Zongsoft.Web.Http
 		}
 		#endregion
 
+		#region 上传方法
+		protected async Task<FileInfo> Upload(string path, Func<FileInfo, bool> uploaded = null)
+		{
+			if(string.IsNullOrEmpty(path))
+				throw new ArgumentNullException(nameof(path));
+
+			//如果上传的内容为空，则返回文件信息的空集
+			if(this.Request?.Content.Headers.ContentLength == null || this.Request.Content.Headers.ContentLength == 0)
+			{
+				uploaded?.Invoke(null);
+				return null;
+			}
+
+			//将上传的文件内容依次写入到指定的目录中
+			var files = await _accessor.Write(this.Request, path, e => e.Cancel = e.Index > 1);
+
+			//依次遍历写入的文件对象
+			foreach(var file in files)
+			{
+				//如果上传回调方法返回真(True)则将其加入到结果集中，否则删除刚保存的文件
+				if(uploaded == null || uploaded(file))
+					return file;
+
+				this.DeleteFile(file.Url);
+			}
+
+			return null;
+		}
+
+		protected async Task<IEnumerable<T>> Upload<T>(string path, Func<FileInfo, T> uploaded, int limit = 0)
+		{
+			if(string.IsNullOrEmpty(path))
+				throw new ArgumentNullException(nameof(path));
+
+			if(uploaded == null)
+				throw new ArgumentNullException(nameof(uploaded));
+
+			//如果上传的内容为空，则返回文件信息的空集
+			if(this.Request.Content == null || this.Request.Content.Headers.ContentLength == null || this.Request.Content.Headers.ContentLength == 0)
+				return Enumerable.Empty<T>();
+
+			//将上传的文件内容依次写入到指定的目录中
+			var files = await _accessor.Write(this.Request, path, e =>
+			{
+				if(limit > 0)
+					e.Cancel = e.Index > limit;
+
+				if(!e.Cancel && limit != 1)
+					e.FileName =  e.FileName + "-" + Zongsoft.Common.RandomGenerator.GenerateString();
+			});
+
+			T item;
+			var result = new List<T>();
+
+			//依次遍历写入的文件对象
+			foreach(var file in files)
+			{
+				//如果上传回调方法返回不为空则将其加入到结果集中，否则删除刚保存的文件
+				if((item = uploaded(file)) != null)
+					result.Add(item);
+				else
+					this.DeleteFile(file.Url);
+			}
+
+			return result;
+		}
+		#endregion
+
 		#region 保护方法
 		protected virtual TService GetService()
 		{
@@ -386,6 +461,17 @@ namespace Zongsoft.Web.Http
 			}
 
 			throw HttpResponseExceptionUtility.BadRequest(message.ToString());
+		}
+
+		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private void DeleteFile(string filePath)
+		{
+			try
+			{
+				if(filePath != null && filePath.Length > 0)
+					FileSystem.File.Delete(filePath);
+			}
+			catch { }
 		}
 
 		private object GetResult(object value, out bool isNullOrEmpty)
