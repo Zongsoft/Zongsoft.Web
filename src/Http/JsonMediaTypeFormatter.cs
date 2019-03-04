@@ -195,7 +195,9 @@ namespace Zongsoft.Web.Http
 
 				if(behaviors.Contains("ignores:none"))
 					settings.SerializationBehavior = SerializationBehavior.None;
-				else if(behaviors.Contains("ignores:default") || behaviors.Contains("ignores:null"))
+				else if(behaviors.Contains("ignores:null"))
+					settings.SerializationBehavior = SerializationBehavior.IgnoreNullValue;
+				else if(behaviors.Contains("ignores:default"))
 					settings.SerializationBehavior = SerializationBehavior.IgnoreDefaultValue;
 			}
 
