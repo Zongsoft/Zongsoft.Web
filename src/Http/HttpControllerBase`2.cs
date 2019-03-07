@@ -282,9 +282,6 @@ namespace Zongsoft.Web.Http
 			if(!this.CanUpdate)
 				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
 
-			if(string.IsNullOrWhiteSpace(id))
-				throw HttpResponseExceptionUtility.BadRequest("Missing the id parameter of the update operation.");
-
 			//确认模型是否有效
 			this.EnsureModel(model);
 
