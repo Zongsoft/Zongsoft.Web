@@ -165,19 +165,10 @@ namespace Zongsoft.Web.Http
 				return this.NotFound();
 		}
 
-		public virtual object Get(string id = null, [FromUri]string key = null, [FromUri]Paging paging = null)
+		public virtual object Get(string id = null, [FromUri]Paging paging = null)
 		{
-			if(string.IsNullOrWhiteSpace(id))
-			{
-				if(string.IsNullOrWhiteSpace(key))
-					return this.GetResult(this.DataService.Select(null, this.GetSchema(), paging));
-				else
-					return this.GetResult(this.DataService.Search(key, this.GetSchema(), paging));
-			}
-
-			//如果同时指定了id和key参数，则抛出无效的请求异常(即400错误)
-			if(key != null)
-				return this.BadRequest("Cannot specify the 'id' and 'key' argument at the same time.");
+			if(string.IsNullOrEmpty(id))
+				return this.GetResult(this.DataService.Select(null, this.GetSchema(), paging));
 
 			var parts = this.Slice(id);
 			IPaginator paginator = null;
@@ -276,8 +267,8 @@ namespace Zongsoft.Web.Http
 
 			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
 		}
- 
-		public virtual void Put(string id, TModel model)
+
+		public virtual void Put(TModel model)
 		{
 			if(!this.CanUpdate)
 				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
@@ -286,6 +277,10 @@ namespace Zongsoft.Web.Http
 			this.EnsureModel(model);
 
 			var count = 0;
+			var id = string.Empty;
+
+			if(this.Request.GetRouteData().Values.TryGetValue("id", out var value) && value != null && value is string)
+				id = (string)value;
 
 			if(string.IsNullOrEmpty(id))
 				count = this.DataService.Update(model, this.GetSchema());
