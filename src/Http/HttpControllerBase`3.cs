@@ -1,6 +1,13 @@
 ﻿/*
+ *   _____                                ______
+ *  /_   /  ____  ____  ____  _________  / __/ /_
+ *    / /  / __ \/ __ \/ __ \/ ___/ __ \/ /_/ __/
+ *   / /__/ /_/ / / / / /_/ /\_ \/ /_/ / __/ /_
+ *  /____/\____/_/ /_/\__  /____/\____/_/  \__/
+ *                   /____/
+ *
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2016-2018 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -25,6 +32,8 @@
  */
 
 using System;
+using System.Net;
+using System.Net.Http;
 using System.Web.Http;
 
 using Zongsoft.Data;
@@ -71,10 +80,15 @@ namespace Zongsoft.Web.Http
 		[HttpGet]
 		public virtual object Search(string keyword, [FromUri]Paging paging = null)
 		{
-			if(string.IsNullOrWhiteSpace(keyword))
-				throw HttpResponseExceptionUtility.BadRequest("Missing keyword for search.");
+			var searcher = this.DataService.Searcher;
 
-			return this.GetResult(this.DataService.Search(keyword, this.GetSchema(), paging));
+			if(searcher == null)
+				return this.BadRequest("This resource does not support the search operation.");
+
+			if(string.IsNullOrWhiteSpace(keyword))
+				this.BadRequest("Missing keyword for search.");
+
+			return this.GetResult(searcher.Search(keyword, this.GetSchema(), paging));
 		}
 
 		[HttpPost]
