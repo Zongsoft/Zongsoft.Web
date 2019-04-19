@@ -1,6 +1,13 @@
 ﻿/*
+ *   _____                                ______
+ *  /_   /  ____  ____  ____  _________  / __/ /_
+ *    / /  / __ \/ __ \/ __ \/ ___/ __ \/ /_/ __/
+ *   / /__/ /_/ / / / / /_/ /\_ \/ /_/ / __/ /_
+ *  /____/\____/_/ /_/\__  /____/\____/_/  \__/
+ *                   /____/
+ *
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2016-2018 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -37,7 +44,7 @@ using Zongsoft.Data;
 
 namespace Zongsoft.Web.Http
 {
-	public class HttpControllerBase<TModel, TService> : System.Web.Http.ApiController where TService : class, IDataService<TModel>
+	public class HttpControllerBase<TModel, TService> : ApiController where TService : class, IDataService<TModel>
 	{
 		#region 单例字段
 		private static readonly WebFileAccessor _accessor = new WebFileAccessor();
@@ -108,10 +115,24 @@ namespace Zongsoft.Web.Http
 
 		#region 公共方法
 		[HttpGet]
-		public virtual object Count(string id = null)
+		public virtual object Count(string id = null, [FromUri]string keyword = null)
 		{
 			if(string.IsNullOrEmpty(id))
-				return this.DataService.Count(null);
+			{
+				if(string.IsNullOrEmpty(keyword))
+					return this.DataService.Count(null);
+				else
+				{
+					if(this.DataService.Searcher == null)
+						return this.BadRequest("The Count operation do not support searching by keyword.");
+
+					return this.DataService.Searcher.Count(keyword);
+				}
+			}
+
+			//不能同时指定编号和关键字参数
+			if(keyword != null && keyword.Length > 0)
+				return this.BadRequest("Cannot specify both 'id' and 'keyword' parameters.");
 
 			var parts = this.Slice(id);
 
@@ -124,29 +145,44 @@ namespace Zongsoft.Web.Http
 			//	case 3:
 			//		return this.DataService.Count(parts[0], parts[1], parts[2]);
 			//	default:
-			//		return this.BadRequest();
+			//		return this.BadRequest("The parts of id argument too many.");
 			//}
 
 			return this.BadRequest();
 		}
 
 		[HttpGet]
-		public virtual object Exists(string id = null)
+		public virtual object Exists(string id = null, [FromUri]string keyword = null)
 		{
 			var existed = false;
 
 			if(string.IsNullOrEmpty(id))
 			{
-				existed = this.DataService.Exists(null);
+				if(string.IsNullOrEmpty(keyword))
+					existed = this.DataService.Exists(null);
+				else
+				{
+					if(this.DataService.Searcher == null)
+						return this.BadRequest("The Exists operation do not support searching by keyword.");
+
+					existed = this.DataService.Searcher.Exists(keyword);
+				}
 			}
 			else
 			{
+				//不能同时指定编号和关键字参数
+				if(keyword != null && keyword.Length > 0)
+					return this.BadRequest("Cannot specify both 'id' and 'keyword' parameters.");
+
 				var parts = this.Slice(id);
 
 				switch(parts.Length)
 				{
 					case 1:
-						existed = this.DataService.Exists(parts[0]);
+						if(parts[0].Contains(":") && this.DataService.Searcher != null)
+							existed = this.DataService.Searcher.Exists(parts[0]);
+						else
+							existed = this.DataService.Exists(parts[0]);
 						break;
 					case 2:
 						existed = this.DataService.Exists(parts[0], parts[1]);
@@ -155,7 +191,7 @@ namespace Zongsoft.Web.Http
 						existed = this.DataService.Exists(parts[0], parts[1], parts[2]);
 						break;
 					default:
-						return this.BadRequest();
+						return this.BadRequest("The parts of id argument too many.");
 				}
 			}
 
@@ -176,8 +212,8 @@ namespace Zongsoft.Web.Http
 			switch(parts.Length)
 			{
 				case 1:
-					if(parts[0].Contains(":"))
-						return this.GetResult(this.DataService.Search(parts[0], this.GetSchema(), paging));
+					if(parts[0].Contains(":") && this.DataService.Searcher != null)
+						return this.GetResult(this.DataService.Searcher.Search(parts[0], this.GetSchema(), paging));
 					else
 						return this.GetResult(this.DataService.Get<string>(parts[0], this.GetSchema(), paging, null, out paginator), paginator);
 				case 2:
@@ -185,7 +221,7 @@ namespace Zongsoft.Web.Http
 				case 3:
 					return this.GetResult(this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], this.GetSchema(), paging, null, out paginator), paginator);
 				default:
-					return this.BadRequest();
+					return this.BadRequest("The parts of id argument too many.");
 			}
 		}
 
