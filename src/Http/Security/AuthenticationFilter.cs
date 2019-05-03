@@ -1,8 +1,15 @@
 ﻿/*
+ *   _____                                ______
+ *  /_   /  ____  ____  ____  _________  / __/ /_
+ *    / /  / __ \/ __ \/ __ \/ ___/ __ \/ /_/ __/
+ *   / /__/ /_/ / / / / /_/ /\_ \/ /_/ / __/ /_
+ *  /____/\____/_/ /_/\__  /____/\____/_/  \__/
+ *                   /____/
+ *
  * Authors:
  *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
  *
- * Copyright (C) 2016 Zongsoft Corporation <http://www.zongsoft.com>
+ * Copyright (C) 2016-2019 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -44,34 +51,22 @@ namespace Zongsoft.Web.Http.Security
 
 		#region 成员字段
 		private ICredentialProvider _credentialProvider;
+		#endregion
 
+		#region 公共属性
 		public bool AllowMultiple
 		{
 			get
 			{
-				throw new NotImplementedException();
+				return false;
 			}
 		}
-		#endregion
 
-		#region 公共属性
-		[Zongsoft.Services.ServiceDependency]
+		[Services.ServiceDependency]
 		public ICredentialProvider CredentialProvider
 		{
-			get
-			{
-				if(_credentialProvider == null)
-					_credentialProvider = Zongsoft.Services.ApplicationContext.Current.Services.Resolve<ICredentialProvider>();
-
-				return _credentialProvider;
-			}
-			set
-			{
-				if(value == null)
-					throw new ArgumentNullException();
-
-				_credentialProvider = value;
-			}
+			get => _credentialProvider;
+			set => _credentialProvider = value ?? throw new ArgumentNullException();
 		}
 		#endregion
 
@@ -83,7 +78,8 @@ namespace Zongsoft.Web.Http.Security
 			//优先从HTTP的Authorization头获取凭证编号，如果没有获取成功则从请求的Cookie中获取
 			if(context.Request.Headers.Authorization != null && string.Equals(context.Request.Headers.Authorization.Scheme, HTTP_AUTHORIZATION_SCHEME, StringComparison.OrdinalIgnoreCase))
 			{
-				credentialId = GetCredentialId(context.Request.Headers.Authorization.Parameter);
+				if(context.Request.Headers.Authorization.Parameter != null)
+					credentialId = context.Request.Headers.Authorization.Parameter.Trim();
 			}
 			else
 			{
@@ -108,16 +104,6 @@ namespace Zongsoft.Web.Http.Security
 
 			var challenge = new System.Net.Http.Headers.AuthenticationHeaderValue(HTTP_AUTHORIZATION_SCHEME);
 			context.Result = new System.Web.Http.Results.UnauthorizedResult(new[] { challenge }, context.Request);
-		}
-		#endregion
-
-		#region 私有方法
-		private static string GetCredentialId(string text)
-		{
-			if(string.IsNullOrWhiteSpace(text))
-				return null;
-
-			return text.Trim();
 		}
 		#endregion
 	}

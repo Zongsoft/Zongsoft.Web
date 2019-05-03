@@ -42,6 +42,16 @@ namespace Zongsoft.Web.Http.Security
 			return (principal != null && principal.Identity != null && principal.Identity.IsAuthenticated);
 		}
 
+		internal static AuthorizationMode GetAuthorizationMode(HttpActionDescriptor actionDescriptor)
+		{
+			var attribute = GetAuthorizationAttribute(actionDescriptor);
+
+			if(attribute == null)
+				return AuthorizationMode.Anonymous;
+
+			return attribute.Mode;
+		}
+
 		internal static AuthorizationAttribute GetAuthorizationAttribute(HttpActionDescriptor actionDescriptor)
 		{
 			//查找位于Action方法的授权标记
@@ -52,16 +62,6 @@ namespace Zongsoft.Web.Http.Security
 				attribute = actionDescriptor.ControllerDescriptor.GetCustomAttributes<AuthorizationAttribute>(true).FirstOrDefault();
 
 			return attribute;
-		}
-
-		internal static AuthorizationMode GetAuthorizationMode(HttpActionDescriptor actionDescriptor)
-		{
-			var attribute = GetAuthorizationAttribute(actionDescriptor);
-
-			if(attribute == null)
-				return AuthorizationMode.Anonymous;
-
-			return attribute.Mode;
 		}
 
 		internal static AuthorizationAttribute GetAuthorizationAttribute(HttpActionDescriptor actionDescriptor, System.Web.Routing.RequestContext requestContext)
