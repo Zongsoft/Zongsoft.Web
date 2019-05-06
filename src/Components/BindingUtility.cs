@@ -210,10 +210,8 @@ namespace Zongsoft.Web.Controls
 			if(value == null)
 				return string.Empty;
 
-			var enumType = Zongsoft.Common.EnumUtility.GetEnumType(value.GetType());
-
-			if(enumType != null)
-				return Zongsoft.Common.EnumUtility.Format(value, format);
+			if(TryFormatEnum(value, format, out var result))
+				return result;
 
 			if(string.IsNullOrWhiteSpace(format))
 			{
@@ -228,6 +226,20 @@ namespace Zongsoft.Web.Controls
 		#endregion
 
 		#region 私有方法
+		private static bool TryFormatEnum(object value, string format, out string result)
+		{
+			var enumType = Zongsoft.Common.EnumUtility.GetEnumType(value.GetType());
+
+			if(enumType != null)
+			{
+				result = Common.EnumUtility.GetEnumDescription((Enum)value) ?? value.ToString();
+				return true;
+			}
+
+			result = null;
+			return false;
+		}
+
 		private static object GetMemberValue(object bindingSource, string memberPath, bool throwExceptionOnMemberNotFound)
 		{
 			if(bindingSource == null || string.IsNullOrWhiteSpace(memberPath))
