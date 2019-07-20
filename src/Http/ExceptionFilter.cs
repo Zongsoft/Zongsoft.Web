@@ -40,6 +40,12 @@ namespace Zongsoft.Web.Http
 			if(actionExecutedContext.Exception == null)
 				return;
 
+			if(actionExecutedContext.Exception is OperationCanceledException)
+			{
+				//退出，不用记录日志
+				return;
+			}
+
 			if(actionExecutedContext.Exception is Zongsoft.Security.Membership.AuthenticationException ||
 			   actionExecutedContext.Exception is Zongsoft.Security.Membership.AuthorizationException)
 			{
@@ -49,7 +55,7 @@ namespace Zongsoft.Web.Http
 				return;
 			}
 
-			if(actionExecutedContext.Exception is System.NotSupportedException)
+			if(actionExecutedContext.Exception is NotSupportedException)
 			{
 				actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception, HttpStatusCode.MethodNotAllowed);
 
@@ -57,7 +63,7 @@ namespace Zongsoft.Web.Http
 				return;
 			}
 
-			if(actionExecutedContext.Exception is System.NotImplementedException)
+			if(actionExecutedContext.Exception is NotImplementedException)
 			{
 				actionExecutedContext.Response = this.GetExceptionResponse(actionExecutedContext.Exception, HttpStatusCode.NotImplemented);
 
