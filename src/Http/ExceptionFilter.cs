@@ -40,10 +40,13 @@ namespace Zongsoft.Web.Http
 			if(actionExecutedContext.Exception == null)
 				return;
 
-			if(actionExecutedContext.Exception is OperationCanceledException)
+			if(actionExecutedContext.Exception is OperationCanceledException ex)
 			{
-				//退出，不用记录日志
-				return;
+				//如果操作取消异常没有内部异常，则不用记录日志
+				if(ex.InnerException == null)
+					return;
+
+				actionExecutedContext.Exception = ex.InnerException;
 			}
 
 			if(actionExecutedContext.Exception is Zongsoft.Security.Membership.AuthenticationException ||
