@@ -45,7 +45,7 @@ namespace Zongsoft.Web.Http.Security
 	public class AuthorizationFilter : System.Web.Http.Filters.IAuthorizationFilter
 	{
 		#region 成员字段
-		private IAuthorization _authorization;
+		private IAuthorizer _authorizer;
 		#endregion
 
 		#region 公共属性
@@ -58,10 +58,10 @@ namespace Zongsoft.Web.Http.Security
 		}
 
 		[Services.ServiceDependency]
-		public IAuthorization Authorization
+		public IAuthorizer Authorizer
 		{
-			get => _authorization;
-			set => _authorization = value ?? throw new ArgumentNullException();
+			get => _authorizer;
+			set => _authorizer = value ?? throw new ArgumentNullException();
 		}
 		#endregion
 

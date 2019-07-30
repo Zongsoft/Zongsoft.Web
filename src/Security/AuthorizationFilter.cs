@@ -36,25 +36,25 @@ namespace Zongsoft.Web.Security
 	public class AuthorizationFilter : System.Web.Mvc.IAuthorizationFilter
 	{
 		#region 成员字段
-		private IAuthorization _authorization;
+		private IAuthorizer _authorizer;
 		private IMemberProvider _memberProvider;
 		private ICredentialProvider _credentialProvider;
 		#endregion
 
 		#region 公共属性
 		[Zongsoft.Services.ServiceDependency]
-		public IAuthorization Authorization
+		public IAuthorizer Authorizer
 		{
 			get
 			{
-				return _authorization;
+				return _authorizer;
 			}
 			set
 			{
 				if(value == null)
 					throw new ArgumentNullException();
 
-				_authorization = value;
+				_authorizer = value;
 			}
 		}
 
@@ -130,7 +130,7 @@ namespace Zongsoft.Web.Security
 					break;
 				case AuthorizationMode.Requires:
 					//执行授权验证操作，如果验证失败则返回验证失败的响应
-					if(!this.Authorization.Authorize(userId, attribute.SchemaId, attribute.ActionId))
+					if(!this.Authorizer.Authorize(userId, attribute.SchemaId, attribute.ActionId))
 						filterContext.Result = new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
 					break;
 			}

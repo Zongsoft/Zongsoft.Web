@@ -25,8 +25,6 @@
  */
 
 using System;
-using System.ComponentModel;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -136,22 +134,22 @@ namespace Zongsoft.Web.Security
 			return string.IsNullOrWhiteSpace(config.DefaultUrl) ? DEFAULT_URL : config.DefaultUrl;
 		}
 
-		public static Credential Login(IAuthentication authentication, ICredentialProvider credentialProvider, string identity, string password, string @namespace, bool isRemember)
+		public static Credential Login(IAuthenticator authenticator, ICredentialProvider credentialProvider, string identity, string password, string @namespace, bool isRemember)
 		{
 			string redirectUrl;
-			return Login(authentication, credentialProvider, identity, password, @namespace, isRemember, out redirectUrl);
+			return Login(authenticator, credentialProvider, identity, password, @namespace, isRemember, out redirectUrl);
 		}
 
-		public static Credential Login(IAuthentication authentication, ICredentialProvider credentialProvider, string identity, string password, string @namespace, bool isRemember, out string redirectUrl)
+		public static Credential Login(IAuthenticator authenticator, ICredentialProvider credentialProvider, string identity, string password, string @namespace, bool isRemember, out string redirectUrl)
 		{
-			if(authentication == null)
-				throw new ArgumentNullException("authentication");
+			if(authenticator == null)
+				throw new ArgumentNullException(nameof(authenticator));
 
 			if(credentialProvider == null)
-				throw new ArgumentNullException("credentialProvider");
+				throw new ArgumentNullException(nameof(credentialProvider));
 
 			//进行身份验证(即验证身份标识和密码是否匹配)
-			var result = authentication.Authenticate(identity, password, @namespace);
+			var result = authenticator.Authenticate(identity, password, @namespace);
 
 			//注册用户凭证
 			var credential = credentialProvider.Register(result.User, AuthenticationUtility.GetScene(), (result.HasParameters ? result.Parameters : null));
