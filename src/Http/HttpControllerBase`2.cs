@@ -469,11 +469,13 @@ namespace Zongsoft.Web.Http
 		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		private void EnsureModel(TModel model)
 		{
-			if(model == null)
-				throw HttpResponseExceptionUtility.BadRequest("Missing required data.");
-
 			if(this.ModelState.IsValid)
+			{
+				if(model == null)
+					throw HttpResponseExceptionUtility.BadRequest("Missing request data.");
+
 				return;
+			}
 
 			var message = new System.Text.StringBuilder();
 
@@ -481,10 +483,13 @@ namespace Zongsoft.Web.Http
 			{
 				foreach(var error in state.Value.Errors)
 				{
+					if(message.Length > 0)
+						message.AppendLine();
+
 					if(error.Exception == null)
-						message.AppendLine($"[{state.Key}]{error.ErrorMessage}");
+						message.Append($"[{state.Key}]{error.ErrorMessage}");
 					else
-						message.AppendLine($"[{state.Key}]{error.Exception.GetType().Name}:{error.ErrorMessage}");
+						message.Append($"[{state.Key}]{error.Exception.GetType().Name}:{error.Exception.Message}");
 				}
 			}
 
