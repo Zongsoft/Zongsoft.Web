@@ -58,7 +58,7 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 验证实现
-		public void OnAuthentication(AuthenticationContext filterContext)
+		public void OnAuthentication(System.Web.Mvc.Filters.AuthenticationContext filterContext)
 		{
 			var credentialId = AuthenticationUtility.CredentialId;
 
@@ -68,7 +68,7 @@ namespace Zongsoft.Web.Security
 				filterContext.Principal = new CredentialPrincipal(new CredentialIdentity(credentialId, this.CredentialProvider));
 		}
 
-		public void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
+		public void OnAuthenticationChallenge(System.Web.Mvc.Filters.AuthenticationChallengeContext filterContext)
 		{
 			if(AuthenticationUtility.IsAuthenticated || AuthenticationUtility.GetAuthorizationMode(filterContext.ActionDescriptor) == AuthorizationMode.Anonymous)
 				return;
