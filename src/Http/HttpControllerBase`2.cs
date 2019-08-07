@@ -441,6 +441,10 @@ namespace Zongsoft.Web.Http
 			if(data == null)
 				return new HttpResponseMessage(System.Net.HttpStatusCode.NoContent);
 
+			//如果模型类型是值类型并且结果数据类型是该值类型并且结果数据等于空值，则返回HTTP状态为无内容
+			if(typeof(TModel).IsValueType && data.GetType() == typeof(TModel) && EqualityComparer<TModel>.Default.Equals((TModel)data, default(TModel)))
+				return new HttpResponseMessage(System.Net.HttpStatusCode.NoContent);
+
 			if(paginator == null)
 				paginator = data as IPaginator;
 
