@@ -467,6 +467,11 @@ namespace Zongsoft.Web.Http
 
 			return data;
 		}
+
+		protected IHttpActionResult NoContent()
+		{
+			return new System.Web.Http.Results.StatusCodeResult(System.Net.HttpStatusCode.NoContent, this);
+		}
 		#endregion
 
 		#region 私有方法
