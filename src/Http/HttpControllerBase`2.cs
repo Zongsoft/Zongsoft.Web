@@ -459,7 +459,7 @@ namespace Zongsoft.Web.Http
 					if(result.Paging == null)
 						result.Paging = new Dictionary<string, string>();
 
-					result.Paging[string.IsNullOrEmpty(e.Name) ? "$" : e.Name] = e.Paging.ToString();
+					result.Paging[string.IsNullOrEmpty(e.Name) ? "$" : e.Name] = GetPaging(e.Paging);
 				}
 
 				return result;
@@ -509,6 +509,17 @@ namespace Zongsoft.Web.Http
 					FileSystem.File.Delete(filePath);
 			}
 			catch { }
+		}
+
+		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private string GetPaging(Paging paging)
+		{
+			if(paging == null || Paging.IsDisabled(paging))
+				return string.Empty;
+
+			return paging.PageIndex.ToString() + "/" +
+			       paging.PageCount.ToString() + "(" +
+			       paging.PageSize.ToString() + ")";
 		}
 
 		private object GetResult(object value, out bool isNullOrEmpty)
