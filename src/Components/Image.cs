@@ -31,9 +31,17 @@ using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class Image : Zongsoft.Common.ModelBase
+	public class Image
 	{
 		#region 成员字段
+		private string _icon;
+		private string _cssClass;
+		private string _imageUrl;
+		private string _navigateUrl;
+		private string _placeholder;
+		private Dimension _dimension;
+		private Unit _width;
+		private Unit _height;
 		private DataBoundControl _owner;
 		#endregion
 
@@ -61,26 +69,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				var value = this.GetPropertyValue(() => this.Icon);
-				return BindingUtility.FormatBindingValue(value, this.BindingSource);
+				return BindingUtility.FormatBindingValue(_icon, this.BindingSource);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Icon, value);
-			}
-		}
-
-		[DefaultValue("")]
-		public string ImageUrl
-		{
-			get
-			{
-				var value = this.GetPropertyValue(() => this.ImageUrl);
-				return BindingUtility.FormatBindingValue(value, this.BindingSource);
-			}
-			set
-			{
-				this.SetPropertyValue(() => this.ImageUrl, value);
+				_icon = value;
 			}
 		}
 
@@ -89,11 +82,24 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.CssClass);
+				return _cssClass;
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.CssClass, Utility.ResolveCssClass(value, () => this.CssClass));
+				_cssClass = Utility.ResolveCssClass(value, () => this.CssClass);
+			}
+		}
+
+		[DefaultValue("")]
+		public string ImageUrl
+		{
+			get
+			{
+				return BindingUtility.FormatBindingValue(_imageUrl, this.BindingSource);
+			}
+			set
+			{
+				_imageUrl = value;
 			}
 		}
 
@@ -102,8 +108,7 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				var value = this.GetPropertyValue(() => this.NavigateUrl);
-				value = BindingUtility.FormatBindingValue(value, this.BindingSource);
+				var value = BindingUtility.FormatBindingValue(_navigateUrl, this.BindingSource);
 
 				if(!string.IsNullOrWhiteSpace(value))
 					return _owner.ResolveUrl(value);
@@ -112,7 +117,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.NavigateUrl, value);
+				_navigateUrl = value;
 			}
 		}
 
@@ -121,12 +126,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				var value = this.GetPropertyValue(() => this.Placeholder);
-				return BindingUtility.FormatBindingValue(value, this.BindingSource);
+				return BindingUtility.FormatBindingValue(_placeholder, this.BindingSource);
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Placeholder, value);
+				_placeholder = value;
 			}
 		}
 
@@ -135,11 +139,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.Dimension);
+				return _dimension;
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Dimension, value);
+				_dimension = value;
 			}
 		}
 
@@ -147,11 +151,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.Width);
+				return _width;
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Width, value);
+				_width = value;
 			}
 		}
 
@@ -159,11 +163,11 @@ namespace Zongsoft.Web.Controls
 		{
 			get
 			{
-				return this.GetPropertyValue(() => this.Height);
+				return _height;
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Height, value);
+				_height = value;
 			}
 		}
 		#endregion

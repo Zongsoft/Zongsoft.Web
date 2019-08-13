@@ -25,14 +25,12 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Web;
 using System.Web.UI;
 
 namespace Zongsoft.Web.Controls
 {
-	public class ViewPart : Zongsoft.Common.ModelBase, IDataBoundControlPart
+	public class ViewPart : IDataBoundControlPart
 	{
 		#region 成员字段
 		private DataBoundControl _owner;
@@ -81,7 +79,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Text, ref _text, value);
+				_text = value;
 			}
 		}
 
@@ -93,7 +91,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Icon, ref _icon, value);
+				_icon = value;
 			}
 		}
 
@@ -110,7 +108,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.NavigateUrl, ref _navigateUrl, value);
+				_navigateUrl = value;
 			}
 		}
 
@@ -122,7 +120,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.CssClass, ref _cssClass, value);
+				_cssClass = value;
 			}
 		}
 
@@ -146,7 +144,7 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.IconAlignment, ref _iconAlignment, value);
+				_iconAlignment = value;
 			}
 		}
 
@@ -158,14 +156,14 @@ namespace Zongsoft.Web.Controls
 			}
 			set
 			{
-				this.SetPropertyValue(() => this.Alignment, ref _alignment, value);
+				_alignment = value;
 			}
 		}
 
 		[MergableProperty(false)]
 		[PersistenceMode(PersistenceMode.InnerProperty)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		public new PropertyCollection Properties
+		public PropertyCollection Properties
 		{
 			get
 			{
