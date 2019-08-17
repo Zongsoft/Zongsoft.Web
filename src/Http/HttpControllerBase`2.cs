@@ -393,7 +393,7 @@ namespace Zongsoft.Web.Http
 					e.Cancel = e.Index > limit;
 
 				if(!e.Cancel && limit != 1)
-					e.FileName =  e.FileName + "-" + Zongsoft.Common.RandomGenerator.GenerateString();
+					e.FileName =  e.FileName + "-" + Zongsoft.Common.Randomizer.GenerateString();
 			});
 
 			T item;

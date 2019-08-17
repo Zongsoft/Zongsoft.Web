@@ -548,7 +548,7 @@ namespace Zongsoft.Web
 
 				//如果文件名为空，则生成一个以“时间戳-随机数.ext”的默认文件名
 				if(string.IsNullOrWhiteSpace(fileName))
-					fileName = string.Format("X{0}-{1}{2}", ((long)(DateTime.UtcNow - EPOCH).TotalSeconds).ToString(), Zongsoft.Common.RandomGenerator.GenerateString(), extensionAppend ? extensionName : string.Empty);
+					fileName = string.Format("X{0}-{1}{2}", ((long)(DateTime.UtcNow - EPOCH).TotalSeconds).ToString(), Zongsoft.Common.Randomizer.GenerateString(), extensionAppend ? extensionName : string.Empty);
 				else if(extensionAppend && !fileName.EndsWith(extensionName))
 					fileName += extensionName;
 
