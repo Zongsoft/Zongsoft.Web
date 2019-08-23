@@ -148,11 +148,13 @@ namespace Zongsoft.Web.Security
 			if(credentialProvider == null)
 				throw new ArgumentNullException(nameof(credentialProvider));
 
+			System.Collections.Generic.IDictionary<string, object> parameters = new System.Collections.Generic.Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
 			//进行身份验证(即验证身份标识和密码是否匹配)
-			var result = authenticator.Authenticate(identity, password, @namespace);
+			var user = authenticator.Authenticate(identity, password, @namespace, null, ref parameters);
 
 			//注册用户凭证
-			var credential = credentialProvider.Register(result.User, AuthenticationUtility.GetScene(), result.Parameters);
+			var credential = credentialProvider.Register(user, AuthenticationUtility.GetScene(), parameters);
 
 			//将注册成功的用户凭证保存到Cookie中
 			AuthenticationUtility.SetCredentialCookie(credential, isRemember ? TimeSpan.FromDays(7) : TimeSpan.Zero);
@@ -160,7 +162,7 @@ namespace Zongsoft.Web.Security
 			object redirectObject = null;
 
 			//如果验证事件中显式指定了返回的URL，则使用它所指定的值
-			if(result.Parameters != null && result.Parameters.TryGetValue("RedirectUrl", out redirectObject) && redirectObject != null)
+			if(parameters != null && parameters.TryGetValue("RedirectUrl", out redirectObject) && redirectObject != null)
 				redirectUrl = redirectObject.ToString();
 			else //返回重定向的路径中
 				redirectUrl = AuthenticationUtility.GetRedirectUrl(credential.Scene);
