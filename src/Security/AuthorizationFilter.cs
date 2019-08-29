@@ -147,7 +147,7 @@ namespace Zongsoft.Web.Security
 				throw new MissingMemberException(this.GetType().FullName, "CredentialProvider");
 
 			//如果指定的主体为空，或对应的凭证编号不存在，或对应的凭证已过期则返回未验证结果
-			if(principal == null || principal.Identity == null || !credentialProvider.Validate(principal.Identity.CredentialId))
+			if(principal == null || principal.Identity == null || !principal.Identity.IsAuthenticated)
 				return new HttpUnauthorizedResult();
 
 			//使用凭证验证器对指定的凭证进行验证，如果验证失败

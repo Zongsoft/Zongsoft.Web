@@ -153,8 +153,11 @@ namespace Zongsoft.Web.Security
 			//进行身份验证(即验证身份标识和密码是否匹配)
 			var user = authenticator.Authenticate(identity, password, @namespace, null, ref parameters);
 
+			//构建用户凭证
+			var credential = new Credential(user, AuthenticationUtility.GetScene(), TimeSpan.FromHours(2), parameters);
+
 			//注册用户凭证
-			var credential = credentialProvider.Register(user, AuthenticationUtility.GetScene(), parameters);
+			credentialProvider.Register(credential);
 
 			//将注册成功的用户凭证保存到Cookie中
 			AuthenticationUtility.SetCredentialCookie(credential, isRemember ? TimeSpan.FromDays(7) : TimeSpan.Zero);
