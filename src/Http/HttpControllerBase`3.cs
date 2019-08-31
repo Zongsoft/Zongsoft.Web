@@ -42,7 +42,7 @@ namespace Zongsoft.Web.Http
 {
 	public class HttpControllerBase<TModel, TConditional, TService> : HttpControllerBase<TModel, TService>
 	                                                                  where TModel : class
-	                                                                  where TConditional : class, IEntity
+	                                                                  where TConditional : class, IModel
 	                                                                  where TService : class, IDataService<TModel>
 	{
 		#region 构造函数
