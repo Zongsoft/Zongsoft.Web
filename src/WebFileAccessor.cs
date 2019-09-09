@@ -226,7 +226,7 @@ namespace Zongsoft.Web
 			foreach(var header in request.Headers)
 			{
 				if(header.Key.Length > EXTENDED_PROPERTY_PREFIX.Length && header.Key.StartsWith(EXTENDED_PROPERTY_PREFIX, StringComparison.OrdinalIgnoreCase))
-					headers[header.Key.Substring(EXTENDED_PROPERTY_PREFIX.Length)] = string.Join("", header.Value);
+					headers[header.Key.Substring(EXTENDED_PROPERTY_PREFIX.Length)] = Uri.UnescapeDataString(string.Join("", header.Value));
 			}
 
 			//创建多段表单信息的文件流操作的供应程序
@@ -243,7 +243,7 @@ namespace Zongsoft.Web
 					string prefix;
 
 					if(fileInfo.HasProperties && fileInfo.Properties.TryGetValue(EXTENDED_PROPERTY_DISPOSITIONNAME, out dispositionName))
-						prefix = EXTENDED_PROPERTY_PREFIX + (string)dispositionName + "-";
+						prefix = (string)dispositionName + ":";
 					else
 						continue;
 
