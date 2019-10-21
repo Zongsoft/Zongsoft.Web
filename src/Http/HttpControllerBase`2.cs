@@ -233,33 +233,17 @@ namespace Zongsoft.Web.Http
 			if(string.IsNullOrWhiteSpace(id))
 				throw HttpResponseExceptionUtility.BadRequest("Missing the id parameter of the delete operation.");
 
-			string[] parts;
-			var entries = id.Split('|', ',');
+			var keys = id.Split('|', ',');
 
-			if(entries != null && entries.Length > 1)
+			if(keys != null && keys.Length > 1)
 			{
 				int count = 0;
 
 				using(var transaction = new Zongsoft.Transactions.Transaction())
 				{
-					foreach(var entry in entries)
+					foreach(var key in keys)
 					{
-						parts = entry.Split('-');
-
-						switch(parts.Length)
-						{
-							case 1:
-								count += this.DataService.Delete<string>(parts[0]);
-								break;
-							case 2:
-								count += this.DataService.Delete<string, string>(parts[0], parts[1]);
-								break;
-							case 3:
-								count += this.DataService.Delete<string, string, string>(parts[0], parts[1], parts[2]);
-								break;
-							default:
-								throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
-						}
+						count += this.OnDelete(key.Split('-'));
 					}
 
 					transaction.Commit();
@@ -268,25 +252,7 @@ namespace Zongsoft.Web.Http
 				return;
 			}
 
-			parts = id.Split('-');
-			var succeed = false;
-
-			switch(parts.Length)
-			{
-				case 1:
-					succeed = this.DataService.Delete<string>(parts[0]) > 0;
-					break;
-				case 2:
-					succeed = this.DataService.Delete<string, string>(parts[0], parts[1]) > 0;
-					break;
-				case 3:
-					succeed = this.DataService.Delete<string, string, string>(parts[0], parts[1], parts[2]) > 0;
-					break;
-				default:
-					throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
-			}
-
-			if(!succeed)
+			if(this.OnDelete(id.Split('-')) < 1)
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 
@@ -298,7 +264,7 @@ namespace Zongsoft.Web.Http
 			//确认模型是否有效
 			this.EnsureModel(model);
 
-			if(this.DataService.Insert(model, this.GetSchema()) > 0)
+			if(this.OnCreate(model) > 0)
 				return model;
 
 			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
@@ -312,35 +278,12 @@ namespace Zongsoft.Web.Http
 			//确认模型是否有效
 			this.EnsureModel(model);
 
-			var count = 0;
 			var id = string.Empty;
 
 			if(this.Request.GetRouteData().Values.TryGetValue("id", out var value) && value != null && value is string)
 				id = (string)value;
 
-			if(string.IsNullOrEmpty(id))
-				count = this.DataService.Update(model, this.GetSchema());
-			else
-			{
-				var parts = this.Slice(id);
-
-				switch(parts.Length)
-				{
-					case 1:
-						count = this.DataService.Update(model, parts[0], this.GetSchema());
-						break;
-					case 2:
-						count = this.DataService.Update(model, parts[0], parts[1], this.GetSchema());
-						break;
-					case 3:
-						count = this.DataService.Update(model, parts[0], parts[1], parts[2], this.GetSchema());
-						break;
-					default:
-						throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
-				}
-			}
-
-			if(count < 1)
+			if(this.OnUpdate(model, string.IsNullOrEmpty(id) ? Array.Empty<string>() : this.Slice(id)) < 1)
 				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
 		}
 		#endregion
@@ -410,6 +353,49 @@ namespace Zongsoft.Web.Http
 			}
 
 			return result;
+		}
+		#endregion
+
+		#region 虚拟方法
+		protected virtual int OnDelete(params string[] keys)
+		{
+			if(keys == null || keys.Length == 0)
+				return 0;
+
+			switch(keys.Length)
+			{
+				case 1:
+					return this.DataService.Delete<string>(keys[0], this.GetSchema());
+				case 2:
+					return this.DataService.Delete<string, string>(keys[0], keys[1], this.GetSchema());
+				case 3:
+					return this.DataService.Delete<string, string, string>(keys[0], keys[1], keys[2], this.GetSchema());
+				default:
+					throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
+			}
+		}
+
+		protected virtual int OnCreate(TModel model)
+		{
+			return this.DataService.Insert(model, this.GetSchema());
+		}
+
+		protected virtual int OnUpdate(TModel model, params string[] keys)
+		{
+			if(keys == null || keys.Length == 0)
+				return this.DataService.Update(model, this.GetSchema());
+
+			switch(keys.Length)
+			{
+				case 1:
+					return this.DataService.Update(model, keys[0], this.GetSchema());
+				case 2:
+					return this.DataService.Update(model, keys[0], keys[1], this.GetSchema());
+				case 3:
+					return this.DataService.Update(model, keys[0], keys[1], keys[2], this.GetSchema());
+				default:
+					throw HttpResponseExceptionUtility.BadRequest("The parts of id argument too many.");
+			}
 		}
 		#endregion
 
