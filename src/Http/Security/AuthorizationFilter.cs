@@ -64,10 +64,9 @@ namespace Zongsoft.Web.Http.Security
 		public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
 		{
 			//如果当前操作是禁止身份授权验证的，则返回下一个步骤
-			if(Utility.IsSuppressed(actionContext.ActionDescriptor))
+			if(Utility.IsSuppressed(actionContext.ActionDescriptor, out var attribute))
 				return await continuation();
 
-			var attribute = Utility.GetAuthorizationAttribute(actionContext.ActionDescriptor);
 			var authorizer = this.Authorizer ?? throw new InvalidOperationException("Missing required authorizer.");
 			var principal = actionContext.RequestContext.Principal as CredentialPrincipal;
 

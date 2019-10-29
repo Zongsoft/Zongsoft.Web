@@ -99,9 +99,8 @@ namespace Zongsoft.Web.Http.Security
 
 		public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
 		{
-			var attribute = Utility.GetAuthorizationAttribute(context.ActionContext.ActionDescriptor);
-
-			if(attribute == null || attribute.Suppressed)
+			//如果当前操作是禁止身份验证的则退出
+			if(Utility.IsSuppressed(context.ActionContext.ActionDescriptor, out var attribute))
 				return Task.CompletedTask;
 
 			var principal = context.ActionContext.RequestContext.Principal;

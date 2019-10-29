@@ -77,9 +77,8 @@ namespace Zongsoft.Web.Security
 
 		public void OnAuthenticationChallenge(System.Web.Mvc.Filters.AuthenticationChallengeContext filterContext)
 		{
-			var attribute = AuthenticationUtility.GetAuthorizationAttribute(filterContext.ActionDescriptor);
-
-			if(attribute == null || attribute.Suppressed)
+			//如果当前操作是禁止身份验证的则退出
+			if(AuthenticationUtility.IsSuppressed(filterContext.ActionDescriptor, out var attribute))
 				return;
 
 			var principal = filterContext.HttpContext.User;

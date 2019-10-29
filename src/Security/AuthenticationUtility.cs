@@ -303,16 +303,12 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 内部方法
-		internal static bool IsSuppressed(ActionDescriptor actionDescriptor)
+		internal static bool IsSuppressed(ActionDescriptor actionDescriptor, out AuthorizationAttribute attribute)
 		{
-			var attribute = GetAuthorizationAttribute(actionDescriptor);
-			return attribute == null ? false : attribute.Suppressed;
-		}
-
-		internal static AuthorizationAttribute GetAuthorizationAttribute(ActionDescriptor actionDescriptor)
-		{
-			return (AuthorizationAttribute)(actionDescriptor.GetCustomAttributes(typeof(AuthorizationAttribute), true).FirstOrDefault() ??
+			attribute = (AuthorizationAttribute)(actionDescriptor.GetCustomAttributes(typeof(AuthorizationAttribute), true).FirstOrDefault() ??
 				   actionDescriptor.ControllerDescriptor.GetCustomAttributes(typeof(AuthorizationAttribute), true).FirstOrDefault());
+
+			return attribute == null ? true : attribute.Suppressed;
 		}
 		#endregion
 

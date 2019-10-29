@@ -42,16 +42,12 @@ namespace Zongsoft.Web.Http.Security
 {
 	internal static class Utility
 	{
-		public static bool IsSuppressed(HttpActionDescriptor actionDescriptor)
+		public static bool IsSuppressed(HttpActionDescriptor actionDescriptor, out AuthorizationAttribute attribute)
 		{
-			var attribute = GetAuthorizationAttribute(actionDescriptor);
-			return attribute == null ? false : attribute.Suppressed;
-		}
+			attribute = actionDescriptor.GetCustomAttributes<AuthorizationAttribute>(true).FirstOrDefault() ??
+			            actionDescriptor.ControllerDescriptor.GetCustomAttributes<AuthorizationAttribute>(true).FirstOrDefault();
 
-		public static AuthorizationAttribute GetAuthorizationAttribute(HttpActionDescriptor actionDescriptor)
-		{
-			return actionDescriptor.GetCustomAttributes<AuthorizationAttribute>(true).FirstOrDefault() ??
-				   actionDescriptor.ControllerDescriptor.GetCustomAttributes<AuthorizationAttribute>(true).FirstOrDefault();
+			return attribute == null ? true : attribute.Suppressed;
 		}
 	}
 }

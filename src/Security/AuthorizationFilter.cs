@@ -85,10 +85,9 @@ namespace Zongsoft.Web.Security
 		public void OnAuthorization(System.Web.Mvc.AuthorizationContext filterContext)
 		{
 			//如果当前操作是禁止身份授权验证的则忽略授权验证
-			if(AuthenticationUtility.IsSuppressed(filterContext.ActionDescriptor))
+			if(AuthenticationUtility.IsSuppressed(filterContext.ActionDescriptor, out var attribute))
 				return;
 
-			var attribute = AuthenticationUtility.GetAuthorizationAttribute(filterContext.ActionDescriptor);
 			var authorizer = this.Authorizer ?? throw new InvalidOperationException("Missing required authorizer.");
 			var principal = filterContext.HttpContext.User as CredentialPrincipal;
 
