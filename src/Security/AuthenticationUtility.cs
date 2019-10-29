@@ -1,8 +1,15 @@
 ﻿/*
- * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   _____                                ______
+ *  /_   /  ____  ____  ____  _________  / __/ /_
+ *    / /  / __ \/ __ \/ __ \/ ___/ __ \/ /_/ __/
+ *   / /__/ /_/ / / / / /_/ /\_ \/ /_/ / __/ /_
+ *  /____/\____/_/ /_/\__  /____/\____/_/  \__/
+ *                   /____/
  *
- * Copyright (C) 2015 Zongsoft Corporation <http://www.zongsoft.com>
+ * Authors:
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
+ *
+ * Copyright (C) 2015-2019 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -296,88 +303,20 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 内部方法
-		internal static AuthorizationAttribute GetAuthorizationAttribute(ActionDescriptor actionDescriptor)
-		{
-			//查找位于Action方法的授权标记
-			var attribute = (AuthorizationAttribute)actionDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
-
-			if(attribute == null)
-			{
-				//查找位于Controller类的授权标记
-				attribute = (AuthorizationAttribute)actionDescriptor.ControllerDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
-			}
-
-			return attribute;
-		}
-
-		internal static AuthorizationMode GetAuthorizationMode(ActionDescriptor actionDescriptor)
+		internal static bool IsSuppressed(ActionDescriptor actionDescriptor)
 		{
 			var attribute = GetAuthorizationAttribute(actionDescriptor);
-
-			if(attribute == null)
-				return AuthorizationMode.Anonymous;
-
-			return attribute.Mode;
+			return attribute == null ? false : attribute.Suppressed;
 		}
 
-		internal static AuthorizationAttribute GetAuthorizationAttribute(ActionDescriptor actionDescriptor, System.Web.Routing.RequestContext requestContext)
+		internal static AuthorizationAttribute GetAuthorizationAttribute(ActionDescriptor actionDescriptor)
 		{
-			//查找位于Action方法的授权标记
-			var attribute = (AuthorizationAttribute)actionDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
-
-			if(attribute == null)
-			{
-				//查找位于Controller类的授权标记
-				attribute = (AuthorizationAttribute)actionDescriptor.ControllerDescriptor.GetCustomAttributes(typeof(Zongsoft.Security.Membership.AuthorizationAttribute), true).FirstOrDefault();
-
-				if(attribute == null)
-					return null;
-
-				if(attribute.Mode == AuthorizationMode.Requires)
-				{
-					if(string.IsNullOrWhiteSpace(attribute.SchemaId))
-						return new AuthorizationAttribute(GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string)) { ValidatorType = attribute.ValidatorType };
-				}
-
-				return attribute;
-			}
-
-			if(attribute.Mode == AuthorizationMode.Requires)
-			{
-				string schemaId = attribute.SchemaId, actionId = attribute.ActionId;
-
-				if(string.IsNullOrWhiteSpace(schemaId))
-				{
-					var controllerAttribute = (AuthorizationAttribute)actionDescriptor.ControllerDescriptor.GetCustomAttributes(typeof(AuthorizationAttribute), true).FirstOrDefault();
-
-					if(controllerAttribute == null || string.IsNullOrWhiteSpace(controllerAttribute.SchemaId))
-						schemaId = GetSchemaId(actionDescriptor.ControllerDescriptor.ControllerName, requestContext.RouteData.Values["area"] as string);
-					else
-						schemaId = controllerAttribute.SchemaId;
-				}
-
-				if(string.IsNullOrWhiteSpace(actionId))
-					actionId = actionDescriptor.ActionName;
-
-				return new AuthorizationAttribute(schemaId, actionId) { ValidatorType = attribute.ValidatorType };
-			}
-
-			return attribute;
+			return (AuthorizationAttribute)(actionDescriptor.GetCustomAttributes(typeof(AuthorizationAttribute), true).FirstOrDefault() ??
+				   actionDescriptor.ControllerDescriptor.GetCustomAttributes(typeof(AuthorizationAttribute), true).FirstOrDefault());
 		}
 		#endregion
 
 		#region 私有方法
-		private static string GetSchemaId(string name, string areaName)
-		{
-			if(name != null && name.Length > 10 && name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase))
-				name = name.Substring(0, name.Length - 10);
-
-			if(string.IsNullOrWhiteSpace(areaName))
-				return name;
-
-			return areaName.Replace('/', '-') + "-" + name;
-		}
-
 		private static Configuration.AuthenticationElement GetAuthenticationElement()
 		{
 			var applicationContext = Zongsoft.Services.ApplicationContext.Current;

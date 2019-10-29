@@ -1,8 +1,15 @@
 ﻿/*
- * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   _____                                ______
+ *  /_   /  ____  ____  ____  _________  / __/ /_
+ *    / /  / __ \/ __ \/ __ \/ ___/ __ \/ /_/ __/
+ *   / /__/ /_/ / / / / /_/ /\_ \/ /_/ / __/ /_
+ *  /____/\____/_/ /_/\__  /____/\____/_/  \__/
+ *                   /____/
  *
- * Copyright (C) 2015 Zongsoft Corporation <http://www.zongsoft.com>
+ * Authors:
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
+ *
+ * Copyright (C) 2015-2019 Zongsoft Corporation <http://www.zongsoft.com>
  *
  * This file is part of Zongsoft.Web.
  *
@@ -70,12 +77,27 @@ namespace Zongsoft.Web.Security
 
 		public void OnAuthenticationChallenge(System.Web.Mvc.Filters.AuthenticationChallengeContext filterContext)
 		{
-			if(AuthenticationUtility.IsAuthenticated || AuthenticationUtility.GetAuthorizationMode(filterContext.ActionDescriptor) == AuthorizationMode.Anonymous)
+			var attribute = AuthenticationUtility.GetAuthorizationAttribute(filterContext.ActionDescriptor);
+
+			if(attribute == null || attribute.Suppressed)
 				return;
 
-			var url = Utility.RepairQueryString(Zongsoft.Web.Security.AuthenticationUtility.GetLoginUrl(), filterContext.HttpContext.Request.Url.Query);
-			url = Utility.RepairQueryString(url, "?ReturnUrl=" + Uri.EscapeDataString(filterContext.HttpContext.Request.RawUrl));
-			filterContext.Result = new RedirectResult(url);
+			var principal = filterContext.HttpContext.User;
+
+			if(attribute.ChallengerType != null)
+			{
+				var challenger = Activator.CreateInstance(attribute.ChallengerType) as IChallenger;
+
+				if(challenger != null)
+					principal = filterContext.HttpContext.User = challenger.Challenge(principal);
+			}
+
+			if(principal == null || !principal.Identity.IsAuthenticated)
+			{
+				var url = Web.Utility.RepairQueryString(AuthenticationUtility.GetLoginUrl(), filterContext.HttpContext.Request.Url.Query);
+				url = Web.Utility.RepairQueryString(url, "?ReturnUrl=" + Uri.EscapeDataString(filterContext.HttpContext.Request.RawUrl));
+				filterContext.Result = new RedirectResult(url);
+			}
 		}
 		#endregion
 	}

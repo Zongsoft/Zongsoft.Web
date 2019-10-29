@@ -7,7 +7,7 @@
  *                   /____/
  *
  * Authors:
- *   钟峰(Popeye Zhong) <zongsoft@gmail.com>
+ *   钟峰(Popeye Zhong) <zongsoft@qq.com>
  *
  * Copyright (C) 2016-2019 Zongsoft Corporation <http://www.zongsoft.com>
  *
@@ -71,7 +71,7 @@ namespace Zongsoft.Web.Http.Security
 		#endregion
 
 		#region 验证实现
-		public async Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
+		public Task AuthenticateAsync(HttpAuthenticationContext context, CancellationToken cancellationToken)
 		{
 			string credentialId = null;
 
@@ -93,17 +93,34 @@ namespace Zongsoft.Web.Http.Security
 				context.Principal = CredentialPrincipal.Empty;
 			else
 				context.Principal = new CredentialPrincipal(new CredentialIdentity(credentialId, this.CredentialProvider));
+
+			return Task.CompletedTask;
 		}
 
-		public async Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
+		public Task ChallengeAsync(HttpAuthenticationChallengeContext context, CancellationToken cancellationToken)
 		{
+			var attribute = Utility.GetAuthorizationAttribute(context.ActionContext.ActionDescriptor);
+
+			if(attribute == null || attribute.Suppressed)
+				return Task.CompletedTask;
+
 			var principal = context.ActionContext.RequestContext.Principal;
 
-			if(AuthenticationUtility.IsAuthenticated(principal) || AuthenticationUtility.GetAuthorizationMode(context.ActionContext.ActionDescriptor) == AuthorizationMode.Anonymous)
-				return;
+			if(attribute.ChallengerType != null)
+			{
+				var challenger = Activator.CreateInstance(attribute.ChallengerType) as IChallenger;
 
-			var challenge = new System.Net.Http.Headers.AuthenticationHeaderValue(HTTP_AUTHORIZATION_SCHEME);
-			context.Result = new System.Web.Http.Results.UnauthorizedResult(new[] { challenge }, context.Request);
+				if(challenger != null)
+					principal = context.ActionContext.RequestContext.Principal = challenger.Challenge(principal);
+			}
+
+			if(principal == null || !principal.Identity.IsAuthenticated)
+			{
+				var challenge = new System.Net.Http.Headers.AuthenticationHeaderValue(HTTP_AUTHORIZATION_SCHEME);
+				context.Result = new System.Web.Http.Results.UnauthorizedResult(new[] { challenge }, context.Request);
+			}
+
+			return Task.CompletedTask;
 		}
 		#endregion
 	}

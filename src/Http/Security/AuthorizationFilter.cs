@@ -44,10 +44,6 @@ namespace Zongsoft.Web.Http.Security
 {
 	public class AuthorizationFilter : System.Web.Http.Filters.IAuthorizationFilter
 	{
-		#region 成员字段
-		private IAuthorizer _authorizer;
-		#endregion
-
 		#region 公共属性
 		public bool AllowMultiple
 		{
@@ -57,21 +53,38 @@ namespace Zongsoft.Web.Http.Security
 			}
 		}
 
-		[Services.ServiceDependency]
+		[Services.ServiceDependency(IsRequired = true)]
 		public IAuthorizer Authorizer
 		{
-			get => _authorizer;
-			set => _authorizer = value ?? throw new ArgumentNullException();
+			get; set;
 		}
 		#endregion
 
 		#region 授权校验
 		public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
 		{
-			var principal = actionContext.RequestContext.Principal;
+			//如果当前操作是禁止身份授权验证的，则返回下一个步骤
+			if(Utility.IsSuppressed(actionContext.ActionDescriptor))
+				return await continuation();
 
-			var response = await continuation();
-			return response;
+			var attribute = Utility.GetAuthorizationAttribute(actionContext.ActionDescriptor);
+			var authorizer = this.Authorizer ?? throw new InvalidOperationException("Missing required authorizer.");
+			var principal = actionContext.RequestContext.Principal as CredentialPrincipal;
+
+			if(principal != null)
+			{
+				if(!principal.Identity.IsAuthenticated)
+					return new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
+
+				if(attribute.TryGetRoles(out var roles) && !authorizer.InRoles(principal.Identity.Credential.User.UserId, roles))
+					return new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
+
+				if(!string.IsNullOrEmpty(attribute.Schema) &&
+				   !authorizer.Authorize(principal.Identity.Credential.User.UserId, attribute.Schema, string.IsNullOrEmpty(attribute.Action) ? actionContext.ActionDescriptor.ActionName : attribute.Action))
+					return new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
+			}
+
+			return await continuation();
 		}
 		#endregion
 	}

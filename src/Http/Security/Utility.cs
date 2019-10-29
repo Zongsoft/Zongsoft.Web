@@ -33,71 +33,25 @@
 
 using System;
 using System.Linq;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Web.Http.Controllers;
 
 using Zongsoft.Security;
 using Zongsoft.Security.Membership;
 
-namespace Zongsoft.Web
+namespace Zongsoft.Web.Http.Security
 {
 	internal static class Utility
 	{
-		#region 私有变量
-		/*
-\s*
-(?<part>
-	(\*)|
-	(\([^\(\)]+\))|
-	([^-]+)
-)
-\s*-?
-		 */
-		private static readonly Regex _regex = new Regex(@"\s*(?<part>(\*)|(\([^\(\)]+\))|([^-]+))\s*-?", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1));
-		#endregion
-
-		public static string RepairQueryString(string path, string queryString = null)
+		public static bool IsSuppressed(HttpActionDescriptor actionDescriptor)
 		{
-			if(string.IsNullOrWhiteSpace(queryString))
-				return path;
-
-			queryString = queryString.Trim().TrimStart('?');
-
-			if(string.IsNullOrWhiteSpace(path))
-				return "/" + (string.IsNullOrWhiteSpace(queryString) ? string.Empty : "?" + queryString);
-
-			var index = path.IndexOf('?');
-
-			if(index > 0)
-				return path + "&" + queryString;
-			else
-				return path + "?" + queryString;
+			var attribute = GetAuthorizationAttribute(actionDescriptor);
+			return attribute == null ? false : attribute.Suppressed;
 		}
 
-		public static string[] Slice(string text)
+		public static AuthorizationAttribute GetAuthorizationAttribute(HttpActionDescriptor actionDescriptor)
 		{
-			if(string.IsNullOrWhiteSpace(text))
-				return new string[0];
-
-			var matches = _regex.Matches(text);
-			var result = new string[matches.Count];
-
-			for(var i = 0; i < matches.Count; i++)
-			{
-				if(matches[i].Success)
-				{
-					result[i] = matches[i].Groups["part"].Value;
-
-					if(result[i] == "*")
-						result[i] = string.Empty;
-				}
-				else
-				{
-					result[i] = string.Empty;
-				}
-			}
-
-			return result;
+			return actionDescriptor.GetCustomAttributes<AuthorizationAttribute>(true).FirstOrDefault() ??
+				   actionDescriptor.ControllerDescriptor.GetCustomAttributes<AuthorizationAttribute>(true).FirstOrDefault();
 		}
 	}
 }
