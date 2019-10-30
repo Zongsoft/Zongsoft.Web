@@ -35,7 +35,8 @@ using System;
 using System.Linq;
 using System.Web.Http.Controllers;
 
-using Zongsoft.Security;
+using Zongsoft.Services;
+using Zongsoft.ComponentModel;
 using Zongsoft.Security.Membership;
 
 namespace Zongsoft.Web.Http.Security
@@ -48,6 +49,33 @@ namespace Zongsoft.Web.Http.Security
 			            actionDescriptor.ControllerDescriptor.GetCustomAttributes<AuthorizationAttribute>(true).FirstOrDefault();
 
 			return attribute == null ? true : attribute.Suppressed;
+		}
+
+		public static SchemaAction GetSchemaAction(this HttpActionContext actionContext, string schemaId, string actionId)
+		{
+			var schemas = ApplicationContext.Current.Schemas;
+
+			if(actionContext.RequestContext.RouteData.Values.TryGetValue("area", out var value) && value is string area && !string.IsNullOrEmpty(area))
+			{
+				if(ApplicationContext.Current.Modules.TryGet(area, out var module) && module != null)
+					schemas = module.Schemas;
+			}
+
+			if(schemas != null && schemas.TryGet(schemaId, out var schema) && schema.HasActions)
+			{
+				if(string.IsNullOrEmpty(actionId))
+				{
+					actionId = actionContext.ActionDescriptor.ActionName;
+
+					if(actionContext.ActionDescriptor is ReflectedHttpActionDescriptor actionDescriptor && actionDescriptor != null)
+						actionId = actionDescriptor.MethodInfo.Name;
+				}
+
+				if(schema.Actions.TryGet(actionId, out var action))
+					return action;
+			}
+
+			return null;
 		}
 	}
 }

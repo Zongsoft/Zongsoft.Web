@@ -47,10 +47,7 @@ namespace Zongsoft.Web.Http.Security
 		#region 公共属性
 		public bool AllowMultiple
 		{
-			get
-			{
-				return true;
-			}
+			get => true;
 		}
 
 		[Services.ServiceDependency(IsRequired = true)]
@@ -78,9 +75,13 @@ namespace Zongsoft.Web.Http.Security
 				if(attribute.TryGetRoles(out var roles) && !authorizer.InRoles(principal.Identity.Credential.User.UserId, roles))
 					return new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
 
-				if(!string.IsNullOrEmpty(attribute.Schema) &&
-				   !authorizer.Authorize(principal.Identity.Credential.User.UserId, attribute.Schema, string.IsNullOrEmpty(attribute.Action) ? actionContext.ActionDescriptor.ActionName : attribute.Action))
-					return new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
+				if(!string.IsNullOrEmpty(attribute.Schema))
+				{
+					var action = actionContext.GetSchemaAction(attribute.Schema, attribute.Action);
+
+					if(!authorizer.Authorize(principal.Identity.Credential.User.UserId, attribute.Schema, action != null ? action.Name : attribute.Action))
+						return new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden);
+				}
 			}
 
 			return await continuation();
