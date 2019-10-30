@@ -51,33 +51,15 @@ namespace Zongsoft.Web.Security
 		[Zongsoft.Services.ServiceDependency(IsRequired = true)]
 		public IAuthorizer Authorizer
 		{
-			get
-			{
-				return _authorizer;
-			}
-			set
-			{
-				if(value == null)
-					throw new ArgumentNullException();
-
-				_authorizer = value;
-			}
+			get => _authorizer;
+			set => _authorizer = value ?? throw new ArgumentNullException();
 		}
 
 		[Zongsoft.Services.ServiceDependency(IsRequired = true)]
 		public ICredentialProvider CredentialProvider
 		{
-			get
-			{
-				return _credentialProvider;
-			}
-			set
-			{
-				if(value == null)
-					throw new ArgumentNullException();
-
-				_credentialProvider = value;
-			}
+			get => _credentialProvider;
+			set => _credentialProvider = value ?? throw new ArgumentNullException();
 		}
 		#endregion
 

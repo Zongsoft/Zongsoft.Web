@@ -47,20 +47,11 @@ namespace Zongsoft.Web.Security
 		#endregion
 
 		#region 公共属性
-		[Zongsoft.Services.ServiceDependency]
+		[Zongsoft.Services.ServiceDependency(IsRequired = true)]
 		public ICredentialProvider CredentialProvider
 		{
-			get
-			{
-				return _credentialProvider;
-			}
-			set
-			{
-				if(value == null)
-					throw new ArgumentNullException();
-
-				_credentialProvider = value;
-			}
+			get => _credentialProvider;
+			set => _credentialProvider = value ?? throw new ArgumentNullException();
 		}
 		#endregion
 

@@ -56,13 +56,10 @@ namespace Zongsoft.Web.Http.Security
 		#region 公共属性
 		public bool AllowMultiple
 		{
-			get
-			{
-				return false;
-			}
+			get => false;
 		}
 
-		[Services.ServiceDependency]
+		[Services.ServiceDependency(IsRequired = true)]
 		public ICredentialProvider CredentialProvider
 		{
 			get => _credentialProvider;

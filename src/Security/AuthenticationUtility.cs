@@ -37,6 +37,8 @@ using System.Web;
 using System.Web.Mvc;
 using System.Security.Cryptography;
 
+using Zongsoft.Services;
+using Zongsoft.ComponentModel;
 using Zongsoft.Security;
 using Zongsoft.Security.Membership;
 
