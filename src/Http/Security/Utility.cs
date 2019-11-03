@@ -51,7 +51,7 @@ namespace Zongsoft.Web.Http.Security
 			return attribute == null ? true : attribute.Suppressed;
 		}
 
-		public static SchemaAction GetSchemaAction(this HttpActionContext actionContext, string schemaId, string actionId)
+		public static SchemaAction GetSchemaAction(this HttpActionContext actionContext, string schemaId, string actionId, out Schema schema)
 		{
 			var schemas = ApplicationContext.Current.Schemas;
 
@@ -61,7 +61,7 @@ namespace Zongsoft.Web.Http.Security
 					schemas = module.Schemas;
 			}
 
-			if(schemas != null && schemas.TryGet(schemaId, out var schema) && schema.HasActions)
+			if(schemas != null && schemas.TryGet(schemaId, out schema) && schema.HasActions)
 			{
 				if(string.IsNullOrEmpty(actionId))
 				{
@@ -75,6 +75,7 @@ namespace Zongsoft.Web.Http.Security
 					return action;
 			}
 
+			schema = null;
 			return null;
 		}
 	}

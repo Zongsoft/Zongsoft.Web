@@ -126,4 +126,10 @@
   <data name="Text.DataUpdateFailed" xml:space="preserve">
     <value>数据更新失败。</value>
   </data>
+  <data name="Text.Forbidden.NotAuthorized" xml:space="preserve">
+    <value>访问被拒绝，您没有对“{0}”进行{1}的授权。</value>
+  </data>
+  <data name="Text.Forbidden.NotInRoles" xml:space="preserve">
+    <value>访问被拒绝，您不是待访问资源的授权角色（{0}）。</value>
+  </data>
 </root>
