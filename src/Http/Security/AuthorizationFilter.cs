@@ -88,7 +88,7 @@ namespace Zongsoft.Web.Http.Security
 						return new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
 						{
 							Content = new StringContent(
-								Resources.ResourceUtility.GetString("Text.Forbidden.NotAuthorized", schema.Title + "(" + schema.Name + ")", action != null ? action.Title : attribute.Action),
+								Resources.ResourceUtility.GetString("Text.Forbidden.NotAuthorized", schema != null ? schema.Title : attribute.Schema, action != null ? action.Title : attribute.Action),
 								System.Text.Encoding.UTF8, "text/plain"),
 						};
 				}
