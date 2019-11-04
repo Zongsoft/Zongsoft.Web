@@ -72,7 +72,7 @@ namespace Zongsoft.Web.Http.Security
 				if(!principal.Identity.IsAuthenticated)
 					return new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
 
-				if(attribute.TryGetRoles(out var roles) && !authorizer.InRoles(principal.Identity.Credential.User.UserId, roles))
+				if(attribute.TryGetRoles(out var roles) && !authorizer.InRoles(principal.Identity.Credential.User, roles))
 					return new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
 					{
 						Content = new StringContent(
@@ -84,7 +84,7 @@ namespace Zongsoft.Web.Http.Security
 				{
 					var action = actionContext.GetSchemaAction(attribute.Schema, attribute.Action, out var schema);
 
-					if(!authorizer.Authorize(principal.Identity.Credential.User.UserId, attribute.Schema, action != null ? action.Name : attribute.Action))
+					if(!authorizer.Authorize(principal.Identity.Credential.User, attribute.Schema, action != null ? action.Name : attribute.Action))
 						return new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
 						{
 							Content = new StringContent(
