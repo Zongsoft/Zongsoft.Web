@@ -225,41 +225,40 @@ namespace Zongsoft.Web.Http
 			}
 		}
 
-		public virtual void Delete(string id)
+		public virtual IHttpActionResult Delete(string id)
 		{
 			if(!this.CanDelete)
-				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
+				return this.StatusCode(System.Net.HttpStatusCode.MethodNotAllowed);
 
 			if(string.IsNullOrWhiteSpace(id))
-				throw HttpResponseExceptionUtility.BadRequest("Missing the id parameter of the delete operation.");
+				return this.BadRequest();
 
-			var keys = id.Split('|', ',');
+			int count = 0;
+			var keys = Common.StringExtension.Slice(id, ',', '|').ToArray();
 
 			if(keys != null && keys.Length > 1)
 			{
-				int count = 0;
-
 				using(var transaction = new Zongsoft.Transactions.Transaction())
 				{
 					foreach(var key in keys)
 					{
-						count += this.OnDelete(key.Split('-'));
+						count += this.OnDelete(Common.StringExtension.Slice(key, '-').ToArray());
 					}
 
 					transaction.Commit();
 				}
 
-				return;
+				return count > 0 ? (IHttpActionResult)this.Ok(count) : this.NotFound();
 			}
 
-			if(this.OnDelete(id.Split('-')) < 1)
-				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+			count = this.OnDelete(Common.StringExtension.Slice(id, '-').ToArray());
+			return count > 0 ? (IHttpActionResult)this.Ok(count) : this.NotFound();
 		}
 
-		public virtual TModel Post(TModel model)
+		public virtual object Post(TModel model)
 		{
 			if(!this.CanCreate)
-				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
+				return this.StatusCode(System.Net.HttpStatusCode.MethodNotAllowed);
 
 			//确认模型是否有效
 			this.EnsureModel(model);
@@ -267,13 +266,13 @@ namespace Zongsoft.Web.Http
 			if(this.OnCreate(model) > 0)
 				return model;
 
-			throw new HttpResponseException(System.Net.HttpStatusCode.Conflict);
+			return this.Conflict();
 		}
 
-		public virtual void Put(TModel model)
+		public virtual IHttpActionResult Put(TModel model)
 		{
 			if(!this.CanUpdate)
-				throw new HttpResponseException(System.Net.HttpStatusCode.MethodNotAllowed);
+				return this.StatusCode(System.Net.HttpStatusCode.MethodNotAllowed);
 
 			//确认模型是否有效
 			this.EnsureModel(model);
@@ -283,8 +282,8 @@ namespace Zongsoft.Web.Http
 			if(this.Request.GetRouteData().Values.TryGetValue("id", out var value) && value != null && value is string)
 				id = (string)value;
 
-			if(this.OnUpdate(model, string.IsNullOrEmpty(id) ? Array.Empty<string>() : this.Slice(id)) < 1)
-				throw new HttpResponseException(System.Net.HttpStatusCode.NotFound);
+			return this.OnUpdate(model, string.IsNullOrEmpty(id) ? Array.Empty<string>() : this.Slice(id)) > 0 ?
+				(IHttpActionResult)this.Ok() : this.NotFound();
 		}
 		#endregion
 
@@ -456,7 +455,7 @@ namespace Zongsoft.Web.Http
 
 		protected IHttpActionResult NoContent()
 		{
-			return new System.Web.Http.Results.StatusCodeResult(System.Net.HttpStatusCode.NoContent, this);
+			return this.StatusCode(System.Net.HttpStatusCode.NoContent);
 		}
 		#endregion
 
@@ -510,7 +509,7 @@ namespace Zongsoft.Web.Http
 
 			return paging.PageIndex.ToString() + "/" +
 			       paging.PageCount.ToString() + "(" +
-			       paging.PageSize.ToString() + ")";
+			       paging.TotalCount.ToString() + ")";
 		}
 
 		private object GetResult(object value, out bool isNullOrEmpty)
