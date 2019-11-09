@@ -35,7 +35,7 @@ namespace Zongsoft.Web
 {
 	public class ControllerBase<TModel, TConditional, TService> : System.Web.Mvc.Controller
 																  where TModel : class
-																  where TConditional : class, IConditional
+																  where TConditional : class, IModel
 																  where TService : class, IDataService<TModel>
 	{
 		#region 成员字段
