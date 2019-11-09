@@ -207,7 +207,7 @@ namespace Zongsoft.Web.Http
 				return this.GetResult(this.DataService.Select(null, this.GetSchema(), paging));
 
 			var parts = this.Slice(id);
-			IPaginator paginator = null;
+			IPageable pageable;
 
 			switch(parts.Length)
 			{
@@ -215,11 +215,11 @@ namespace Zongsoft.Web.Http
 					if(parts[0].Contains(":") && this.DataService.Searcher != null)
 						return this.GetResult(this.DataService.Searcher.Search(parts[0], this.GetSchema(), paging));
 					else
-						return this.GetResult(this.DataService.Get<string>(parts[0], this.GetSchema(), paging, null, out paginator), paginator);
+						return this.GetResult(this.DataService.Get<string>(parts[0], this.GetSchema(), paging, null, out pageable), pageable);
 				case 2:
-					return this.GetResult(this.DataService.Get<string, string>(parts[0], parts[1], this.GetSchema(), paging, null, out paginator), paginator);
+					return this.GetResult(this.DataService.Get<string, string>(parts[0], parts[1], this.GetSchema(), paging, null, out pageable), pageable);
 				case 3:
-					return this.GetResult(this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], this.GetSchema(), paging, null, out paginator), paginator);
+					return this.GetResult(this.DataService.Get<string, string, string>(parts[0], parts[1], parts[2], this.GetSchema(), paging, null, out pageable), pageable);
 				default:
 					return this.BadRequest("The parts of id argument too many.");
 			}
@@ -421,7 +421,7 @@ namespace Zongsoft.Web.Http
 			return Utility.Slice(text);
 		}
 
-		protected object GetResult(object data, IPaginator paginator = null)
+		protected object GetResult(object data, IPageable pageable = null)
 		{
 			if(data == null)
 				return new HttpResponseMessage(System.Net.HttpStatusCode.NoContent);
@@ -430,14 +430,14 @@ namespace Zongsoft.Web.Http
 			if(typeof(TModel).IsValueType && data.GetType() == typeof(TModel) && EqualityComparer<TModel>.Default.Equals((TModel)data, default(TModel)))
 				return new HttpResponseMessage(System.Net.HttpStatusCode.NoContent);
 
-			if(paginator == null)
-				paginator = data as IPaginator;
+			if(pageable == null)
+				pageable = data as IPageable;
 
-			if(paginator != null)
+			if(pageable != null)
 			{
 				var result = new Result(data);
 
-				paginator.Paginated += Paginator_Paginated;
+				pageable.Paginated += Paginator_Paginated;
 
 				void Paginator_Paginated(object sender, PagingEventArgs e)
 				{
