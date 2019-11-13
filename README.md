@@ -1,7 +1,12 @@
-﻿Zongsoft.Web
-============
+﻿# Zongsoft.Web
 
-关于Web程序常用功能的类库，提供了一套基于数据绑定表达式的控件和主题库。
+![license](https://img.shields.io/github/license/Zongsoft/Zongsoft.Web) ![download](https://img.shields.io/nuget/dt/Zongsoft.Web) ![version](https://img.shields.io/github/v/release/Zongsoft/Zongsoft.Web?include_prereleases) ![github stars](https://img.shields.io/github/stars/Zongsoft/Zongsoft.Web?style=social)
+
+README: [English](https://github.com/Zongsoft/Zongsoft.Web/blob/master/README.md) | [简体中文](https://github.com/Zongsoft/Zongsoft.Web/blob/master/README-zh_CN.md)
+
+-----
+
+提供了 **API** 的控制器基类、HTTP上传处理的工具类、身份验证和授权控制的过滤器等，还包括一套自定义的 Web 控件集，基于前后端分离的Web开发模式，今后将不再支持 Web 控件。
 
 
 ## 控件设计
