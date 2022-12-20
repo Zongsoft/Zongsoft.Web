@@ -5,6 +5,8 @@
 README: [English](https://github.com/Zongsoft/Zongsoft.Web/blob/master/README.md) | [简体中文](https://github.com/Zongsoft/Zongsoft.Web/blob/master/README-zh_CN.md)
 
 -----
+注：该项目已归档，对应的替代版本请参考：https://github.com/Zongsoft/Framework/blob/master/Zongsoft.Web
+-----
 
 提供了 **API** 的控制器基类、HTTP上传处理的工具类、身份验证和授权控制的过滤器等，还包括一套自定义的 Web 控件集，基于前后端分离的Web开发模式，今后将不再支持 Web 控件。
 
